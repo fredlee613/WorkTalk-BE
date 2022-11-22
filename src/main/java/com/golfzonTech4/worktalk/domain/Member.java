@@ -34,5 +34,19 @@ public class Member {
     private int penalty;
 
     @Column(columnDefinition = "VARCHAR(100 char) DEFAULT 'profill.png'")
-    private String imgname;
+    private String imgName;
+
+    @Override
+    public String toString() {
+        return "Member{" +
+                "id=" + id +
+                ", email='" + email + '\'' +
+                ", pw='" + pw + '\'' +
+                ", name='" + name + '\'' +
+                ", tel='" + tel + '\'' +
+                ", memberType=" + memberType +
+                ", penalty=" + penalty +
+                ", imgname='" + imgName + '\'' +
+                '}';
+    }
 }
