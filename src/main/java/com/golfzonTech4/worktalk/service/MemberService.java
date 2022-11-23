@@ -1,39 +1,44 @@
 package com.golfzonTech4.worktalk.service;
 
 import com.golfzonTech4.worktalk.domain.Member;
-import com.golfzonTech4.worktalk.domain.MemberType;
+import com.golfzonTech4.worktalk.dto.member.MemberDetailDto;
+import com.golfzonTech4.worktalk.exception.DuplicateMemberException;
+import com.golfzonTech4.worktalk.exception.NotFoundMemberException;
 import com.golfzonTech4.worktalk.repository.MemberRepository;
+import com.golfzonTech4.worktalk.util.SecurityUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
 @Slf4j
 @Transactional(readOnly = true)
 public class MemberService {
-
     private final MemberRepository memberRepository;
+    private final PasswordEncoder passwordEncoder;
 
-    /**
-     * 회원 가입 서비즈 로직
-     * 로그인 성공 시 회원 번호 반환
-     * 실패 시 0 반환
-     */
     @Transactional
-    public Long save(Member member) {
-        log.info("save : {}", member);
-        member.setMemberType(MemberType.USER); // 회원 타입 => 일반 유저 설정
+    public MemberDetailDto signup(Member member) {
+        log.info("signup : {}", member);
+        member.setPw(passwordEncoder.encode(member.getPw())); // 비밀번호 인코딩
+//        member.setMemberType(MemberType.ROLE_HOST); // 회원 타입 => 일반 유저 설정
         member.setPenalty(0); // 페널티 여부 0으로 초기화
         member.setImgName("profill.png"); // 프로필 이미지 => 기본 이미지로 설정
 
-        log.info("member: {}", member);
-        findDuplicatesName(member);
+        findDuplicatesName(member); // 회원명 중복 검증
+
         memberRepository.save(member);
-        return memberRepository.findOne(member).getId();
+        Member findMember = memberRepository.findOneByName(member.getName());
+
+        MemberDetailDto dto = getMemberDetailDto(findMember);
+
+        return dto;
     }
 
     /**
@@ -44,7 +49,7 @@ public class MemberService {
         log.info("findDuplicatesName : {}", member);
         List<Member> findMembers = memberRepository.findByName(member.getName());
         if (!findMembers.isEmpty()) {
-            throw new IllegalStateException("이미 존재하는 회원 이름입니다.");
+            throw new DuplicateMemberException();
         }
     }
 
@@ -60,8 +65,54 @@ public class MemberService {
         }
     }
 
+    /**
+     * 전체 회원 리스트 조회
+     */
     public List<Member> findAll() {
         log.info("findAll");
         return memberRepository.findAll();
+    }
+
+    /**
+     * username을 기준으로 정보를 가져오는 메서드
+     */
+
+    public MemberDetailDto getUserWithAuthorities(String username) {
+        log.info("getUserWithAuthorities : {}", username);
+
+        Member findMember = memberRepository.findOneByName(username);
+
+        MemberDetailDto dto = getMemberDetailDto(findMember);
+
+        return dto;
+    }
+
+
+    /**
+     * SecurityContext에 저장된 username의 정보만 가져온다.
+     */
+    public MemberDetailDto getMyUserWithAuthorities() {
+        log.info("getMyUserWithAuthorities");
+
+        Optional<String> currentUsername = SecurityUtil.getCurrentUsername();
+        if (currentUsername.isEmpty()) throw new NotFoundMemberException("Member not found");
+        Member findMember = memberRepository.findOneByName(currentUsername.get());
+        return getMemberDetailDto(findMember);
+    }
+
+    // member -> memberDetailDto
+    private static MemberDetailDto getMemberDetailDto(Member member) {
+        MemberDetailDto memberDetailDto = new MemberDetailDto();
+
+        memberDetailDto.setId(member.getId());
+        memberDetailDto.setEmail(member.getEmail());
+        memberDetailDto.setPw(member.getPw());
+        memberDetailDto.setName(member.getName());
+        memberDetailDto.setTel(member.getTel());
+        memberDetailDto.setPenalty(member.getPenalty());
+        memberDetailDto.setMemberType(member.getMemberType());
+        memberDetailDto.setImgName(member.getImgName());
+
+        return memberDetailDto;
     }
 }

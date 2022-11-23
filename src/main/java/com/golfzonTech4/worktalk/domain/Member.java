@@ -18,7 +18,7 @@ public class Member {
     @Column(name = "EMAIL", unique = true, nullable = false, length = 50)
     private String email;
 
-    @Column(name = "PW", nullable = false, length = 50)
+    @Column(name = "PW", nullable = false, length = 100)
     private String pw;
 
     @Column(name = "NAME", unique = true, nullable = false, length = 50)
@@ -46,7 +46,7 @@ public class Member {
                 ", tel='" + tel + '\'' +
                 ", memberType=" + memberType +
                 ", penalty=" + penalty +
-                ", imgname='" + imgName + '\'' +
+                ", imgName='" + imgName + '\'' +
                 '}';
     }
 }
