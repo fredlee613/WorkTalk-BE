@@ -18,7 +18,7 @@ public class Member {
     @Column(name = "EMAIL", unique = true, nullable = false, length = 50)
     private String email;
 
-    @Column(name = "PW", nullable = false, length = 50)
+    @Column(name = "PW", nullable = false, length = 100)
     private String pw;
 
     @Column(name = "NAME", unique = true, nullable = false, length = 50)
@@ -34,5 +34,19 @@ public class Member {
     private int penalty;
 
     @Column(columnDefinition = "VARCHAR(100 char) DEFAULT 'profill.png'")
-    private String imgname;
+    private String imgName;
+
+    @Override
+    public String toString() {
+        return "Member{" +
+                "id=" + id +
+                ", email='" + email + '\'' +
+                ", pw='" + pw + '\'' +
+                ", name='" + name + '\'' +
+                ", tel='" + tel + '\'' +
+                ", memberType=" + memberType +
+                ", penalty=" + penalty +
+                ", imgName='" + imgName + '\'' +
+                '}';
+    }
 }
