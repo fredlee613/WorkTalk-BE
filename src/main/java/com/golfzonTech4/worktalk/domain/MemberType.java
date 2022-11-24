@@ -1,5 +1,5 @@
 package com.golfzonTech4.worktalk.domain;
 
 public enum MemberType {
-    USER, HOST, MASTER
+    ROLE_USER, ROLE_HOST, ROLE_MASTER
 }
