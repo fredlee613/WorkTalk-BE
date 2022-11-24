@@ -1,7 +1,11 @@
 package com.golfzonTech4.worktalk.domain;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.ColumnDefault;
+import org.hibernate.annotations.DynamicInsert;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.persistence.*;
@@ -9,22 +13,24 @@ import java.io.Serializable;
 
 @Entity
 @Getter @Setter
+@DynamicInsert
 @SequenceGenerator(name = "SEQ_SPACE_GENERATOR", sequenceName = "SEQ_SPACE", initialValue = 1, allocationSize = 50)
 public class Space implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_SPACE_GENERATOR")
     @Column(name = "SPACE_ID")
-    private Long space_id;
+    private Long spaceId;
 
     @ManyToOne
+    @JsonManagedReference //순환참조를 방지하기 위한 어노테이션입니다
     @JoinColumn(name = "MEMBER_ID", nullable = false)
     private Member member;
 
     @Column(name = "SPACE_NAME", nullable = false, length = 50)
-    private String space_name;
+    private String spaceName;
 
     @Column(name = "SPACE_DETAIL", nullable = true, length = 1000)
-    private String space_detail;
+    private String spaceDetail;
 
     @Column(name = "POSTCODE", nullable = false, length = 20)
     private String postcode;
@@ -33,17 +39,21 @@ public class Space implements Serializable {
     private String address;
 
     @Column(name = "DETAIL_ADDRESS", nullable = false, length = 100)
-    private String detail_address;
+    private String detailAddress;
 
     @Column(name = "REG_CODE", nullable = false, length = 50)
-    private String reg_code;
+    private String regCode;
 
     @Column(name = "SPACE_TYPE", nullable = false)
-    private int space_type;
+    private int spaceType;
 
-    @Column(name = "SPACE_STATUS", nullable = false, length = 20)
-    private String space_status;
+    @ColumnDefault(value = "'waiting'")
+    @Column(name = "SPACE_STATUS", length = 20)
+    private String spaceStatus;
 
+    @ColumnDefault("'space.jpg'")
     @Column(name = "SPACE_IMG", nullable = true, length = 100)
-    private String space_img;
+    private String spaceImg;
+
+
 }

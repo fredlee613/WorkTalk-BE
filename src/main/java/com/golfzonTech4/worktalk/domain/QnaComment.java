@@ -13,7 +13,7 @@ import java.time.LocalDateTime;
 @Setter
 @EqualsAndHashCode
 @Table(name = "QNA_COMMENT")
-public class QnaComment implements Serializable {
+public class QnaComment extends BaseTimeEntity implements Serializable {
 
     @Id
     @OneToOne
@@ -30,8 +30,8 @@ public class QnaComment implements Serializable {
     @Enumerated(EnumType.STRING)
     private CcType type;
 
-    @Column(name = "QNACOMMENT_DATE")
-    private LocalDateTime qnacomment_date;
+//    @Column(name = "QNACOMMENT_DATE")
+//    private LocalDateTime qnacomment_date;
 
 
 }
