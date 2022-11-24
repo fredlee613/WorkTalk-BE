@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 @SequenceGenerator(name = "SEQ_REVIEW_GENERATOR", sequenceName = "SEQ_REVIEW_QNA", initialValue = 1, allocationSize = 50)
-public class Review implements Serializable {
+public class Review extends BaseTimeEntity implements Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_REVIEW_GENERATOR")
@@ -32,8 +32,8 @@ public class Review implements Serializable {
     @Column(name = "GRADE", nullable = false)
     private Double grade;
 
-    @Column(name = "REVIEW_DATE")
-    private LocalDateTime review_date;
+//    @Column(name = "REVIEW_DATE")
+//    private LocalDateTime review_date;
 
     @Column(name = "REVIEW_IMG", nullable = true, length = 100)
     private String review_img;

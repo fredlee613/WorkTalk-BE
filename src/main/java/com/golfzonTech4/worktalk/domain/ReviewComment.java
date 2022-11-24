@@ -13,7 +13,7 @@ import java.time.LocalDateTime;
 @Setter
 @EqualsAndHashCode
 @Table(name = "REVIEW_COMMENT")
-public class ReviewComment implements Serializable {
+public class ReviewComment extends BaseTimeEntity implements Serializable {
 
     @Id
     @OneToOne
@@ -27,6 +27,6 @@ public class ReviewComment implements Serializable {
     @Column(name = "REVIEWCOMMENT", nullable = false, length = 1000)
     private String reviewcomment;
 
-    @Column(name = "REVIEWCOMMENT_DATE")
-    private LocalDateTime reviewcomment_date;
+//    @Column(name = "REVIEWCOMMENT_DATE")
+//    private LocalDateTime reviewcomment_date;
 }
