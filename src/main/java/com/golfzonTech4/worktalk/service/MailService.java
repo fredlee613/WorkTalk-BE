@@ -1,7 +1,6 @@
 package com.golfzonTech4.worktalk.service;
 
 import com.golfzonTech4.worktalk.domain.Member;
-import com.golfzonTech4.worktalk.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.mail.javamail.JavaMailSender;
