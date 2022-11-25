@@ -21,7 +21,7 @@ public class Room implements Serializable {
     private Space space;
 
     @Enumerated(EnumType.STRING)
-    private Roomtype room_type;
+    private RoomType roomType;
 
     @Column(name = "ROOM_NAME", nullable = false, length = 50)
     private String room_name;

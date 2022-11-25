@@ -1,8 +1,8 @@
 package com.golfzonTech4.worktalk.domain;
 
-public enum Roomtype {
-    OFFICE,
+public enum RoomType {
     DESK,
+    OFFICE,
     MEETING4,
     MEETING6,
     MEETING8,

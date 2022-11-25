@@ -78,7 +78,7 @@ public class Reservation {
 
     private static int calAmount(Room room, BookDate bookDate) {
         int period;
-        if (room.getRoom_type() == Roomtype.OFFICE)  period = BookDate.getPeriodDate(bookDate.getCheckOutDate(), bookDate.getCheckInDate());
+        if (room.getRoomType() == RoomType.OFFICE)  period = BookDate.getPeriodDate(bookDate.getCheckOutDate(), bookDate.getCheckInDate());
         else  period = BookDate.getPeriodHours(bookDate.getCheckInTime(), bookDate.getCheckOutTime());
 
         return room.getRoom_price() * period;
