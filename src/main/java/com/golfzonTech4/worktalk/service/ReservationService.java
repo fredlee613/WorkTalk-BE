@@ -48,14 +48,17 @@ public class ReservationService {
                 reserveDto.getCheckOutTime());
 
         Reservation reservation = Reservation.makeReservation(findMember, findRoom, bookDate);
-        reservationRepository.save(reservation);
+//        reservationRepository.save(reservation);
 
-        return reservationRepository.findOne(reservation.getReserveId()).getReserveId();
+        return reservationRepository.save(reservation).getReserveId();
     }
 
     @Transactional
     public LocalDateTime cancel(Long reserveId, String cancelReason) {
-        Reservation findReservation = reservationRepository.findOne(reserveId);
+//        Reservation findReservation = reservationRepository.findOne(reserveId);
+
+        // 해당 값이 Null일 경우 NoSuchElementException 발생
+        Reservation findReservation = reservationRepository.findById(reserveId).get();
 
         LocalDate checkInDate = findReservation.getBookDate().getCheckInDate();
         Integer checkInTime = findReservation.getBookDate().getCheckInTime();

@@ -1,7 +1,6 @@
 package com.golfzonTech4.worktalk.controller;
 
 import com.golfzonTech4.worktalk.domain.Member;
-import com.golfzonTech4.worktalk.domain.MemberType;
 import com.golfzonTech4.worktalk.dto.member.MemberDetailDto;
 import com.golfzonTech4.worktalk.service.MemberService;
 import lombok.RequiredArgsConstructor;
@@ -12,7 +11,6 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.validation.Valid;
 import java.io.IOException;
 import java.util.List;
 

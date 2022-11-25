@@ -9,7 +9,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.validation.Valid;
@@ -25,15 +24,17 @@ public class MemberController {
      * MemberDetailDto 파라미터로 받아서 MemberService의 signup메서드를 호출
      */
     @PostMapping("/join")
-    public ResponseEntity<MemberDetailDto> join(
+    public ResponseEntity<Long> join(
             @Valid @RequestBody MemberDetailDto request) {
         log.info("signupUser: {}", request);
 
         Member member = new Member();
+
         member.setEmail(request.getEmail());
         member.setPw(request.getPw());
         member.setName(request.getName());
         member.setTel(request.getTel());
+
         // request의 role 값에 따라 회원 구분을 다르게 설정
         if (request.getRole() == 0) {
             member.setMemberType(MemberType.ROLE_USER);
@@ -47,11 +48,13 @@ public class MemberController {
     }
 
     @PostMapping("/nameCheck")
-    public ResponseEntity<Integer> findDuplicated(@RequestBody MemberDetailDto request) {
+    public ResponseEntity findDuplicated(@RequestBody MemberDetailDto request) {
         log.info("findDuplicated: {}", request);
         Member member = new Member();
         member.setName(request.getName());
 
-        return ResponseEntity.ok(memberService.checkName(member));
+        memberService.findDuplicatesName(member); // 중복 회원 존재 시 Exception 발생
+
+        return ResponseEntity.ok().build(); // 종복 회원이 존재하지 않을 시 성공 메세지
     }
 }
