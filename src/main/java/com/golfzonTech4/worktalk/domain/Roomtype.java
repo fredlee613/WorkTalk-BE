@@ -4,6 +4,7 @@ public enum Roomtype {
     DESK,
     OFFICE,
     MEETING4,
+    MEETING6,
     MEETING8,
-    MEETING10
+    MEETING20
 }
