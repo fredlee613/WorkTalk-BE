@@ -53,6 +53,18 @@ public class SpaceController {
         return new ResponseEntity("입력완료",HttpStatus.OK);
     }
 
+    //호스트의 사무공간 등록-다중이미지
+    @PostMapping("/host/space_createi")
+    public ResponseEntity<Space> createiSpace(@Valid @RequestBody SpaceInsertDto dto/*, BindingResult result*/){
+//        if(result.hasErrors()){
+//            return new ResponseEntity("null값이 있습니다", HttpStatus.BAD_REQUEST) ;
+//        }
+//        spaceService.createiSpace(dto);
+
+//        return new ResponseEntity.ok(spaceService.createSpace(form));
+        return new ResponseEntity("입력완료",HttpStatus.OK);
+    }
+
     //호스트 사무공간 수정(사무공간 설명, 이미지)
 //    @PostMapping("/host/space_update/{spaceId}")
 //    public ResponseEntity<Space> updateSpace(@Valid SpaceUpdateDto dto, BindingResult result){
