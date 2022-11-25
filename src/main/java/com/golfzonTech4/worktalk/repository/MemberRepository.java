@@ -45,7 +45,7 @@ public class MemberRepository {
      * 단일 회원 조회 로직(회원 이메일 기준)
      */
     public Member findOneByEmail(String email) {
-        log.info("findByName: {}", email);
+        log.info("findOneByEmail: {}", email);
         return em.createQuery("select m from Member m where m.email = :email", Member.class)
                 .setParameter("email", email)
                 .getSingleResult();

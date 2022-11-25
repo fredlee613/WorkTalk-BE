@@ -24,10 +24,9 @@ public class MemberService {
     private final PasswordEncoder passwordEncoder;
 
     @Transactional
-    public MemberDetailDto signup(Member member) {
+    public MemberDetailDto join(Member member) {
         log.info("signup : {}", member);
         member.setPw(passwordEncoder.encode(member.getPw())); // 비밀번호 인코딩
-//        member.setMemberType(MemberType.ROLE_HOST); // 회원 타입 => 일반 유저 설정
         member.setPenalty(0); // 페널티 여부 0으로 초기화
         member.setImgName("profill.png"); // 프로필 이미지 => 기본 이미지로 설정
 
@@ -52,6 +51,26 @@ public class MemberService {
             throw new DuplicateMemberException();
         }
     }
+
+    /**
+     * 회원명 중복 확인 비동기 처리 로직
+     * 중복 시 1, 비중복 시 0 반환
+     */
+    public Integer checkName(Member member) {
+        log.info("checkName : {}", member);
+        List<Member> findMembers = memberRepository.findByName(member.getName());
+        if (!findMembers.isEmpty()) {
+            return 1;
+        } else {
+            return 0;
+        }
+    }
+
+    public Member findByName(String name) {
+        log.info("findByName : {}", name);
+        return memberRepository.findOneByName(name);
+    }
+
 
     /**
      * 회원 이메일 중복 확인 서비스 로직
@@ -103,7 +122,8 @@ public class MemberService {
     // member -> memberDetailDto
     private static MemberDetailDto getMemberDetailDto(Member member) {
         MemberDetailDto memberDetailDto = new MemberDetailDto();
-
+        
+        // 추후 생성자로 수정
         memberDetailDto.setId(member.getId());
         memberDetailDto.setEmail(member.getEmail());
         memberDetailDto.setPw(member.getPw());

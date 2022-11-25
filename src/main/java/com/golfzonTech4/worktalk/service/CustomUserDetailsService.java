@@ -36,14 +36,12 @@ public class CustomUserDetailsService implements UserDetailsService {
       return createdUser;
    }
 
-   private org.springframework.security.core.userdetails.User createUser(String username, Member member) {
+   private User createUser(String username, Member member) {
       log.info("createUser : {}", username);
       List<GrantedAuthority> grantedAuthorities = new ArrayList<GrantedAuthority>();
       String authority = member.getMemberType().toString();
       grantedAuthorities.add(new SimpleGrantedAuthority(authority));
 
-      return new org.springframework.security.core.userdetails.User(member.getName(),
-              member.getPw(),
-              grantedAuthorities);
+      return new User(member.getName(), member.getPw(), grantedAuthorities);
    }
 }

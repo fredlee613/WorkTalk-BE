@@ -22,14 +22,13 @@ import javax.validation.Valid;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api")
 @Slf4j
 public class AuthController {
     private final TokenProvider tokenProvider;
     private final AuthenticationManagerBuilder authenticationManagerBuilder;
 
 
-    @PostMapping("/authenticate") // 로그인 경로
+    @PostMapping("/login") // 로그인 경로
     public ResponseEntity<TokenDto> authorize(@Valid @RequestBody LoginDto loginDto) {
         log.info("authorize : {}", loginDto);
 
