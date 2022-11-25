@@ -21,5 +21,6 @@ public class MemberDetailDto {
     private MemberType memberType;
     private int penalty;
     private String imgName;
+    private int role; // 유저: 0, 호스트: 1
 
 }

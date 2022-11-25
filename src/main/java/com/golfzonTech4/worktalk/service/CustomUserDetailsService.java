@@ -9,12 +9,12 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Component("userDetailsService")
 @RequiredArgsConstructor
@@ -27,23 +27,18 @@ public class CustomUserDetailsService implements UserDetailsService {
    @Transactional
    public UserDetails loadUserByUsername(final String username) {
       log.info("loadUserByUsername : {}", username);
-      List<Member> findMembers = memberRepository.findByEmail(username);
-      if (findMembers.isEmpty()) {
-         throw new UsernameNotFoundException(username + " -> 데이터베이스에서 찾을 수 없습니다.");
-      }
-      User createdUser = createUser(username, findMembers.get(0));
+      Optional<Member> result = memberRepository.findByEmail(username);
+      User createdUser = createUser(username, result.get());
 
       return createdUser;
    }
 
-   private org.springframework.security.core.userdetails.User createUser(String username, Member member) {
+   private User createUser(String username, Member member) {
       log.info("createUser : {}", username);
       List<GrantedAuthority> grantedAuthorities = new ArrayList<GrantedAuthority>();
       String authority = member.getMemberType().toString();
       grantedAuthorities.add(new SimpleGrantedAuthority(authority));
 
-      return new org.springframework.security.core.userdetails.User(member.getName(),
-              member.getPw(),
-              grantedAuthorities);
+      return new User(member.getName(), member.getPw(), grantedAuthorities);
    }
 }
