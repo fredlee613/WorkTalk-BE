@@ -2,8 +2,8 @@ package com.golfzonTech4.worktalk.service;
 
 import com.golfzonTech4.worktalk.domain.Member;
 import com.golfzonTech4.worktalk.domain.Space;
+import com.golfzonTech4.worktalk.domain.SpaceImgg;
 import com.golfzonTech4.worktalk.repository.MemberRepository;
-import com.golfzonTech4.worktalk.repository.MemberRepository_me;
 import com.golfzonTech4.worktalk.repository.SpaceRepository;
 import com.golfzonTech4.worktalk.dto.space.SpaceInsertDto;
 import com.golfzonTech4.worktalk.dto.space.SpaceUpdateDto;
@@ -12,6 +12,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.persistence.EntityNotFoundException;
 import java.util.List;
@@ -23,9 +24,10 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class SpaceService {
 
-    private final MemberRepository_me memberRepository2;
     private final MemberRepository memberRepository;
     private final SpaceRepository spaceRepository;
+
+    private final SpaceImgService spaceImgService;
 
 
     //사무공간 등록
@@ -40,6 +42,29 @@ public class SpaceService {
         BeanUtils.copyProperties(dto, spaceToCreate);
         spaceToCreate.setMember(member.get());
         return spaceRepository.save(spaceToCreate);
+    }
+    //사무공간 등록-다중이미지추가
+    @Transactional
+    public Long createiSpace(SpaceInsertDto dto,
+                             List<MultipartFile> multipartFileList) throws Exception{
+        Optional<Member> member = Optional.ofNullable(memberRepository.findOneByName(dto.getName()));
+        if(!member.isPresent()){
+            throw new EntityNotFoundException("Member Not Found");
+        }
+
+        Space spaceToCreate = new Space();
+        BeanUtils.copyProperties(dto, spaceToCreate);
+        spaceToCreate.setMember(member.get());
+        spaceRepository.save(spaceToCreate);
+
+        //이미지 등록
+        for (int i=0; i< multipartFileList.size();i++){
+            SpaceImgg spaceImgg = new SpaceImgg();
+            spaceImgg.setSpace(spaceToCreate);
+            spaceImgService.saveSpaceImg(spaceImgg, multipartFileList.get(i));
+        }
+        return spaceToCreate.getSpaceId();
+
     }
 
     //사무공간 수정
