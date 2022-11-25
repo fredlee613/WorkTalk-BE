@@ -50,10 +50,12 @@ public class JwtFilter extends GenericFilterBean {
     * RequestHeader에서 토큰 정보를 꺼내오기 위한 resolveToken 메서드 추가
     */
    private String resolveToken(HttpServletRequest request) {
+      log.info("resolveToken");
       String bearerToken = request.getHeader(AUTHORIZATION_HEADER);
+      log.info("bearerToken: {}", bearerToken);
 
-      if (StringUtils.hasText(bearerToken) && bearerToken.startsWith("Bearer ")) {
-         return bearerToken.substring(7);
+      if (StringUtils.hasText(bearerToken)) {
+         return bearerToken;
       }
 
       return null;
