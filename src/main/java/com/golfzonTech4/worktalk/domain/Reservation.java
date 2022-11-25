@@ -81,7 +81,7 @@ public class Reservation {
         if (room.getRoomType() == RoomType.OFFICE)  period = BookDate.getPeriodDate(bookDate.getCheckOutDate(), bookDate.getCheckInDate());
         else  period = BookDate.getPeriodHours(bookDate.getCheckInTime(), bookDate.getCheckOutTime());
 
-        return room.getRoom_price() * period;
+        return room.getRoomPrice() * period;
     }
 
 }

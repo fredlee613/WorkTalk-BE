@@ -12,7 +12,7 @@ import java.time.LocalDateTime;
 @Setter
 @SequenceGenerator(name = "SEQ_CUSTOMER_CENTER_GENERATOR", sequenceName = "SEQ_CUSTOMER_CENTER", initialValue = 1, allocationSize = 50)
 @Table(name = "CUSTOMER_CENTER")
-public class CustomerCenter implements Serializable {
+public class CustomerCenter extends BaseTimeEntity implements Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_CUSTOMER_CENTER_GENERATOR")
@@ -32,6 +32,6 @@ public class CustomerCenter implements Serializable {
     @Enumerated(EnumType.STRING)
     private com.golfzonTech4.worktalk.domain.CcType type;
 
-    @Column(name = "cc_date")
-    private LocalDateTime cc_date;
+//    @Column(name = "cc_date")
+//    private LocalDateTime cc_date;
 }

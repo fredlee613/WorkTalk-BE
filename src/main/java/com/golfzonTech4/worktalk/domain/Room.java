@@ -14,7 +14,7 @@ public class Room implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_ROOM_GENERATOR")
     @Column(name = "ROOM_ID")
-    private Long room_id;
+    private Long roomId;
 
     @ManyToOne
     @JoinColumn(name = "SPACE_ID", nullable = false)
@@ -24,21 +24,21 @@ public class Room implements Serializable {
     private RoomType roomType;
 
     @Column(name = "ROOM_NAME", nullable = false, length = 50)
-    private String room_name;
+    private String roomName;
 
     @Column(name = "ROOM_DETAIL", nullable = true, length = 500)
-    private String room_detail;
+    private String roomDetail;
 
     @Column(name = "ROOM_IMG", nullable = true, length = 100)
-    private String room_img;
+    private String roomImg;
 
     @Column(name = "ROOM_PRICE", nullable = false)
-    private int room_price;
+    private int roomPrice;
 
     @Column(name = "WORK_START", nullable = false)
-    private int work_start;
+    private int workStart;
 
     @Column(name = "WORK_END", nullable = false)
-    private int work_end;
+    private int workEnd;
 
 }
