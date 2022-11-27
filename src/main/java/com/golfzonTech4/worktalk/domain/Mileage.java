@@ -22,7 +22,9 @@ public class Mileage implements Serializable {
     @Column(length = 20)
     private Mileage_status status;
 
-    private int amount;
+    @Column(name = "MILEAGE_AMOUNT")
+    private int mileageAmount;
 
-    private LocalDateTime m_date;
+    @Column(name = "MILEAGE_DATE")
+    private LocalDateTime mileageDate;
 }

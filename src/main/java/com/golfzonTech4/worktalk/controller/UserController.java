@@ -36,7 +36,7 @@ public class UserController {
     /**
      * 권한 모두 허용
      */
-    @GetMapping("/user")
+    @GetMapping("/")
     @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_HOST', 'ROLE_MASTER')")
     public ResponseEntity<MemberDetailDto> getMyUserInfo(HttpServletRequest request) {
         log.info("getMyUserInfo: {}", request);
@@ -46,7 +46,7 @@ public class UserController {
     /**
      * HOST 권한만 허용
      */
-    @GetMapping("/user/{username}")
+    @GetMapping("/{username}")
     @PreAuthorize("hasAnyRole('ROLE_HOST')")
     public ResponseEntity<MemberDetailDto> getUserInfo(@PathVariable String username) {
         log.info("getUserInfo: {}", username);
