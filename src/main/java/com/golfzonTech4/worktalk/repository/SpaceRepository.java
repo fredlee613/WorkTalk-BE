@@ -16,7 +16,9 @@ public interface SpaceRepository extends JpaRepository<Space, Long> {
 
     Space findBySpaceId(Long spaceId); //사무공간 상세페이지
 
-    List<Space> findAllByMember(Member member); //호스트가 등록한 사무공간리스트
+//    List<Space> findAllByMember(Member member); //호스트가 등록한 사무공간리스트
+
+    List<Space> findAllByMemberId(Long memberId); // 호스트가 등록한 사무공간리스트
 
 //    save(): 레코드 저장
 //    findOne(): PK로 레코드 한 건 찾기

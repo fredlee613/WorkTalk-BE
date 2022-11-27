@@ -6,7 +6,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
 
-public interface SpaceImgRepository  extends JpaRepository<SpaceImgg, Long> {
+public interface SpaceImgRepository extends JpaRepository<SpaceImgg, Long> {
 
     List<SpaceImgg> findBySpace(Space space);
 }
