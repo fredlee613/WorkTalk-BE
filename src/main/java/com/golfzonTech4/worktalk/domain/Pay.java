@@ -26,11 +26,8 @@ public class Pay {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "PAY_STATUS", length = 50)
-    private Payment_status payStatus;
+    private PaymentStatus payStatus;
 
     @Column(name = "AMOUNT")
     private int payAmount;
-
-    @Column(name = "PAY_DATE")
-    private LocalDateTime payDate;
 }
