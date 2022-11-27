@@ -56,6 +56,7 @@ public class JwtFilter extends GenericFilterBean {
 
       if (StringUtils.hasText(bearerToken)) {
          return bearerToken;
+//         return bearerToken.substring(7); // postman 코드 실행 시
       }
 
       return null;
