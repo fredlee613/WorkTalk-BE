@@ -3,10 +3,12 @@ package com.golfzonTech4.worktalk.service;
 import com.golfzonTech4.worktalk.domain.Member;
 import com.golfzonTech4.worktalk.domain.Space;
 import com.golfzonTech4.worktalk.domain.SpaceImgg;
+import com.golfzonTech4.worktalk.exception.NotFoundMemberException;
 import com.golfzonTech4.worktalk.repository.MemberRepository;
 import com.golfzonTech4.worktalk.repository.SpaceRepository;
 import com.golfzonTech4.worktalk.dto.space.SpaceInsertDto;
 import com.golfzonTech4.worktalk.dto.space.SpaceUpdateDto;
+import com.golfzonTech4.worktalk.util.SecurityUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
@@ -25,7 +27,12 @@ import java.util.Optional;
 public class SpaceService {
 
     private final MemberRepository memberRepository;
+
+    private final MemberService memberService;
+
+
     private final SpaceRepository spaceRepository;
+
 
     private final SpaceImgService spaceImgService;
 
@@ -33,7 +40,9 @@ public class SpaceService {
     //사무공간 등록
     @Transactional
     public Space createSpace(SpaceInsertDto dto){
-        Optional<Member> member = Optional.ofNullable(memberRepository.findOneByName(dto.getName()));
+
+        Optional<Member> member = memberRepository.findByName(dto.getName());
+
         if(!member.isPresent()){
             throw new EntityNotFoundException("Member Not Found");
         }
@@ -47,7 +56,7 @@ public class SpaceService {
     @Transactional
     public Long createiSpace(SpaceInsertDto dto,
                              List<MultipartFile> multipartFileList) throws Exception{
-        Optional<Member> member = Optional.ofNullable(memberRepository.findOneByName(dto.getName()));
+        Optional<Member> member = memberRepository.findByName(dto.getName());
         if(!member.isPresent()){
             throw new EntityNotFoundException("Member Not Found");
         }
@@ -98,9 +107,17 @@ public class SpaceService {
     }
 
     //호스트가 등록한 사무공간 리스트 조회
-    public List<Space> selectSpaceByHost(Member member) {
+    public List<Space> selectSpaceByHost(String name) {
         log.info("selectSpaceByHost()....");
-        return spaceRepository.findAllByMember(member);
+//        Optional<String> currentUsername = SecurityUtil.getCurrentUsername();
+//        if (currentUsername.isEmpty()) throw new NotFoundMemberException("Member not found");
+//        Member findMember = memberService.findByName(currentUsername.get());
+        Optional<Member> findMember = memberRepository.findByName(name);
+
+//        if(!optionalMember.isPresent()){
+//            throw new EntityNotFoundException("Member Not Found");
+//        }
+        return spaceRepository.findAllByMemberId(findMember.get().getId());
     }
 
     //유저-사무공간 리스트 조회

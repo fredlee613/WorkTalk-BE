@@ -23,13 +23,13 @@ public class RoomController {
     private final RoomService roomService;
 
     //사무공간상세페이지에서 세부공간 리스트 출력
-    @GetMapping("/space_selectOne/{space}/rooms")
+    @GetMapping("/spaceOne/{space}/rooms")
     public ResponseEntity findByRooms(@PathVariable("space") Space space){
         return ResponseEntity.ok(roomService.getRooms(space));
     }
 
     //호스트의 세부사무공간 등록
-    @PostMapping("/host/room_create")
+    @PostMapping("/host/{space}/roomCreate")
     public ResponseEntity<Room> createRoom(@Valid @RequestBody RoomInsertDto dto, Space space){
 
         roomService.createRoom(dto);
@@ -39,13 +39,13 @@ public class RoomController {
     }
 
     //사무공간 상세페이지에서 세부공간 선택
-    @GetMapping("/room_selectOne/{roomId}")
+    @GetMapping("/roomOne/{roomId}")
     public ResponseEntity findOneSpace(@PathVariable("roomId") final Long roomId){
         return ResponseEntity.ok(roomService.selectRoom(roomId));
     }
 
     //세부공간 삭제
-    @DeleteMapping("/host/space_delete/{roomId}")
+    @DeleteMapping("/host/spaceDelete/{roomId}")
     public ResponseEntity<Void> deleteRoom(@PathVariable Long roomId){
         roomService.deleteRoom(roomId);
         return ResponseEntity.ok().build();
