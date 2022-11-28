@@ -35,6 +35,8 @@ public class RoomService {
         Room roomToCreate = new Room();
         BeanUtils.copyProperties(dto, roomToCreate);
         roomToCreate.setSpace(space.get()); //spaceId 가져오기
+        space.get().setSpaceStatus("waiting");//space테이블의 spaceStatus상태 waiting으로 바꾸기
+
         return roomRepository.save(roomToCreate);
     }
 

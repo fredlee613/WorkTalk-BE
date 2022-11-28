@@ -8,5 +8,5 @@ import java.util.List;
 
 public interface SpaceImgRepository extends JpaRepository<SpaceImgg, Long> {
 
-    List<SpaceImgg> findBySpace(Space space);
+    List<SpaceImgg> findBySpace(Long space);
 }

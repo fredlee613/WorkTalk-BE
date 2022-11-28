@@ -80,11 +80,18 @@ public class SpaceController {
 //        return new ResponseEntity("수정완료",HttpStatus.OK);
 //    }
 
+    //호스트의 사무공간삭제
     @DeleteMapping("/host/spaceDelete/{spaceId}")
     public ResponseEntity<Void> deleteSpace(@PathVariable Long spaceId){
         spaceService.deleteSpace(spaceId);
         return ResponseEntity.ok().build();
     }
 
+    //마스터의 사무공간 승인
+    @PostMapping("/spaceApproved/{spaceId}")
+    public ResponseEntity spaceApproved(@PathVariable("spaceId") final Long spaceId){
+        spaceService.ApprovedSpace(spaceId);
+        return new ResponseEntity("승인완료",HttpStatus.OK);
+    }
 
 }
