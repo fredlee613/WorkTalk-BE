@@ -11,15 +11,15 @@ import com.golfzonTech4.worktalk.repository.reservation.ReservationSimpleReposit
 import com.golfzonTech4.worktalk.util.SecurityUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @Service
 @Transactional(readOnly = true)
@@ -138,15 +138,16 @@ public class ReservationService {
         log.info("updateNoShow");
         log.info("current time : {}", LocalDateTime.now());
         List<ReserveSimpleDto> reservaionList = findAllByTime();
-        List<Long> memberList = new ArrayList<>();
+//        List<Long> memberList = new ArrayList<>();
+        Set<Long> memberSet = new HashSet<>();
         for (ReserveSimpleDto reserveSimpleDto : reservaionList) {
             changeToNoShow(reserveSimpleDto.getReserveId());
-            memberList.add(reserveSimpleDto.getMemberId());
-            log.info("memberList.size() : {}", memberList.size());
+            memberSet.add(reserveSimpleDto.getMemberId());
+            log.info("memberSet.size() : {}", memberSet.size());
         }
         int count = 0;
-        if (memberList.size() != 0) {
-            for (Long memberId : memberList) {
+        if (memberSet.size() != 0) {
+            for (Long memberId : memberSet) {
                 log.info("memberId: {}", memberId);
                 Long noShowCount = countNoShow(memberId);
                 if (noShowCount >= 3) {
