@@ -1,4 +1,4 @@
-package com.golfzonTech4.worktalk.controller;
+package com.golfzonTech4.worktalk.config;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;

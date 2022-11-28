@@ -1,19 +1,18 @@
 package com.golfzonTech4.worktalk.domain;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.DynamicInsert;
-import org.springframework.web.multipart.MultipartFile;
+import org.hibernate.annotations.DynamicUpdate;
 
 import javax.persistence.*;
 import java.io.Serializable;
 
 @Entity
 @Getter @Setter
-@DynamicInsert
+@DynamicInsert @DynamicUpdate
 @SequenceGenerator(name = "SEQ_SPACE_GENERATOR", sequenceName = "SEQ_SPACE", initialValue = 1, allocationSize = 50)
 public class Space implements Serializable {
     @Id
@@ -47,13 +46,12 @@ public class Space implements Serializable {
     @Column(name = "SPACE_TYPE", nullable = false)
     private int spaceType;
 
-    @ColumnDefault(value = "'waiting'")
+    @ColumnDefault(value = "'no_setting'")
     @Column(name = "SPACE_STATUS", length = 20)
     private String spaceStatus;
 
     @ColumnDefault("'space.jpg'")
     @Column(name = "SPACE_IMG", nullable = true, length = 100)
     private String spaceImg;
-
 
 }

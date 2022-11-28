@@ -3,6 +3,7 @@ package com.golfzonTech4.worktalk.service;
 import com.golfzonTech4.worktalk.domain.Member;
 import com.golfzonTech4.worktalk.domain.Space;
 import com.golfzonTech4.worktalk.domain.SpaceImgg;
+import com.golfzonTech4.worktalk.dto.space.SpaceStatusDto;
 import com.golfzonTech4.worktalk.exception.NotFoundMemberException;
 import com.golfzonTech4.worktalk.repository.MemberRepository;
 import com.golfzonTech4.worktalk.repository.SpaceRepository;
@@ -96,9 +97,9 @@ public class SpaceService {
     }
 
     //사무공간 상세페이지
-    public Space selectSpace(Long space_id){
+    public Space selectSpace(Long spaceId){
         log.info("selectSpace()....");
-        Space space = spaceRepository.findBySpaceId(space_id);
+        Space space = spaceRepository.findBySpaceId(spaceId);
         if(space != null){
             return space;
         }
@@ -129,6 +130,15 @@ public class SpaceService {
     public void deleteSpace(Long spaceId){
         log.info("deleteSpace()....");
         spaceRepository.deleteById(spaceId);
+    }
+
+    @Transactional
+    public Space ApprovedSpace(Long spaceId){
+        log.info("ApprovedSpace()....");
+        Space space = selectSpace(spaceId);
+        log.info(String.valueOf(spaceId));
+        space.setSpaceStatus("approved");    //변경감지
+        return space;
     }
 
 }
