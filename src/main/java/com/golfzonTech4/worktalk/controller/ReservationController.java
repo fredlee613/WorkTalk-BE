@@ -1,26 +1,33 @@
 package com.golfzonTech4.worktalk.controller;
 
 import com.golfzonTech4.worktalk.domain.MemberType;
+import com.golfzonTech4.worktalk.domain.PaymentStatus;
 import com.golfzonTech4.worktalk.domain.Reservation;
 import com.golfzonTech4.worktalk.dto.reservation.ReserveCheckDto;
 import com.golfzonTech4.worktalk.dto.reservation.ReserveDto;
 import com.golfzonTech4.worktalk.dto.reservation.ReserveSimpleDto;
+import com.golfzonTech4.worktalk.service.PayService;
 import com.golfzonTech4.worktalk.service.ReservationService;
 import com.golfzonTech4.worktalk.util.SecurityUtil;
+import com.siot.IamportRestClient.exception.IamportResponseException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RestController;
 
-import java.time.LocalDateTime;
+import java.io.IOException;
 import java.util.List;
-import java.util.Optional;
+import java.util.Map;
 
 @RestController
 @RequiredArgsConstructor
 @Slf4j
 public class ReservationController {
     private final ReservationService reservationService;
+    private final PayService payService;
 
     /**
      * 예약 요청
@@ -34,27 +41,38 @@ public class ReservationController {
     }
 
     /**
-     * 예약 취소 요청
+     * 예약 취소 및 결제 취소 요청
      */
     @PostMapping("/reservation/cancel")
-    public ResponseEntity<LocalDateTime> cancelByUser(@RequestBody ReserveDto reserveDto) {
+    public ResponseEntity<Integer> cancelByUser(@RequestBody ReserveDto reserveDto) throws IamportResponseException, IOException {
         String currentUserRole = SecurityUtil.getCurrentUserRole().get();
-        if (currentUserRole.equals(MemberType.ROLE_USER)) {
-            log.info("cancelBy{}: {}, {}",currentUserRole, reserveDto.getReserveId(), reserveDto.getCancelReason());
-            return ResponseEntity.ok(reservationService.cancelByUser(reserveDto.getReserveId(), reserveDto.getCancelReason()));
-        } else {
-            log.info("cancelBy{}: {}, {}",currentUserRole, reserveDto.getReserveId(), reserveDto.getCancelReason());
-            return ResponseEntity.ok(reservationService.cancelByHost(reserveDto.getReserveId(), reserveDto.getCancelReason()));
+        Long reservedId = 0L;
+        int flag = 0;
+        int count = 0;
+        // 계정 종류에 따라 분기
+        if (currentUserRole.equals(MemberType.ROLE_USER)) { // 유저 취소 경우
+            log.info("cancelBy{}: {}, {}", currentUserRole, reserveDto.getReserveId(), reserveDto.getCancelReason());
+            // 예약 취소 요청 (예약번호, 보증금 취소 가능 여부, 결제 종류 반환)
+            Map<String, Object> result = reservationService.cancelByUser(reserveDto.getReserveId(), reserveDto.getCancelReason());
+            // 결제 취소 요청 (결제 종류에 따라 분기)
+            if (String.valueOf(result.get("status")).equals(PaymentStatus.PREPAID)) {
+                count = payService.cancelPrepaid((Long) result.get("reserveId"), (int) result.get("flag"));
+            } else {
+            // 결제 취소 요청 (결제 종류에 따라 분기)
+                count = payService.cancelPostPaid((Long) result.get("reserveId"), (int) result.get("flag"));
+            }
+        } else { // 호스트 취소 경우
+            log.info("cancelBy{}: {}, {}", currentUserRole, reserveDto.getReserveId(), reserveDto.getCancelReason());
+            // 예약 취소 요청 (예약번호, 결제 종류 반환)
+            Map<String, Object> result = reservationService.cancelByHost(reserveDto.getReserveId(), reserveDto.getCancelReason());
+            if (String.valueOf(result.get("status")).equals(PaymentStatus.PREPAID)) {
+                count = payService.cancelPostPaid((Long)result.get("reserveId"), 0);
+            } else {
+                count = payService.cancelPostPaid((Long)result.get("reserveId"), 0);
+            }
         }
+        return ResponseEntity.ok(count);
     }
-
-//    /**
-//     * 호스트 예약 취소 요청
-//     */
-//    @PostMapping("/host/cancel")
-//    public ResponseEntity<LocalDateTime> cancelByHost(@RequestBody ReserveDto reserveDto) {
-//        log.info("cancel: {}, {}", reserveDto.getReserveId(), reserveDto.getCancelReason());
-//    }
 
     /**
      * 예약 리스트 조회 요청
@@ -74,6 +92,9 @@ public class ReservationController {
         return ResponseEntity.ok(reservationService.findAllByUser());
     }
 
+    /**
+     * 예약 리스트 조회 요청 (호스트 기중)
+     */
     @GetMapping("/reservations/host")
     public ResponseEntity<List<ReserveSimpleDto>> findAllByHost() {
         log.info("findAllByUser");

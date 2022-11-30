@@ -59,9 +59,18 @@ public class BookDate {
         return (int) ChronoUnit.MINUTES.between(reserveDate, cancelDate);
     }
 
+    public static int getPeriodSeconds(LocalDateTime reserveDate, LocalDateTime cancelDate) {
+        return (int) ChronoUnit.SECONDS.between(reserveDate, cancelDate);
+    }
+
     public static LocalDateTime getInitTime(LocalDate checkInDate, Integer checkInTime) {
         LocalDateTime initTime = checkInDate.atTime(checkInTime, 0);
         return initTime;
+    }
+
+    public static LocalDateTime getEndTime(LocalDate checkInDate, Integer checkOutTime) {
+        LocalDateTime endTime = checkInDate.atTime(checkOutTime, 0);
+        return endTime;
     }
 
     public static boolean validTime(int checkInTime, int checkOutTime) {

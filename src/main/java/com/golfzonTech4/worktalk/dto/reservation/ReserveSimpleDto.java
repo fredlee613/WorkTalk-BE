@@ -7,6 +7,7 @@ import com.golfzonTech4.worktalk.domain.RoomType;
 import com.querydsl.core.annotations.QueryProjection;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.data.jpa.repository.Query;
 
 @Data
 @NoArgsConstructor
@@ -24,12 +25,12 @@ public class ReserveSimpleDto {
     private ReserveStatus reserveStatus;
     private PaymentStatus paymentStatus;
     private RoomType roomType;
-
-
+    private int reserveAmount;
 
     @QueryProjection
-    public ReserveSimpleDto(String roomName, Long reserveId, Long memberId, Long rooomId, BookDate bookDate, String name, ReserveStatus reserveStatus, PaymentStatus paymentStatus, RoomType roomType, int paid) {
+    public ReserveSimpleDto(String roomName, int paid, Long reserveId, Long memberId, Long rooomId, BookDate bookDate, String name, ReserveStatus reserveStatus, PaymentStatus paymentStatus, RoomType roomType, int reserveAmount) {
         this.roomName = roomName;
+        this.paid = paid;
         this.reserveId = reserveId;
         this.memberId = memberId;
         this.rooomId = rooomId;
@@ -38,7 +39,7 @@ public class ReserveSimpleDto {
         this.reserveStatus = reserveStatus;
         this.paymentStatus = paymentStatus;
         this.roomType = roomType;
-        this.paid = paid;
+        this.reserveAmount = reserveAmount;
     }
 
     @QueryProjection
@@ -52,5 +53,11 @@ public class ReserveSimpleDto {
     public ReserveSimpleDto(Long reserveId, Long memberId) {
         this.reserveId = reserveId;
         this.memberId = memberId;
+    }
+
+    @QueryProjection
+    public ReserveSimpleDto(String roomName, BookDate bookDate) {
+        this.roomName = roomName;
+        this.bookDate = bookDate;
     }
 }

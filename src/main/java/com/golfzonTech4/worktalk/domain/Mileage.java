@@ -14,6 +14,10 @@ import java.time.LocalDateTime;
 public class Mileage implements Serializable {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_MILEAGE_GENERATOR")
+    @Column(name = "MILEAGE_ID")
+    private Long mileageId;
+
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "PAY_ID")
     private Pay pay;

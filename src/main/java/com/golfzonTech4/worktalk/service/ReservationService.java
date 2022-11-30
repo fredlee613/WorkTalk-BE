@@ -9,17 +9,16 @@ import com.golfzonTech4.worktalk.repository.RoomRepository;
 import com.golfzonTech4.worktalk.repository.reservation.ReservationRepository;
 import com.golfzonTech4.worktalk.repository.reservation.ReservationSimpleRepository;
 import com.golfzonTech4.worktalk.util.SecurityUtil;
+import com.siot.IamportRestClient.exception.IamportResponseException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
 @Service
 @Transactional(readOnly = true)
@@ -36,8 +35,8 @@ public class ReservationService {
      * 예약 기능
      */
     @Transactional
-    public Long reserve(ReserveDto reserveDto) {
-        log.info("reserve : {}", reserveDto);
+    public Long reserve(ReserveDto dto) {
+        log.info("reserve : {}", dto);
 
         Optional<String> currentUsername = SecurityUtil.getCurrentUsername();
         // 로그인 값이 없을 경우 예외처리
@@ -46,21 +45,21 @@ public class ReservationService {
         Member findMember = memberService.findByName(currentUsername.get());
         log.info("findMember : {}", findMember);
 
-        Room findRoom = roomRepository.findByRoomId(reserveDto.getRoom_id());
+        Room findRoom = roomRepository.findByRoomId(dto.getRoom_id());
         log.info("findRoom : {}", findRoom);
 
         // 오피스의 경우 체크인 일자가 체크아웃 일자보다 늦을 경우 예외처리
         // 그 외의 경우 체크인 시간이 체크아웃 시간보다 늦을 경우 예외처리
-        validateDateTime(reserveDto, findRoom);
+        validateDateTime(dto, findRoom);
 
         BookDate bookDate = new BookDate(
                 LocalDateTime.now(),
-                reserveDto.getCheckInDate(),
-                reserveDto.getCheckOutDate(),
-                reserveDto.getCheckInTime(),
-                reserveDto.getCheckOutTime());
+                dto.getCheckInDate(),
+                dto.getCheckOutDate(),
+                dto.getCheckInTime(),
+                dto.getCheckOutTime());
 
-        Reservation reservation = Reservation.makeReservation(findMember, findRoom, bookDate);
+        Reservation reservation = Reservation.makeReservation(findMember, findRoom, bookDate, dto.getAmount(), dto.getPaymentStatus());
 
         return reservationRepository.save(reservation).getReserveId();
     }
@@ -86,13 +85,14 @@ public class ReservationService {
      * 사용자 예약 취소 기능
      */
     @Transactional
-    public LocalDateTime cancelByUser(Long reserveId, String cancelReason) {
+    public Map<String, Object> cancelByUser(Long reserveId, String cancelReason) throws IamportResponseException, IOException {
         log.info("cancelByUser : {}, {}", reserveId, cancelReason);
 
         // 해당 값이 Null일 경우 NoSuchElementException 발생
         Reservation findReservation = reservationRepository.findById(reserveId).get();
 
         LocalDate checkInDate = findReservation.getBookDate().getCheckInDate();
+        LocalDateTime reserveDate = findReservation.getBookDate().getReserveDate();
         Integer checkInTime = findReservation.getBookDate().getCheckInTime();
         LocalDateTime initTime = BookDate.getInitTime(checkInDate, checkInTime);
 
@@ -108,15 +108,24 @@ public class ReservationService {
         findReservation.setReserveStatus(ReserveStatus.CANCELED_BY_USER);
         findReservation.setCancelReason(cancelReason);
 
-        return findReservation.getBookDate().getCancelDate();
+        // 예약 시간으로 부터 현재까지의 시간 차(초 기준)
+        int reservePeriod = BookDate.getPeriodSeconds(LocalDateTime.now(), reserveDate);
+
+        int flag = reservePeriod <= 3600 ? 0 : 1; // 1시간 이하일 경우 0, 초과 시 1
+
+        Map result = new HashMap<>();
+        result.put("reserveId", reserveId);
+        result.put("flag", flag);
+        result.put("Type", findReservation.getPaymentStatus());
+        return result;
     }
 
     /**
-     * 호스튼 예약 취소 기능
+     * 호스트는 예약 취소 기능
      */
     @Transactional
-    public LocalDateTime cancelByHost(Long reserveId, String cancelReason) {
-        log.info("cancelByHost : {}, {}", reserveId,cancelReason);
+    public Map<String, Object> cancelByHost(Long reserveId, String cancelReason) throws IamportResponseException, IOException {
+        log.info("cancelByHost : {}, {}", reserveId, cancelReason);
         // 해당 값이 Null일 경우 NoSuchElementException 발생
         Reservation findReservation = reservationRepository.findById(reserveId).get();
 
@@ -124,7 +133,10 @@ public class ReservationService {
         findReservation.setReserveStatus(ReserveStatus.CANCELED_BY_HOST);
         findReservation.setCancelReason(cancelReason);
 
-        return findReservation.getBookDate().getCancelDate();
+        Map result = new HashMap<>();
+        result.put("reserveId", reserveId);
+        result.put("Type", findReservation.getPaymentStatus());
+        return result;
     }
 
     /**
@@ -238,5 +250,9 @@ public class ReservationService {
         String currentUsername = SecurityUtil.getCurrentUsername().get();
         log.info("findAllByHost : {}", currentUsername);
         return reservationSimpleRepository.findAllByHost(currentUsername);
+    }
+
+    public Optional<Reservation> findById(Long reserveId) {
+        return reservationRepository.findById(reserveId);
     }
 }
