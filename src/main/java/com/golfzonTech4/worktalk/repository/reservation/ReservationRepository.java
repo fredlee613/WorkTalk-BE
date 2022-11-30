@@ -16,4 +16,6 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
     @Query("select r from Reservation r where r.member.name = :name order by r.reserveId desc ")
     public List<Reservation> findAllByName(@Param("name") String name);
 
+    Reservation findByReserveId(Long reserveId); //예약번호 조회
+
 }

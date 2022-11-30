@@ -5,7 +5,6 @@ import lombok.Setter;
 
 import javax.persistence.*;
 import java.io.Serializable;
-import java.time.LocalDateTime;
 
 @Entity
 @Getter
@@ -16,13 +15,13 @@ public class Qna extends BaseTimeEntity implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_QNA_GENERATOR")
     @Column(name = "QNA_ID")
-    private Long qna_id;
+    private Long qnaId;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "SPACE_ID", nullable = false)
-    private com.golfzonTech4.worktalk.domain.Space space;
+    private Space space;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "MEMBER_ID", nullable = false)
     private Member member;
 
@@ -32,6 +31,4 @@ public class Qna extends BaseTimeEntity implements Serializable {
     @Column(name = "CONTENT", nullable = false, length = 1000)
     private String content;
 
-//    @Column(name = "qna_date")
-//    private LocalDateTime qna_date;
 }

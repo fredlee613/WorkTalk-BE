@@ -21,7 +21,7 @@ public class Space implements Serializable {
     private Long spaceId;
 
     @ManyToOne
-    @JsonManagedReference //순환참조를 방지하기 위한 어노테이션입니다
+    @JsonManagedReference //순환참조를 방지하기 위한 어노테이션
     @JoinColumn(name = "MEMBER_ID", nullable = false)
     private Member member;
 

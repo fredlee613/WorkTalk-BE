@@ -3,7 +3,6 @@ package com.golfzonTech4.worktalk.service;
 import com.golfzonTech4.worktalk.domain.Member;
 import com.golfzonTech4.worktalk.domain.Space;
 import com.golfzonTech4.worktalk.domain.SpaceImgg;
-import com.golfzonTech4.worktalk.dto.space.SpaceStatusDto;
 import com.golfzonTech4.worktalk.exception.NotFoundMemberException;
 import com.golfzonTech4.worktalk.repository.MemberRepository;
 import com.golfzonTech4.worktalk.repository.SpaceRepository;
@@ -31,9 +30,7 @@ public class SpaceService {
 
     private final MemberService memberService;
 
-
     private final SpaceRepository spaceRepository;
-
 
     private final SpaceImgService spaceImgService;
 

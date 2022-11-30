@@ -18,8 +18,6 @@ import javax.validation.Valid;
 @RequiredArgsConstructor
 public class RoomController {
 
-    private final SpaceService spaceService;
-
     private final RoomService roomService;
 
     //사무공간상세페이지에서 세부공간 리스트 출력
