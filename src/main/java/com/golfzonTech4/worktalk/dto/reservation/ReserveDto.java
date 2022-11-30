@@ -1,6 +1,7 @@
 package com.golfzonTech4.worktalk.dto.reservation;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.golfzonTech4.worktalk.domain.PaymentStatus;
 import lombok.Data;
 
 import java.time.LocalDate;
@@ -25,4 +26,8 @@ public class ReserveDto {
     private Integer checkOutTime; // 사용 종료 시간
     
     private String cancelReason; // 취소 사유
+
+    private Integer amount; // 결제 가격
+
+    private PaymentStatus paymentStatus; // 결제 유형
 }

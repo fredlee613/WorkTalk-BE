@@ -9,6 +9,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.time.LocalDateTime;
+
 @RestController
 @RequiredArgsConstructor
 @Slf4j
@@ -23,6 +25,16 @@ public class MailController {
         log.info("mailCheck: {}", request);
         String validCode = mailService.joinMail(request.getEmail());
         return ResponseEntity.ok(validCode);
+    }
+
+    /**
+     * 결제 관련 메일 발송 테스트
+     */
+    @PostMapping("/payCheck")
+    public ResponseEntity<String> payCheck() {
+        log.info("payCheck: {}");
+        mailService.payMail(101L, 51L, 10000, LocalDateTime.now());
+        return ResponseEntity.ok().build();
     }
 
 }

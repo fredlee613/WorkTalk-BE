@@ -40,7 +40,7 @@ public class Reservation {
     @Column(name = "AMOUNT")
     private int reserveAmount; // 예상 금액
 
-    @Column(name = "CANCEL_REASON", length = 500)
+    @Column(name = "CANCEL_REASON", length = 200)
     private String cancelReason; // 취소 사유
 
     @Override
@@ -56,16 +56,15 @@ public class Reservation {
                 '}';
     }
 
-    public static Reservation makeReservation(Member member, Room room, BookDate bookDate) {
+    public static Reservation makeReservation(Member member, Room room, BookDate bookDate, int amount, PaymentStatus paymentStatus) {
         Reservation reservation = new Reservation();
         reservation.setMember(member);
         reservation.setRoom(room);
         reservation.setReserveStatus(ReserveStatus.BOOKED);
-        reservation.setPaymentStatus(PaymentStatus.UNPAID); // 초기 설정 값: UNPAID
+        reservation.setPaymentStatus(paymentStatus);
         reservation.setPaid(0);
         reservation.setBookDate(bookDate);
-        reservation.setReserveAmount(calAmount(room, bookDate));
-        
+        reservation.setReserveAmount(amount);
         return reservation;
     }
 

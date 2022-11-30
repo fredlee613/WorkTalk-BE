@@ -11,9 +11,11 @@ import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.persistence.EntityManager;
+import javax.swing.text.html.Option;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 import static com.golfzonTech4.worktalk.domain.QReservation.reservation;
 
@@ -32,6 +34,7 @@ public class ReservationSimpleRepositoryImpl implements ReservationSimpleReposit
 
         List<ReserveSimpleDto> result = queryFactory.select(new QReserveSimpleDto(
                         reservation.room.roomName,
+                        reservation.paid,
                         reservation.reserveId,
                         reservation.member.id,
                         reservation.room.roomId,
@@ -40,7 +43,7 @@ public class ReservationSimpleRepositoryImpl implements ReservationSimpleReposit
                         reservation.reserveStatus,
                         reservation.paymentStatus,
                         reservation.room.roomType,
-                        reservation.paid)
+                        reservation.reserveAmount)
                 )
                 .from(reservation)
                 .where(reservation.member.name.eq(name)).fetch();
@@ -117,4 +120,15 @@ public class ReservationSimpleRepositoryImpl implements ReservationSimpleReposit
                                 .or(reservation.bookDate.checkOutTime.between(initTime, endTime))))
                 .fetch();
     }
+
+    @Override
+    public Optional<ReserveSimpleDto> findRoomName(Long reserveId) {
+        log.info("findRoomName : {}", reserveId);
+        ReserveSimpleDto result = queryFactory.select(new QReserveSimpleDto(reservation.room.roomName, reservation.bookDate))
+                .from(reservation)
+                .where(reservation.reserveId.eq(reserveId))
+                .fetchOne();
+        return Optional.ofNullable(result);
+    }
+
 }

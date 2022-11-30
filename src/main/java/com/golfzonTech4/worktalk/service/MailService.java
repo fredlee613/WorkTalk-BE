@@ -1,6 +1,10 @@
 package com.golfzonTech4.worktalk.service;
 
+import com.golfzonTech4.worktalk.config.EmailConfig;
 import com.golfzonTech4.worktalk.domain.Member;
+import com.golfzonTech4.worktalk.dto.reservation.ReserveSimpleDto;
+import com.golfzonTech4.worktalk.repository.MemberRepository;
+import com.golfzonTech4.worktalk.repository.reservation.ReservationSimpleRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -9,6 +13,8 @@ import org.springframework.stereotype.Service;
 
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Random;
 
 @Service
@@ -17,7 +23,10 @@ import java.util.Random;
 public class MailService {
 
     private final MemberService memberService;
+    private final MemberRepository memberRepository;
     private final JavaMailSender javaMailSender;
+    private final ReservationSimpleRepository reservationSimpleRepository;
+    private final EmailConfig emailConfig;
 
     public int creatingRandomCode() {
         log.info("creatingRandomCode");
@@ -31,7 +40,6 @@ public class MailService {
 
     public String joinMail(String email) {
         log.info("joinMail() : {}", email);
-
         Member member = new Member();
         member.setEmail(email);
 
@@ -40,7 +48,8 @@ public class MailService {
         memberService.findDuplicatesEmail(member);
 
         int validCode = creatingRandomCode();
-        String setFrom = "brownenvelope613@gmail.com"; // setting sender's own eamil that were registerd at email-config
+
+        String setFrom = emailConfig.getUserEmail(); // setting sender's own eamil that were registerd at email-config
         String toMail = email;
         String title = "WorkTalk 회원 가입 인증 이메일 입니다."; // Email Title
         String content =
@@ -51,6 +60,38 @@ public class MailService {
                         "해당 인증번호를 인증번호 확인란에 기입하여 주세요."; //Email content
         sendMail(setFrom, toMail, title, content);
         return Integer.toString(validCode);
+    }
+
+    public void payMail(Long memberId, Long reserveID, int amount, LocalDateTime payDate) {
+        log.info("payMail() : {}", memberId);
+
+        Member member = new Member();
+        member.setId(memberId);
+
+        Member findMember = memberRepository.findById(memberId).get();
+        ReserveSimpleDto dto = new ReserveSimpleDto();
+        dto.setReserveId(reserveID);
+        ReserveSimpleDto findReservation = reservationSimpleRepository.findRoomName(reserveID).get();
+
+        String purchaseDate = payDate.format(DateTimeFormatter.ofPattern("yyyy년 MM월 dd일 HH:mm:ss"));
+
+
+        String setFrom = emailConfig.getUserEmail();; // setting sender's own eamil that were registerd at email-config
+        String toMail = findMember.getEmail();
+        String title = "WorkTalk 미결제 관련 안내 메일입니다."; // Email Title
+        String content =
+                "WorkTalk를 이용해주셔서 감사합니다." +    //Should be written in html
+                        "<br><br>" +
+                        "예약건 : [" + findReservation.getRoomName() + "]에 대한 예역 결제가 실패하였습니다." +
+                        "<br>" +
+                        "다음 예약 결제일은 " + purchaseDate + "이며 " + "" +
+                        "<br>" +
+                        "결제 예정 금액은 " + amount + "원이 되겠습니다." +
+                        "<br>" +
+                        "원활한 이용을 위하여 결제 전 확인 부탁드립니다 ." +
+                        "<br>" +
+                        "감사합니다."; //Email content
+        sendMail(setFrom, toMail, title, content);
     }
 
     public void sendMail(String setFrom, String toMail, String title, String content) {
