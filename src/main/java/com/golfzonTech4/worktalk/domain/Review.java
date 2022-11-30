@@ -5,7 +5,6 @@ import lombok.Setter;
 
 import javax.persistence.*;
 import java.io.Serializable;
-import java.time.LocalDateTime;
 
 @Entity
 @Getter
@@ -16,13 +15,13 @@ public class Review extends BaseTimeEntity implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_REVIEW_GENERATOR")
     @Column(name = "REVIEW_ID")
-    private Long review_id;
+    private Long reviewId;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "RESERVATION_ID", nullable = false)
     private Reservation reservation;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "MEMBER_ID", nullable = false)
     private Member member;
 
@@ -31,9 +30,6 @@ public class Review extends BaseTimeEntity implements Serializable {
 
     @Column(name = "GRADE", nullable = false)
     private Double grade;
-
-//    @Column(name = "REVIEW_DATE")
-//    private LocalDateTime review_date;
 
     @Column(name = "REVIEW_IMG", nullable = true, length = 100)
     private String review_img;

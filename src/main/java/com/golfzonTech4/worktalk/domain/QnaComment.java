@@ -14,24 +14,20 @@ import java.time.LocalDateTime;
 @EqualsAndHashCode
 @Table(name = "QNA_COMMENT")
 public class QnaComment extends BaseTimeEntity implements Serializable {
-
     @Id
-    @OneToOne
+    @Column(name = "QNA_ID")
+    private Long qnaId;
+
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @MapsId//@매핑한 연관관계를 기본키에도 매핑하기 위함
     @JoinColumn(name = "QNA_ID")
     private Qna qna;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JoinColumn(name = "MEMBER_ID", nullable = false)
     private Member member;
 
     @Column(name = "QNACOMMENT", nullable = false, length = 1000)
     private String qnacomment;
-
-    @Enumerated(EnumType.STRING)
-    private CcType type;
-
-//    @Column(name = "QNACOMMENT_DATE")
-//    private LocalDateTime qnacomment_date;
-
 
 }

@@ -5,7 +5,6 @@ import lombok.Setter;
 
 import javax.persistence.*;
 import java.io.Serializable;
-import java.time.LocalDateTime;
 
 @Entity
 @Getter
@@ -17,9 +16,9 @@ public class CustomerCenter extends BaseTimeEntity implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_CUSTOMER_CENTER_GENERATOR")
     @Column(name = "CC_ID")
-    private Long cc_id;
+    private Long ccId;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "MEMBER_ID", nullable = false)
     private Member member;
 
@@ -30,8 +29,6 @@ public class CustomerCenter extends BaseTimeEntity implements Serializable {
     private String content;
 
     @Enumerated(EnumType.STRING)
-    private com.golfzonTech4.worktalk.domain.CcType type;
+    private CcType type;
 
-//    @Column(name = "cc_date")
-//    private LocalDateTime cc_date;
 }

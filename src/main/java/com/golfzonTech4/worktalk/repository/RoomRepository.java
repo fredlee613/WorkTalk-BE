@@ -9,7 +9,6 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-
 public interface RoomRepository extends JpaRepository<Room, Long> {
 
     List<Room> findAllBySpace(Space space); //해당 사무공간의 세부공간 리스트

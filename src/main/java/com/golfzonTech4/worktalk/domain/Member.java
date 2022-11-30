@@ -39,7 +39,7 @@ public class Member {
     @Column(columnDefinition = "VARCHAR(100 char) DEFAULT 'profill.png'")
     private String imgName;
 
-    @JsonBackReference //순환참조를 방지하기 위한 어노테이션입니다
+    @JsonBackReference //순환참조를 방지하기 위한 어노테이션
     @OneToMany(mappedBy = "member", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private List<Space> spaces;
 
