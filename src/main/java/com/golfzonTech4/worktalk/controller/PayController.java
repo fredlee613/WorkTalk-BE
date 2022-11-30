@@ -43,7 +43,7 @@ public class PayController {
         if (!clientAmount.equals(serverAmount)) {
             new IllegalStateException("잘못된 가격값입니다.");
         }
-        Long result = payService.save(dto);
+        Long result = payService.save(dto).getPayId();
         log.info("result: {}", result);
         return response;
     }
