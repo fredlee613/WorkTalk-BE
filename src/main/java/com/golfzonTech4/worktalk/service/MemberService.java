@@ -26,7 +26,6 @@ public class MemberService {
     public Long join(Member member) {
         log.info("signup : {}", member);
         member.setPw(passwordEncoder.encode(member.getPw())); // 비밀번호 인코딩
-        member.setPenalty(0); // 페널티 여부 0으로 초기화
         member.setImgName("profill.png"); // 프로필 이미지 => 기본 이미지로 설정
 
         findDuplicatesName(member); // 회원명 중복 검증 => 중복 회원 존재할 경우 예외 처리
@@ -125,7 +124,6 @@ public class MemberService {
         memberDetailDto.setPw(member.getPw());
         memberDetailDto.setName(member.getName());
         memberDetailDto.setTel(member.getTel());
-        memberDetailDto.setPenalty(member.getPenalty());
         memberDetailDto.setMemberType(member.getMemberType());
         memberDetailDto.setImgName(member.getImgName());
 

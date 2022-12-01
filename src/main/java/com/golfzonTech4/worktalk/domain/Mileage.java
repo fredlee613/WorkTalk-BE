@@ -20,21 +20,21 @@ public class Mileage implements Serializable {
     @Column(name = "MILEAGE_ID")
     private Long mileageId;
 
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "PAY_ID")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "PAY_ID", nullable = false)
     private Pay pay;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "MEMBER_ID")
+    @JoinColumn(name = "MEMBER_ID", nullable = false)
     private Member member;
 
     @Enumerated(EnumType.STRING)
-    @Column(length = 20)
+    @Column(length = 20, nullable = false)
     private Mileage_status status;
 
-    @Column(name = "MILEAGE_AMOUNT")
+    @Column(name = "MILEAGE_AMOUNT", nullable = false)
     private int mileageAmount;
 
-    @Column(name = "MILEAGE_DATE")
+    @Column(name = "MILEAGE_DATE", nullable = false)
     private LocalDate mileageDate;
 }

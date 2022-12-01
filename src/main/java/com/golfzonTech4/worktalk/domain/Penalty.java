@@ -18,15 +18,16 @@ public class Penalty {
     private Long penaltyId;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "MEMBER_ID")
+    @JoinColumn(name = "MEMBER_ID", nullable = false)
     private Member member;
 
-    @Column(name = "PENALTY_REASON", length = 1000)
+    @Column(name = "PENALTY_REASON", length = 1000, nullable = false)
     private String penaltyReason;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "PENALTY_TYPE", length = 50)
+    @Column(name = "PENALTY_TYPE", length = 50, nullable = false)
     private PenaltyType penaltyType;
 
-    private LocalDateTime p_date;
+    @Column(name = "PENALTY_DATE", nullable = false)
+    private LocalDateTime penaltyDate;
 }
