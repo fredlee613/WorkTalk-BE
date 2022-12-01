@@ -1,9 +1,12 @@
 package com.golfzonTech4.worktalk.domain;
 
 import lombok.Getter;
+import lombok.NonNull;
 import lombok.ToString;
 
+import javax.persistence.Column;
 import javax.persistence.Embeddable;
+import javax.validation.constraints.NotNull;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.Period;
@@ -14,16 +17,20 @@ import java.time.temporal.ChronoUnit;
 @ToString
 public class BookDate {
 
+    @Column(nullable = false)
     private LocalDateTime reserveDate; // 예약 일자
-
     private LocalDateTime cancelDate; // 취소 일자
 
+    @Column(nullable = false)
     private LocalDate checkInDate; // 사용 시작 일자
 
+    @Column(nullable = false)
     private LocalDate checkOutDate; // 사용 종료 일자
 
+    @Column(nullable = false)
     private Integer checkInTime; // 사용 시작 시간
 
+    @Column(nullable = false)
     private Integer checkOutTime; // 사용 종료 시간
 
     public BookDate() {

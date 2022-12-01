@@ -4,6 +4,7 @@ import lombok.*;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Table(name = "PAY")
@@ -21,7 +22,7 @@ public class Pay {
     private Long payId; // 결제 데이터 고유 키
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "RESERVATION_ID")
+    @JoinColumn(name = "RESERVATION_ID", nullable = false)
     private Reservation reservation; // 해당 결제가 이루어진 예약건
 
     @Column(name = "IMP_UID", length = 50)
@@ -34,13 +35,12 @@ public class Pay {
     private String customerUid; // 개인 빌링키
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "PAY_STATUS", length = 50)
+    @Column(name = "PAY_STATUS", length = 50, nullable = false)
     private PaymentStatus payStatus; // 결제 유형 (DEPOSIT, PREPAID, POSTPAID, REFUND)
 
-    @Column(name = "AMOUNT")
+    @Column(name = "AMOUNT", nullable = false)
     private int payAmount; // 결제 금액
 
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "MILEAGE_ID")
-    private Mileage mileage;
+    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "pay")
+    private List<Mileage> mileages;
 }

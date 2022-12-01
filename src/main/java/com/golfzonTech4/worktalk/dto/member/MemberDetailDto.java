@@ -19,7 +19,7 @@ public class MemberDetailDto {
     @NotEmpty
     private String tel;
     private MemberType memberType;
-    private int penalty;
+    private int activated;
     private String imgName;
     private int role; // 유저: 0, 호스트: 1
 

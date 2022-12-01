@@ -2,6 +2,7 @@ package com.golfzonTech4.worktalk.domain;
 
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.ColumnDefault;
 
 import javax.persistence.*;
 
@@ -16,33 +17,32 @@ public class Reservation {
     private Long reserveId; // 예약 고유 번호
 
     @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "MEMBER_ID")
+    @JoinColumn(name = "MEMBER_ID", nullable = false)
     private Member member; // 예약 회원
 
     @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "ROOM_ID")
+    @JoinColumn(name = "ROOM_ID", nullable = false)
     private Room room; // 예약 세부 공간
-
-    @Enumerated(EnumType.STRING)
-    @Column(name = "RESERVATION_STATUS", length = 20)
-    private ReserveStatus reserveStatus; // 예약 상태 (BOOKED, CANCELED_BY_USER, CANCELED_BY_HOST, USED)
-
-    @Enumerated(EnumType.STRING)
-    @Column(name = "PAYMENT_STATUS", length = 20)
-    private PaymentStatus paymentStatus; // 결제 방법 (DEPOSIT, PREPAID, POSTPAID, REFUND)
-    @Column(name = "PAID")
-    private int paid; // 결제 상태 : 보증금 or 선결제 (결제: 0, 미결제: 1)
-
 
     @Embedded
     private BookDate bookDate;
 
-    @Column(name = "AMOUNT")
+    @Enumerated(EnumType.STRING)
+    @Column(name = "RESERVATION_STATUS", length = 20, nullable = false)
+    private ReserveStatus reserveStatus; // 예약 상태 (BOOKED, CANCELED_BY_USER, CANCELED_BY_HOST, USED)
+
+    @ColumnDefault("0")
+    @Column(name = "PAID", nullable = false)
+    private int paid; // 결제 상태 : 보증금 or 선결제 (결제: 0, 미결제: 1)
+    @Column(name = "AMOUNT", nullable = false)
     private int reserveAmount; // 예상 금액
 
     @Column(name = "CANCEL_REASON", length = 200)
     private String cancelReason; // 취소 사유
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "PAYMENT_STATUS", length = 20, nullable = false)
+    private PaymentStatus paymentStatus; // 결제 방법 (PREPAID, POSTPAID)
     @Override
     public String toString() {
         return "Reservation{" +
