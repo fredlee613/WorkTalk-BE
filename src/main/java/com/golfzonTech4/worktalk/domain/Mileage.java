@@ -1,16 +1,18 @@
 package com.golfzonTech4.worktalk.domain;
 
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 import javax.persistence.*;
 import java.io.Serializable;
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 
 @Entity
 @SequenceGenerator(name = "SEQ_MILEAGE_GENERATOR", sequenceName = "SEQ_MILEAGE", initialValue = 1, allocationSize = 50)
 @Getter
 @Setter
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
 public class Mileage implements Serializable {
 
     @Id
@@ -22,6 +24,10 @@ public class Mileage implements Serializable {
     @JoinColumn(name = "PAY_ID")
     private Pay pay;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "MEMBER_ID")
+    private Member member;
+
     @Enumerated(EnumType.STRING)
     @Column(length = 20)
     private Mileage_status status;
@@ -30,5 +36,5 @@ public class Mileage implements Serializable {
     private int mileageAmount;
 
     @Column(name = "MILEAGE_DATE")
-    private LocalDateTime mileageDate;
+    private LocalDate mileageDate;
 }

@@ -29,6 +29,7 @@ import java.util.List;
 public class PayService {
     private final PayRepository payRepository;
     private final ReservationService reservationService;
+    private final MileageService mileageService;
     private final MyIamport myIamport;
 
     private final MailService mailService;
@@ -36,8 +37,8 @@ public class PayService {
     /**
      * 결제 데이터 검증 및 저장 로직
      */
-    @Transactional
-    public Long save(PayInsertDto dto) {
+    @Transactional(rollbackFor = Exception.class)
+    public Pay save(PayInsertDto dto) {
         log.info("save : {}", dto);
         Reservation findReservation = reservationService.findById(dto.getReserveId()).get();
 
@@ -46,8 +47,7 @@ public class PayService {
                 .payAmount(dto.getPayAmount()).build();
 
         Pay savedPay = payRepository.save(pay);
-
-        return savedPay.getPayId();
+        return savedPay;
     }
 
     /**
@@ -120,7 +120,7 @@ public class PayService {
                 IamportResponse<Payment> response = client.cancelPaymentByImpUid(new CancelData(findPay.getImp_uid(), true));
                 log.info("response : {}", response);
                 findPay.setPayStatus(PaymentStatus.REFUND); // 결제 데이터 상태를 환불로 변경
-                Long canceledPay = save(findPay); // 취소 결제 데이터 추가
+                Long canceledPay = save(findPay).getPayId(); // 취소 결제 데이터 추가
                 log.info("canceledPay : {}", canceledPay);
                 count++;
             } else if (findPay.getPayStatus().equals(PaymentStatus.POSTPAID_BOOKED)) { // 예약 결제의 경우 취소
@@ -155,7 +155,7 @@ public class PayService {
                         new CancelData(findPay.getImp_uid(), true));// imp_uid 값으로 전액 취소
                 log.info("response : {}", response);
                 findPay.setPayStatus(PaymentStatus.REFUND); // 결제 데이터 상태를 환불로 변경
-                Long canceledPay = save(findPay); // 취소 결제 데이터 추가
+                Long canceledPay = save(findPay).getPayId(); // 취소 결제 데이터 추가
                 log.info("canceledPay : {}", canceledPay);
                 count++;
             }
@@ -168,7 +168,7 @@ public class PayService {
                                     BigDecimal.valueOf(findPay.getPayAmount() * rate)));
                     log.info("response : {}", response);
                     findPay.setPayStatus(PaymentStatus.REFUND); // 결제 데이터 상태를 환불로 변경
-                    Long canceledPay = save(findPay); // 취소 결제 데이터 추가
+                    Long canceledPay = save(findPay).getPayId(); // 취소 결제 데이터 추가
                     log.info("canceledPay : {}", canceledPay);
                     count++;
                 }
@@ -194,7 +194,7 @@ public class PayService {
                             new CancelData(findPay.getImp_uid(), true));// imp_uid 값으로 전액 취소
                     log.info("response : {}", response);
                     findPay.setPayStatus(PaymentStatus.REFUND); // 결제 데이터 상태를 환불로 변경
-                    Long canceledPay = save(findPay); // 취소 결제 데이터 추가
+                    Long canceledPay = save(findPay).getPayId(); // 취소 결제 데이터 추가
                     log.info("canceledPay : {}", canceledPay);
                     count++;
                 }
