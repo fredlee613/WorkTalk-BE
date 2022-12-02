@@ -18,7 +18,7 @@ before_install:
 script: "./gradlew clean build"
 
 before_deploy:
-  - zip -r WorkTalk-BE
+  - zip -r WorkTalk-BE *
   - mkdir -p deploy
   - mv WorkTalk-BE.zip deploy/WorkTalk-BE.zip
 
