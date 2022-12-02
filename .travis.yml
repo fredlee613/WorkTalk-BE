@@ -35,6 +35,17 @@ deploy:
     on:
       all_branches: true # branch가 다른 이유로 발생하는 에러 해결
 
+  - provider: codedeploy
+    access_key_id: $AWS_ACCESS_KEY # Travis repo settings에 설정된 값
+    secret_access_key: $AWS_SECRET_KEY # Travis repo settings에 설정된 값
+    bucket: worktalk-springboot-build # S3 버킷
+    key: WorkTalk-BE.zip
+    bundle_type: zip
+    application: WorkTalk
+    deployment_group: WorkTalk-group
+    region: ap-northeast-2
+    wait-until-deployed: true
+
 # CI 실행 완료 시 메일로 알람
 notifications:
   email:
