@@ -15,6 +15,9 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 
+/**
+ * 작성자 : 최수연
+ */
 @Slf4j
 @RestController
 @RequiredArgsConstructor

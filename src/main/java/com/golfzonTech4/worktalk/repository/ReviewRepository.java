@@ -24,7 +24,7 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
             "left join ro.space s on s.spaceId = :spaceId")
     List<ReviewDetailDto> findReviewsDtoListBySpaceId(@Param("spaceId") Long spaceId);//해당 사무공간의 후기 리스트
 
-    //review, reservation, member 조인
+    //review, reservation, member 조인 + room, spacename 추가하기
     @Query("select distinct new com.golfzonTech4.worktalk.dto.review.ReviewDetailDto" +
             "(r.reviewId, re.reserveId, r.member.id, r.content, r.lastModifiedDate, r.grade) " +
             "from Review r left join Reservation re on r.reservation.reserveId = re.reserveId " +
