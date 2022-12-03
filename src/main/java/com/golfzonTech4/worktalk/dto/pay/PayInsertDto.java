@@ -23,6 +23,10 @@ public class PayInsertDto {
     private PaymentStatus payStatus; // 결제 유형 (DEPOSIT, PREPAID, POSTPAID, REFUND)
     private int payAmount; // 결제 금액
 
+    private int mileageUsage; // 마일리지 사용금액
+    
+    private int mileageSave; // 마일리지 적립금액
+
     @QueryProjection
     public PayInsertDto(Long payId, Long reserveId, String customer_uid, String imp_uid, String merchant_uid, PaymentStatus payStatus, int payAmount) {
         this.payId = payId;

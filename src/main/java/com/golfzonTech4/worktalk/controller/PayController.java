@@ -1,10 +1,8 @@
 package com.golfzonTech4.worktalk.controller;
 
 import com.golfzonTech4.worktalk.domain.MyIamport;
-import com.golfzonTech4.worktalk.domain.Pay;
 import com.golfzonTech4.worktalk.dto.pay.PayInsertDto;
 import com.golfzonTech4.worktalk.dto.pay.PayWebhookDto;
-import com.golfzonTech4.worktalk.repository.pay.PayRepository;
 import com.golfzonTech4.worktalk.service.PayService;
 import com.siot.IamportRestClient.IamportClient;
 import com.siot.IamportRestClient.exception.IamportResponseException;
@@ -26,7 +24,6 @@ import java.util.List;
 public class PayController {
     private final MyIamport myIamport;
     private final PayService payService;
-    private final PayRepository payRepository;
 
     /**
      * 선결제 데이터 검증 및 저장 요청
@@ -69,8 +66,7 @@ public class PayController {
     @PostMapping("/payments/postpaid")
     public void postpaid(
             @RequestBody PayWebhookDto dto) throws IamportResponseException, IOException {
-        log.info("webhookTest");
-        log.info("jsonObject: {}", dto);
+        log.info("postpaid: dto");
 
         payService.postpaid(dto);
 

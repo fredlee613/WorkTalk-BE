@@ -38,8 +38,8 @@ public class BookDate {
 
     public BookDate(LocalDateTime reserveDate, LocalDate checkInDate, LocalDate checkOutDate, Integer checkInTime, Integer checkOutTime) {
         this.reserveDate = reserveDate;
-        checkInDate = checkInDate;
-        checkOutDate = checkOutDate;
+        this.checkInDate = checkInDate;
+        this.checkOutDate = checkOutDate;
         this.checkInTime = checkInTime;
         this.checkOutTime = checkOutTime;
     }
@@ -67,7 +67,7 @@ public class BookDate {
     }
 
     public static int getPeriodSeconds(LocalDateTime reserveDate, LocalDateTime cancelDate) {
-        return (int) ChronoUnit.SECONDS.between(reserveDate, cancelDate);
+        return (int) ChronoUnit.SECONDS.between(cancelDate, reserveDate);
     }
 
     public static LocalDateTime getInitTime(LocalDate checkInDate, Integer checkInTime) {
@@ -81,15 +81,15 @@ public class BookDate {
     }
 
     public static boolean validTime(int checkInTime, int checkOutTime) {
-        if (checkInTime <= checkInTime) return true;
+        if (checkInTime <= checkOutTime) return true;
         else return false;
     }
 
     public static boolean validDate(LocalDate checkInDate, LocalDate checkOutDate) {
         if (checkInDate.isAfter(checkOutDate) || // 입실 날짜가 퇴실 날짜보다 늦은 경우
                 checkInDate.isAfter(LocalDate.now()) // 입실 날짜가 예약일을 이미 지난 경우
-        ) return true;
-        else return false;
+        ) return false;
+        else return true;
     }
 
 }

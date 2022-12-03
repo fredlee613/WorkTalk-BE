@@ -2,10 +2,7 @@ package com.golfzonTech4.worktalk.dto.mileage;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.golfzonTech4.worktalk.domain.Mileage_status;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
+import lombok.*;
 
 import java.time.LocalDate;
 
@@ -13,6 +10,7 @@ import java.time.LocalDate;
 @AllArgsConstructor
 @NoArgsConstructor
 @ToString
+@Builder
 public class MileageDto{
 
     private Long mileageId;

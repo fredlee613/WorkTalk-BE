@@ -14,8 +14,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -33,6 +34,7 @@ public class MileageService {
         log.info("save : {}", dto);
 
         String userName = SecurityUtil.getCurrentUsername().get();
+        // 선결제일 경우에는 클라이언트 side 에서 온 request로 저장되기에 사용자 호출이 가능하다.
         Pay findPay = payRepository.findById(dto.getPayId()).get();
         Member member = memberRepository.findByName(userName).get();
 
@@ -40,7 +42,7 @@ public class MileageService {
                 .pay(findPay)
                 .status(Mileage_status.SAVED)
                 .mileageAmount(dto.getMileageAmount())
-                .mileageDate(dto.getMileageDate())
+                .mileageDate(LocalDate.now())
                 .member(member)
                 .build();
 
@@ -57,8 +59,9 @@ public class MileageService {
         Pay findPay = payRepository.findById(dto.getPayId()).get();
         Member member = memberRepository.findByName(userName).get();
         int total = getTotal();
+        log.info("total : {}", total);
 
-        if (dto.getMileageAmount() > getTotal()) {
+        if (dto.getMileageAmount() > total) {
             throw new IllegalArgumentException("마일리지 사용 희망액이 잔액보다 큽니다.");
         }
 
@@ -66,7 +69,7 @@ public class MileageService {
                 .pay(findPay)
                 .status(Mileage_status.USED)
                 .mileageAmount(dto.getMileageAmount())
-                .mileageDate(dto.getMileageDate())
+                .mileageDate(LocalDate.now())
                 .member(member)
                 .build();
 
@@ -77,18 +80,18 @@ public class MileageService {
      * 마일리지 적립 취소 (삭제) 로직
      */
     public void cancelSave(Long payId) {
-        log.info("delete : {}", payId);
-        Mileage deleteMileage = mileageRepository.findById(payId).get();
-        mileageRepository.delete(deleteMileage);
+        log.info("cancelSave : {}", payId);
+        Optional<Mileage> deleteMileage = mileageRepository.findByPay(payId, Mileage_status.SAVED);
+        if (! deleteMileage.isEmpty()) mileageRepository.delete(deleteMileage.get());
     }
 
     /**
      * 마일리지 사용 취소 (삭제) 로직
      */
     public void cancelUsage(Long payId) {
-        log.info("delete : {}", payId);
-        Mileage deleteMileage = mileageRepository.findById(payId).get();
-        mileageRepository.delete(deleteMileage);
+        log.info("cancelUsage : {}", payId);
+        Optional<Mileage> deleteMileage = mileageRepository.findByPay(payId, Mileage_status.USED);
+        if (! deleteMileage.isEmpty()) mileageRepository.delete(deleteMileage.get());
     }
 
     /**
@@ -112,4 +115,11 @@ public class MileageService {
         return total;
     }
 
+    /**
+     * 마일리지 리스트 조회 (payId기준)
+     */
+    public List<Mileage> findAllByPay(Long payId) {
+        log.info("getListByPay: {}", payId);
+        return mileageRepository.findAllByPay(payId);
+    }
 }
