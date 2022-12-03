@@ -69,12 +69,5 @@ public class PayController {
         log.info("postpaid: dto");
 
         payService.postpaid(dto);
-
-    }
-
-    @GetMapping("/payments/cancel/{reserveId}/{flag}")
-    public void cancelByHost(@PathVariable(name = "reserveId") Long reserveId, @PathVariable(name = "flag") Integer flag) throws IamportResponseException, IOException {
-        log.info("cancelByHost : {}, {}", reserveId, flag);
-        payService.cancelPay(reserveId, flag);
     }
 }
