@@ -32,7 +32,7 @@ public class ReservationController {
     /**
      * 예약 요청
      */
-    @PostMapping("/reserve")
+    @PostMapping("/reservation/reserve")
     public ResponseEntity<Long> reserve(@RequestBody ReserveDto reserveDto) {
 
         log.info("reserve: {}", reserveDto);
@@ -70,28 +70,19 @@ public class ReservationController {
         return ResponseEntity.ok(count);
     }
 
-    /**
-     * 예약 리스트 조회 요청
-     */
-    @GetMapping("/reservations")
-    public ResponseEntity<List<Reservation>> findAllByName() {
-        log.info("findAllByName");
-        return ResponseEntity.ok(reservationService.findAllByName());
-    }
-
-    /**
-     * 예약 리스트 조회 요청 (유저 기준: Spring Data JPA + JPQL)
-     */
-    @GetMapping("/reservations/user")
-    public ResponseEntity<List<ReserveSimpleDto>> findAllByUser() {
-        log.info("findAllByUser");
-        return ResponseEntity.ok(reservationService.findAllByUser());
-    }
+//    /**
+//     * 예약 리스트 조회 요청 (유저 기준: Spring Data JPA + JPQL)
+//     */
+//    @GetMapping("/reservations/user")
+//    public ResponseEntity<List<ReserveSimpleDto>> findAllByUser() {
+//        log.info("findAllByUser");
+//        return ResponseEntity.ok(reservationService.findAllByUser());
+//    }
 
     /**
      * 예약 리스트 조회 요청(유저 기준: QueryDsl)
      */
-    @GetMapping("/reservations/query")
+    @GetMapping("/reservations/user")
     public ResponseEntity<List<ReserveSimpleDto>> findAllByUserQuery() {
         log.info("findAllByUser");
         return ResponseEntity.ok(reservationService.findAllByUserQuery());
