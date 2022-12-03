@@ -1,8 +1,14 @@
 package com.golfzonTech4.worktalk.controller;
 
+import com.amazonaws.services.s3.AmazonS3;
+import com.amazonaws.services.s3.AmazonS3Client;
+import com.amazonaws.services.s3.model.CannedAccessControlList;
+import com.amazonaws.services.s3.model.ObjectMetadata;
+import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.golfzonTech4.worktalk.domain.Member;
 import com.golfzonTech4.worktalk.domain.Space;
 import com.golfzonTech4.worktalk.dto.space.SpaceUpdateDto;
+import com.golfzonTech4.worktalk.service.AwsS3Service;
 import com.golfzonTech4.worktalk.service.RoomService;
 import com.golfzonTech4.worktalk.service.SpaceService;
 import com.golfzonTech4.worktalk.dto.space.SpaceInsertDto;
@@ -16,6 +22,8 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 
 import javax.validation.Valid;
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 @Slf4j
@@ -25,6 +33,9 @@ public class SpaceController {
 
     private final SpaceService spaceService;
     private final RoomService roomService;
+    private final AwsS3Service awsS3Service;
+    private final AmazonS3 amazonS3;
+    private String S3Bucket = "worktalk-img";
 
     //유저-사무공간 전체리스트 조회
     @GetMapping("/user/spaceAll")
@@ -93,5 +104,33 @@ public class SpaceController {
         spaceService.ApprovedSpace(spaceId);
         return new ResponseEntity("승인완료",HttpStatus.OK);
     }
+
+    //이미지 업로드
+    @PostMapping("/upload")
+    public ResponseEntity<Object> upload(
+            @Valid @RequestBody SpaceInsertDto dto, @RequestParam("SpaceImgFile") List<MultipartFile> multipartFileList, MultipartHttpServletRequest req) throws Exception {
+        List<String> imagePathList = new ArrayList<>();
+        if(multipartFileList.size()>0) {
+            for (MultipartFile multipartFile : multipartFileList) {
+                String originalName = multipartFile.getOriginalFilename(); // 파일 이름
+                long size = multipartFile.getSize(); // 파일 크기
+
+                ObjectMetadata objectMetaData = new ObjectMetadata();
+                objectMetaData.setContentType(multipartFile.getContentType());
+                objectMetaData.setContentLength(size);
+
+                // S3에 업로드
+                amazonS3.putObject(
+                        new PutObjectRequest(S3Bucket, originalName, multipartFile.getInputStream(), objectMetaData)
+                                .withCannedAcl(CannedAccessControlList.PublicRead)
+                );
+
+                String imagePath = amazonS3.getUrl(S3Bucket, originalName).toString(); // 접근가능한 URL 가져오기
+                imagePathList.add(imagePath);
+            }
+        }
+        return new ResponseEntity<Object>(imagePathList, HttpStatus.OK);
+    }
+
 
 }

@@ -2,13 +2,11 @@ package com.golfzonTech4.worktalk.service;
 
 import com.golfzonTech4.worktalk.domain.Member;
 import com.golfzonTech4.worktalk.domain.Space;
-import com.golfzonTech4.worktalk.domain.SpaceImgg;
-import com.golfzonTech4.worktalk.exception.NotFoundMemberException;
-import com.golfzonTech4.worktalk.repository.MemberRepository;
-import com.golfzonTech4.worktalk.repository.SpaceRepository;
+import com.golfzonTech4.worktalk.domain.SpaceImg;
 import com.golfzonTech4.worktalk.dto.space.SpaceInsertDto;
 import com.golfzonTech4.worktalk.dto.space.SpaceUpdateDto;
-import com.golfzonTech4.worktalk.util.SecurityUtil;
+import com.golfzonTech4.worktalk.repository.MemberRepository;
+import com.golfzonTech4.worktalk.repository.SpaceRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
@@ -66,9 +64,9 @@ public class SpaceService {
 
         //이미지 등록
         for (int i=0; i< multipartFileList.size();i++){
-            SpaceImgg spaceImgg = new SpaceImgg();
-            spaceImgg.setSpace(spaceToCreate);
-            spaceImgService.saveSpaceImg(spaceImgg, multipartFileList.get(i));
+            SpaceImg spaceImg = new SpaceImg();
+            spaceImg.setSpace(spaceToCreate);
+            spaceImgService.saveSpaceImg(spaceImg, multipartFileList.get(i));
         }
         return spaceToCreate.getSpaceId();
 
@@ -87,7 +85,7 @@ public class SpaceService {
 
         Space findSpace = spaceRepository.findBySpaceId(dto.getSpaceId());
         findSpace.setSpaceDetail(dto.getSpaceDetail());
-        findSpace.setSpaceImg(dto.getSpaceImg());
+//        findSpace.setSpaceImg(dto.getSpaceImg());
         //변경감지 사용
 //        return "수정완료";
         return spaceRepository.save(findSpace);
