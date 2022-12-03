@@ -11,6 +11,7 @@ import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface MileageRepository extends JpaRepository<Mileage, Long>, MileageRepositoryCustom {
@@ -25,4 +26,9 @@ public interface MileageRepository extends JpaRepository<Mileage, Long>, Mileage
             "where m.member.name = :name " +
             "order by r.reserveId desc ")
     List<MileageFindDto> findAllByName(@Param("name") String name);
+
+    List<Mileage> findAllByPay(Long payId);
+
+    @Query("select m from Mileage m where m.pay.payId = :payId and m.status = :status")
+    Optional<Mileage> findByPay(@Param("payId") Long payId, @Param("status") Mileage_status status);
 }

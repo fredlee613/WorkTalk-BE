@@ -41,6 +41,4 @@ public class Pay {
     @Column(name = "AMOUNT", nullable = false)
     private int payAmount; // 결제 금액
 
-    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "pay")
-    private List<Mileage> mileages;
 }

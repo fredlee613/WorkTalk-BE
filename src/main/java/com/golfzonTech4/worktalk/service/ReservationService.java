@@ -43,10 +43,10 @@ public class ReservationService {
         if (currentUsername.isEmpty()) throw new NotFoundMemberException("Member not found");
 
         Member findMember = memberService.findByName(currentUsername.get());
-        log.info("findMember : {}", findMember);
+        log.info("findMember : {}", findMember.toString());
 
         Room findRoom = roomRepository.findByRoomId(dto.getRoom_id());
-        log.info("findRoom : {}", findRoom);
+        log.info("findRoom : {}", findRoom.toString());
 
         // 오피스의 경우 체크인 일자가 체크아웃 일자보다 늦을 경우 예외처리
         // 그 외의 경우 체크인 시간이 체크아웃 시간보다 늦을 경우 예외처리
@@ -59,6 +59,8 @@ public class ReservationService {
                 dto.getCheckInTime(),
                 dto.getCheckOutTime());
 
+        log.info("bookDate: {}", bookDate);
+
         Reservation reservation = Reservation.makeReservation(findMember, findRoom, bookDate, dto.getAmount(), dto.getPaymentStatus());
 
         return reservationRepository.save(reservation).getReserveId();
@@ -70,12 +72,12 @@ public class ReservationService {
     private static void validateDateTime(ReserveDto reserveDto, Room room) {
         if (room.getRoomType().equals(RoomType.OFFICE)) {
             // 오피스의 경우 날짜 비교
-            if (BookDate.validDate(reserveDto.getCheckInDate(), reserveDto.getCheckOutDate())) {
+            if (!BookDate.validDate(reserveDto.getCheckInDate(), reserveDto.getCheckOutDate())) {
                 throw new IllegalArgumentException("잘못된 날짜값 입력입니다.");
             }
         } else {
             // 그 외의 경우 시간 비교
-            if (BookDate.validTime(reserveDto.getCheckInTime(), reserveDto.getCheckOutTime())) {
+            if (!BookDate.validTime(reserveDto.getCheckInTime(), reserveDto.getCheckOutTime())) {
                 throw new IllegalArgumentException("잘못된 시간값 입력입니다.");
             }
         }
@@ -111,12 +113,16 @@ public class ReservationService {
         // 예약 시간으로 부터 현재까지의 시간 차(초 기준)
         int reservePeriod = BookDate.getPeriodSeconds(LocalDateTime.now(), reserveDate);
 
+        log.info("reservePeriod : {}", reservePeriod);
+
         int flag = reservePeriod <= 3600 ? 0 : 1; // 1시간 이하일 경우 0, 초과 시 1
+
+        log.info("before map put >> {} : {} : {}", reserveId, flag, findReservation.getPaymentStatus());
 
         Map result = new HashMap<>();
         result.put("reserveId", reserveId);
         result.put("flag", flag);
-        result.put("Type", findReservation.getPaymentStatus());
+        result.put("status", findReservation.getPaymentStatus().toString());
         return result;
     }
 
@@ -135,7 +141,9 @@ public class ReservationService {
 
         Map result = new HashMap<>();
         result.put("reserveId", reserveId);
-        result.put("Type", findReservation.getPaymentStatus());
+        String status = findReservation.getPaymentStatus().toString();
+        log.info("status : {}", status);
+        result.put("status", status);
         return result;
     }
 
