@@ -1,12 +1,11 @@
 package com.golfzonTech4.worktalk.repository;
 
-import com.golfzonTech4.worktalk.domain.Space;
-import com.golfzonTech4.worktalk.domain.SpaceImgg;
+import com.golfzonTech4.worktalk.domain.SpaceImg;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
 
-public interface SpaceImgRepository extends JpaRepository<SpaceImgg, Long> {
+public interface SpaceImgRepository extends JpaRepository<SpaceImg, Long> {
 
-    List<SpaceImgg> findBySpace(Long space);
+    List<SpaceImg> findBySpace(Long space);
 }

@@ -8,9 +8,9 @@ import javax.persistence.*;
 @Entity
 @Setter
 @Getter
-@Table(name = "SPACE_IMGG")
+@Table(name = "SPACE_IMG")
 @SequenceGenerator(name = "SEQ_SPACE_IMG_GENERATOR", sequenceName = "SEQ_SPACE_IMG", initialValue = 1, allocationSize = 50)
-public class SpaceImgg {
+public class SpaceImg {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_SPACE_IMG_GENERATOR")
     @Column(name = "SPACE_IMG_ID")
@@ -23,12 +23,8 @@ public class SpaceImgg {
     @JoinColumn(name = "SPACE_ID")
     private Space space;
 
-    @JoinColumn(name = "IMG_URL")
-    private String imgUrl;
-
-    public void updateSpaceImg(String imgName, String imgUrl){
+    public void updateSpaceImg(String imgName){
         this.imgName = imgName;
-        this.imgUrl = imgUrl;
     }
 
 }
