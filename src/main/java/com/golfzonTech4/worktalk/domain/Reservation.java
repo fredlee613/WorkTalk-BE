@@ -1,5 +1,6 @@
 package com.golfzonTech4.worktalk.domain;
 
+import com.querydsl.core.annotations.QueryInit;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.ColumnDefault;
