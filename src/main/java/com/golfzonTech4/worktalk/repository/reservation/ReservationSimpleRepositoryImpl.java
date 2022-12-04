@@ -7,11 +7,13 @@ import com.golfzonTech4.worktalk.dto.reservation.QReserveCheckDto;
 import com.golfzonTech4.worktalk.dto.reservation.QReserveSimpleDto;
 import com.golfzonTech4.worktalk.dto.reservation.ReserveCheckDto;
 import com.golfzonTech4.worktalk.dto.reservation.ReserveSimpleDto;
+import com.golfzonTech4.worktalk.repository.ListResult;
+import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
 
 import javax.persistence.EntityManager;
-import javax.swing.text.html.Option;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -24,12 +26,12 @@ public class ReservationSimpleRepositoryImpl implements ReservationSimpleReposit
 
     private final JPAQueryFactory queryFactory;
 
-    public ReservationSimpleRepositoryImpl(EntityManager em) {
+    public ReservationSimpleRepositoryImpl(EntityManager em, EntityManager em1) {
         this.queryFactory = new JPAQueryFactory(em);
     }
 
     @Override
-    public List<ReserveSimpleDto> findAllByUserQuery(String name) {
+    public ListResult findAllByUser(String name, Integer paid, PaymentStatus paymentStatus) {
         log.info("findAllByUser : {}", name);
 
         List<ReserveSimpleDto> result = queryFactory.select(new QReserveSimpleDto(
@@ -46,9 +48,37 @@ public class ReservationSimpleRepositoryImpl implements ReservationSimpleReposit
                         reservation.reserveAmount)
                 )
                 .from(reservation)
-                .where(reservation.member.name.eq(name)).fetch();
+                .where(reservation.member.name.eq(name), eqPaid(paid), eqPayStatus(paymentStatus))
+                .fetch();
 
-        return result;
+        return new ListResult(result.size(), result);
+    }
+
+    @Override
+    public ListResult findAllByUserPage(String name, int pageNum, Integer paid, PaymentStatus paymentStatus) {
+        log.info("findAllByUser : {}, {}, {}, {}", name, pageNum, paid, paymentStatus);
+
+        List<ReserveSimpleDto> result = queryFactory.select(new QReserveSimpleDto(
+                        reservation.room.roomName,
+                        reservation.paid,
+                        reservation.reserveId,
+                        reservation.member.id,
+                        reservation.room.roomId,
+                        reservation.bookDate,
+                        reservation.member.name,
+                        reservation.reserveStatus,
+                        reservation.paymentStatus,
+                        reservation.room.roomType,
+                        reservation.reserveAmount)
+                )
+                .from(reservation)
+                .where(reservation.member.name.eq(name), eqPaid(paid), eqPayStatus(paymentStatus))
+                .orderBy(reservation.reserveId.desc())
+                .offset(pageNum * 10)
+                .limit((pageNum + 1) * 10 - 1)
+                .fetch();
+
+        return new ListResult(result.size(), result);
     }
 
     @Override
@@ -129,6 +159,21 @@ public class ReservationSimpleRepositoryImpl implements ReservationSimpleReposit
                 .where(reservation.reserveId.eq(reserveId))
                 .fetchOne();
         return Optional.ofNullable(result);
+    }
+
+    // 예약의 결제 여부를 나타내는 BooleanExpression
+    private BooleanExpression eqPaid(Integer paid) {
+        if (paid == null) {
+            return null;
+        }
+        return reservation.paid.eq(paid);
+    }
+
+    private BooleanExpression eqPayStatus(PaymentStatus paymentStatus) {
+        if (paymentStatus == null) {
+            return null;
+        }
+        return reservation.paymentStatus.eq(paymentStatus);
     }
 
 }

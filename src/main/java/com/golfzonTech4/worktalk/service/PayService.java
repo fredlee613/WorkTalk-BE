@@ -3,8 +3,12 @@ package com.golfzonTech4.worktalk.service;
 import com.golfzonTech4.worktalk.domain.*;
 import com.golfzonTech4.worktalk.dto.mileage.MileageDto;
 import com.golfzonTech4.worktalk.dto.pay.PayInsertDto;
+import com.golfzonTech4.worktalk.dto.pay.PayOrderSearch;
+import com.golfzonTech4.worktalk.dto.pay.PaySimpleDto;
 import com.golfzonTech4.worktalk.dto.pay.PayWebhookDto;
+import com.golfzonTech4.worktalk.repository.ListResult;
 import com.golfzonTech4.worktalk.repository.pay.PayRepository;
+import com.golfzonTech4.worktalk.util.SecurityUtil;
 import com.siot.IamportRestClient.IamportClient;
 import com.siot.IamportRestClient.exception.IamportResponseException;
 import com.siot.IamportRestClient.request.CancelData;
@@ -16,6 +20,7 @@ import com.siot.IamportRestClient.response.Payment;
 import com.siot.IamportRestClient.response.Schedule;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -312,6 +317,74 @@ public class PayService {
         }
     }
 
+    /**
+     * 사용자 결제 내역 전체 조회
+     */
+    public ListResult findAllByUser() {
+        log.info("findAllByUser");
+        String name = SecurityUtil.getCurrentUsername().get();
+        List<PaySimpleDto> result = payRepository.findAllByUser(name);
+        return new ListResult(result.size(), result);
+    }
+
+    /**
+     * 사용자 결제 내역 페이징 조회 및 조건 검색
+     */
+    public ListResult findAllByUserPage(int pageNum, PayOrderSearch orderSearch) {
+        log.info("findAllByUserPage");
+        String name = SecurityUtil.getCurrentUsername().get();
+        PageRequest pageRequest = PageRequest.of(pageNum, 10);
+        if (orderSearch.getPayStatus() != null) {
+            if (orderSearch.getReserveDate() != null) {
+                log.info("Both");
+                List<PaySimpleDto> result = payRepository.findAllByUser(name, orderSearch.getReserveDate(), orderSearch.getPayStatus(), pageRequest);
+                return new ListResult(result.size(), result);
+            } else {
+                log.info("Status");
+                List<PaySimpleDto> result = payRepository.findAllByUser(name, orderSearch.getPayStatus(), pageRequest);
+                return new ListResult(result.size(), result);
+            }
+        } else {
+            if (orderSearch.getReserveDate() != null) {
+                log.info("Time");
+                List<PaySimpleDto> result = payRepository.findAllByUser(name, orderSearch.getReserveDate(), pageRequest);
+                return new ListResult(result.size(), result);
+            }
+        }
+        log.info("Default");
+        List<PaySimpleDto> result = payRepository.findAllByUser(name, pageRequest);
+        return new ListResult(result.size(), result);
+    }
+
+    /**
+     * 호스트 결제 내역 전체 조회
+     */
+    public ListResult findAllByHost() {
+        log.info("findAllByUser");
+        String name = SecurityUtil.getCurrentUsername().get();
+        List<PaySimpleDto> result = payRepository.findAllByHost(name);
+        return new ListResult(result.size(), result);
+    }
+
+    /**
+     * 호스트 결제 내역 페이징 조회 및 조건 검색
+     */
+    public ListResult findAllByHostPage(int pageNum, PayOrderSearch orderSearch) {
+        log.info("findAllByUserPage");
+        String name = SecurityUtil.getCurrentUsername().get();
+        PageRequest pageRequest = PageRequest.of(pageNum, 10);
+        if (orderSearch.getReserveDate() != null) {
+            List<PaySimpleDto> result = payRepository.findAllByHost(name, orderSearch.getReserveDate(), pageRequest);
+            return new ListResult(result.size(), result);
+        }
+        log.info("Default");
+        List<PaySimpleDto> result = payRepository.findAllByHost(name, pageRequest);
+        return new ListResult(result.size(), result);
+    }
+
+    /**
+     * 마일리지 적립 매서드
+     */
     private void saveMileage(PayInsertDto dto, Pay savedPay) {
         int mileageSave = dto.getMileageSave();
         if (mileageSave != 0) {
@@ -323,6 +396,9 @@ public class PayService {
         }
     }
 
+    /**
+     * 마일리지 사용 매서드
+     */
     private void useMileage(PayInsertDto dto, Pay savedPay) {
         int mileageUsage = dto.getMileageUsage();
         if (mileageUsage != 0) {
@@ -333,4 +409,5 @@ public class PayService {
             mileageService.use(usage);
         }
     }
+
 }

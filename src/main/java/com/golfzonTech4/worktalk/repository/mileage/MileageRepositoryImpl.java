@@ -2,7 +2,6 @@ package com.golfzonTech4.worktalk.repository.mileage;
 
 import com.golfzonTech4.worktalk.domain.Mileage_status;
 import com.querydsl.jpa.impl.JPAQueryFactory;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.persistence.EntityManager;

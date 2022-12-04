@@ -1,8 +1,6 @@
 package com.golfzonTech4.worktalk.repository.pay;
 
-import com.golfzonTech4.worktalk.domain.Pay;
 import com.golfzonTech4.worktalk.domain.PaymentStatus;
-import com.golfzonTech4.worktalk.domain.QPay;
 import com.golfzonTech4.worktalk.dto.pay.PayInsertDto;
 import com.golfzonTech4.worktalk.dto.pay.QPayInsertDto;
 import com.querydsl.jpa.impl.JPAQueryFactory;
