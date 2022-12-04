@@ -306,4 +306,12 @@ public class ReservationService {
         return reservationRepository.findById(reserveId);
     }
 
+    /**
+     * 예약 이용 완료 처리 로직
+     */
+    @Transactional(rollbackFor = Exception.class)
+    public void end(Long reserveId) {
+        Reservation findReservation = reservationRepository.findById(reserveId).get();
+        findReservation.setReserveStatus(ReserveStatus.USED);
+    }
 }

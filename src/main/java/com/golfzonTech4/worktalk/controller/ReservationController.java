@@ -2,9 +2,9 @@ package com.golfzonTech4.worktalk.controller;
 
 import com.golfzonTech4.worktalk.domain.MemberType;
 import com.golfzonTech4.worktalk.domain.PaymentStatus;
-import com.golfzonTech4.worktalk.dto.reservation.ReserveOrderSearch;
 import com.golfzonTech4.worktalk.dto.reservation.ReserveCheckDto;
 import com.golfzonTech4.worktalk.dto.reservation.ReserveDto;
+import com.golfzonTech4.worktalk.dto.reservation.ReserveOrderSearch;
 import com.golfzonTech4.worktalk.repository.ListResult;
 import com.golfzonTech4.worktalk.service.PayService;
 import com.golfzonTech4.worktalk.service.ReservationService;
@@ -70,6 +70,16 @@ public class ReservationController {
             else count = payService.cancelPostPaid((Long) result.get("reserveId"), 0);
         }
         return ResponseEntity.ok(count);
+    }
+
+    /**
+     * 사용 종료 요청
+     */
+    @GetMapping("/reservation/end/{reserveId}")
+    public ResponseEntity end(@PathVariable("reserveId") Long reserveId) {
+        log.info("end: {}", reserveId);
+        reservationService.end(reserveId);
+        return ResponseEntity.ok().build();
     }
 
 //    /**
