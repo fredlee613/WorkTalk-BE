@@ -1,6 +1,7 @@
 package com.golfzonTech4.worktalk.service;
 
 import com.golfzonTech4.worktalk.domain.Member;
+import com.golfzonTech4.worktalk.domain.MemberType;
 import com.golfzonTech4.worktalk.dto.member.MemberDetailDto;
 import com.golfzonTech4.worktalk.exception.NotFoundMemberException;
 import com.golfzonTech4.worktalk.repository.MemberRepository;
@@ -23,8 +24,27 @@ public class MemberService {
     private final PasswordEncoder passwordEncoder;
 
     @Transactional
-    public Long join(Member member) {
-        log.info("signup : {}", member);
+    public Long join(MemberDetailDto dto) {
+        log.info("signup : {}", dto);
+
+        Member member = new Member();
+
+        member.setEmail(dto.getEmail());
+        member.setPw(dto.getPw());
+        member.setName(dto.getName());
+        member.setTel(dto.getTel());
+
+        // request의 role 값에 따라 회원 구분 및 활성화 여부를 다르게 설정
+        if (dto.getRole() == 0) {
+            member.setMemberType(MemberType.ROLE_USER);
+            member.setActivated(1);
+        } else if(dto.getRole() == 1){
+            member.setMemberType(MemberType.ROLE_HOST);
+        } else {
+            member.setMemberType(MemberType.ROLE_MASTER);
+            member.setActivated(1);
+        }
+
         member.setPw(passwordEncoder.encode(member.getPw())); // 비밀번호 인코딩
         member.setImgName("profill.png"); // 프로필 이미지 => 기본 이미지로 설정
 
@@ -101,7 +121,6 @@ public class MemberService {
 
         return dto;
     }
-
 
     /**
      * SecurityContext에 저장된 username의 정보만 가져온다.

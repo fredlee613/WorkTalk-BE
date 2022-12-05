@@ -6,6 +6,7 @@ import com.golfzonTech4.worktalk.domain.Mileage_status;
 import com.golfzonTech4.worktalk.domain.Pay;
 import com.golfzonTech4.worktalk.dto.mileage.MileageDto;
 import com.golfzonTech4.worktalk.dto.mileage.MileageFindDto;
+import com.golfzonTech4.worktalk.repository.ListResult;
 import com.golfzonTech4.worktalk.repository.MemberRepository;
 import com.golfzonTech4.worktalk.repository.mileage.MileageRepository;
 import com.golfzonTech4.worktalk.repository.pay.PayRepository;
@@ -97,9 +98,10 @@ public class MileageService {
     /**
      * 마일리지 이력 조회 로직
      */
-    public List<MileageFindDto> findAllByName() {
+    public ListResult findAllByName() {
         String currentUser = SecurityUtil.getCurrentUsername().get();
-        return mileageRepository.findAllByName(currentUser);
+        List<MileageFindDto> findMileages = mileageRepository.findAllByName(currentUser);
+        return new ListResult((long) getTotal(), findMileages);
     }
 
     /**

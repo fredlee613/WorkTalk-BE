@@ -28,23 +28,7 @@ public class MemberController {
             @Valid @RequestBody MemberDetailDto request) {
         log.info("signupUser: {}", request);
 
-        Member member = new Member();
-
-        member.setEmail(request.getEmail());
-        member.setPw(request.getPw());
-        member.setName(request.getName());
-        member.setTel(request.getTel());
-
-        // request의 role 값에 따라 회원 구분을 다르게 설정
-        if (request.getRole() == 0) {
-            member.setMemberType(MemberType.ROLE_USER);
-        } else if(request.getRole() == 1){
-            member.setMemberType(MemberType.ROLE_HOST);
-        } else {
-            member.setMemberType(MemberType.ROLE_MASTER);
-        }
-
-        return ResponseEntity.ok(memberService.join(member));
+        return ResponseEntity.ok(memberService.join(request));
     }
 
     @PostMapping("/nameCheck")

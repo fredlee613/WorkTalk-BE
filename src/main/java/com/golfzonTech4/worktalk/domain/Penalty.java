@@ -1,7 +1,6 @@
 package com.golfzonTech4.worktalk.domain;
 
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
@@ -10,6 +9,9 @@ import java.time.LocalDateTime;
 @SequenceGenerator(name = "SEQ_PENALTY_GENERATOR", sequenceName = "SEQ_PENALTY", initialValue = 1, allocationSize = 50)
 @Getter
 @Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class Penalty {
 
     @Id
