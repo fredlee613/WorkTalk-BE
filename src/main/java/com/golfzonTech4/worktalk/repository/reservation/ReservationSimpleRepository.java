@@ -5,16 +5,16 @@ import com.golfzonTech4.worktalk.domain.Reservation;
 import com.golfzonTech4.worktalk.domain.ReserveStatus;
 import com.golfzonTech4.worktalk.domain.RoomType;
 import com.golfzonTech4.worktalk.dto.reservation.ReserveSimpleDto;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
 
-import javax.swing.text.html.Option;
+import java.time.LocalDate;
 import java.util.List;
 
-public interface ReservationSimpleRepository extends JpaRepository<Reservation, Long>, ReservationSimpleRepositoryCustom{
+public interface ReservationSimpleRepository extends JpaRepository<Reservation, Long>, ReservationSimpleRepositoryCustom {
 
     // JPQL + Spring DATA JPA를 활용한 회원 예약 리스트 조회 (연관관계 초기화 이슈 없음.)
 
@@ -38,7 +38,8 @@ public interface ReservationSimpleRepository extends JpaRepository<Reservation, 
             "join r.room ro " +
             "join ro.space s " +
             "where s.member.name = :name " +
-            "order by r.reserveId desc")
+            "order by r.reserveId desc"
+    )
     List<ReserveSimpleDto> findAllByHost(@Param("name") String name);
 
     @Query("select " +
@@ -50,10 +51,34 @@ public interface ReservationSimpleRepository extends JpaRepository<Reservation, 
             "join r.room ro " +
             "join ro.space s " +
             "where s.member.name = :name " +
-            "order by r.reserveId desc ")
-    List<ReserveSimpleDto> findAllByHostPage(@Param("name") String name, PageRequest pageRequest);
+            "and b.checkOutDate > :date " +
+            "and r.reserveStatus = 'BOOKED'" +
+            "order by r.reserveId desc"
+    )
+    List<ReserveSimpleDto> findAllByHost(@Param("name") String name, @Param("date") LocalDate date);
 
-    @Query("select " +
+    @Query(value = "select " +
+            "new com.golfzonTech4.worktalk.dto.reservation.ReserveSimpleDto" +
+            "(ro.roomName, r.paid, r.reserveId,m.id, ro.roomId, b, m.name, r.reserveStatus, r.paymentStatus, ro.roomType, r.reserveAmount)" +
+            "from Reservation r " +
+            "join r.member m " +
+            "join r.bookDate b " +
+            "join r.room ro " +
+            "join ro.space s " +
+            "where s.member.name = :name " +
+            "order by r.reserveId desc ",
+            countQuery = "select " +
+                    "count(r)" +
+                    "from Reservation r " +
+                    "join r.member m " +
+                    "join r.bookDate b " +
+                    "join r.room ro " +
+                    "join ro.space s " +
+                    "where s.member.name = :name ")
+//    List<ReserveSimpleDto> findAllByHostPage(@Param("name") String name, PageRequest pageRequest);
+    Page<ReserveSimpleDto> findAllByHostPage(@Param("name") String name, PageRequest pageRequest);
+
+    @Query(value = "select " +
             "new com.golfzonTech4.worktalk.dto.reservation.ReserveSimpleDto" +
             "(ro.roomName, r.paid, r.reserveId,m.id, ro.roomId, b, m.name, r.reserveStatus, r.paymentStatus, ro.roomType, r.reserveAmount)" +
             "from Reservation r " +
@@ -64,14 +89,25 @@ public interface ReservationSimpleRepository extends JpaRepository<Reservation, 
             "where s.member.name = :name " +
             "and r.paid = :paid " +
             "and r.paymentStatus = :paymentStatus " +
-            "order by r.reserveId desc ")
-    List<ReserveSimpleDto> findAllByHostPagePaid(
+            "order by r.reserveId desc ",
+            countQuery = "select " +
+                    "count(r)" +
+                    "from Reservation r " +
+                    "join r.member m " +
+                    "join r.bookDate b " +
+                    "join r.room ro " +
+                    "join ro.space s " +
+                    "where s.member.name = :name " +
+                    "and r.paid = :paid " +
+                    "and r.paymentStatus = :paymentStatus")
+    Page<ReserveSimpleDto> findAllByHostPagePaid(
+//    List<ReserveSimpleDto> findAllByHostPagePaid(
             @Param("name") String name,
             @Param("paid") Integer paid,
             @Param("paymentStatus") PaymentStatus paymentStatus,
             PageRequest pageRequest);
 
-    @Query("select " +
+    @Query(value = "select " +
             "new com.golfzonTech4.worktalk.dto.reservation.ReserveSimpleDto" +
             "(ro.roomName, r.paid, r.reserveId,m.id, ro.roomId, b, m.name, r.reserveStatus, r.paymentStatus, ro.roomType, r.reserveAmount)" +
             "from Reservation r " +
@@ -81,13 +117,23 @@ public interface ReservationSimpleRepository extends JpaRepository<Reservation, 
             "join ro.space s " +
             "where s.member.name = :name " +
             "and ro.roomType = :roomType " +
-            "order by r.reserveId desc ")
-    List<ReserveSimpleDto> findAllByHostPageRoom(
+            "order by r.reserveId desc ",
+            countQuery = "select " +
+                    "count(r)" +
+                    "from Reservation r " +
+                    "join r.member m " +
+                    "join r.bookDate b " +
+                    "join r.room ro " +
+                    "join ro.space s " +
+                    "where s.member.name = :name " +
+                    "and ro.roomType = :roomType")
+//    List<ReserveSimpleDto> findAllByHostPageRoom(
+    Page<ReserveSimpleDto> findAllByHostPageRoom(
             @Param("name") String name,
             @Param("roomType") RoomType roomType,
             PageRequest pageRequest);
 
-    @Query("select " +
+    @Query(value = "select " +
             "new com.golfzonTech4.worktalk.dto.reservation.ReserveSimpleDto" +
             "(ro.roomName, r.paid, r.reserveId,m.id, ro.roomId, b, m.name, r.reserveStatus, r.paymentStatus, ro.roomType, r.reserveAmount)" +
             "from Reservation r " +
@@ -99,8 +145,20 @@ public interface ReservationSimpleRepository extends JpaRepository<Reservation, 
             "and r.paid = :paid " +
             "and r.paymentStatus = :paymentStatus " +
             "and ro.roomType = :roomType " +
-            "order by r.reserveId desc ")
-    List<ReserveSimpleDto> findAllByHostPageBoth(
+            "order by r.reserveId desc ",
+            countQuery = "select " +
+                    "count(r)" +
+                    "from Reservation r " +
+                    "join r.member m " +
+                    "join r.bookDate b " +
+                    "join r.room ro " +
+                    "join ro.space s " +
+                    "where s.member.name = :name " +
+                    "and r.paid = :paid " +
+                    "and r.paymentStatus = :paymentStatus " +
+                    "and ro.roomType = :roomType")
+    Page<ReserveSimpleDto> findAllByHostPageBoth(
+//    List<ReserveSimpleDto> findAllByHostPageBoth(
             @Param("name") String name,
             @Param("paid") Integer paid,
             @Param("roomType") RoomType roomType,

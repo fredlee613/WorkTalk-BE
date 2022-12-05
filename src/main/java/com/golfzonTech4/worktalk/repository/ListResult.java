@@ -7,7 +7,7 @@ import lombok.Data;
 @AllArgsConstructor
 public class ListResult<T> {
 
-    private int count;
+    private Long count;
     private T data;
 
 }

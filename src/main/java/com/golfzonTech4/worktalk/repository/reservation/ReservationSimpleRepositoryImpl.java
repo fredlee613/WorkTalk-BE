@@ -11,6 +11,8 @@ import com.golfzonTech4.worktalk.repository.ListResult;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 
 import javax.persistence.EntityManager;
@@ -31,7 +33,7 @@ public class ReservationSimpleRepositoryImpl implements ReservationSimpleReposit
     }
 
     @Override
-    public ListResult findAllByUser(String name, Integer paid, PaymentStatus paymentStatus) {
+    public ListResult findAllByUser(String name, Integer paid, PaymentStatus paymentStatus, ReserveStatus reserveStatus) {
         log.info("findAllByUser : {}", name);
 
         List<ReserveSimpleDto> result = queryFactory.select(new QReserveSimpleDto(
@@ -48,17 +50,17 @@ public class ReservationSimpleRepositoryImpl implements ReservationSimpleReposit
                         reservation.reserveAmount)
                 )
                 .from(reservation)
-                .where(reservation.member.name.eq(name), eqPaid(paid), eqPayStatus(paymentStatus))
+                .where(reservation.member.name.eq(name), eqPaid(paid), eqPayStatus(paymentStatus), eqReserveStatus(reserveStatus))
                 .fetch();
 
-        return new ListResult(result.size(), result);
+        return new ListResult((long) result.size(), result);
     }
 
     @Override
-    public ListResult findAllByUserPage(String name, int pageNum, Integer paid, PaymentStatus paymentStatus) {
-        log.info("findAllByUser : {}, {}, {}, {}", name, pageNum, paid, paymentStatus);
+    public PageImpl<ReserveSimpleDto> findAllByUserPage(String name, PageRequest pageRequest, Integer paid, PaymentStatus paymentStatus) {
+        log.info("findAllByUser : {}, {}, {}, {}", name, pageRequest, paid, paymentStatus);
 
-        List<ReserveSimpleDto> result = queryFactory.select(new QReserveSimpleDto(
+        List<ReserveSimpleDto> content = queryFactory.select(new QReserveSimpleDto(
                         reservation.room.roomName,
                         reservation.paid,
                         reservation.reserveId,
@@ -74,11 +76,18 @@ public class ReservationSimpleRepositoryImpl implements ReservationSimpleReposit
                 .from(reservation)
                 .where(reservation.member.name.eq(name), eqPaid(paid), eqPayStatus(paymentStatus))
                 .orderBy(reservation.reserveId.desc())
-                .offset(pageNum * 10)
-                .limit((pageNum + 1) * 10 - 1)
+                .offset(pageRequest.getOffset())
+                .limit(pageRequest.getPageSize())
                 .fetch();
 
-        return new ListResult(result.size(), result);
+        Long count = queryFactory
+                .select(reservation.count())
+                .from(reservation)
+                .where(reservation.member.name.eq(name), eqPaid(paid), eqPayStatus(paymentStatus))
+                .fetchOne();
+
+
+        return new PageImpl<>(content, pageRequest, count);
     }
 
     @Override
@@ -174,6 +183,13 @@ public class ReservationSimpleRepositoryImpl implements ReservationSimpleReposit
             return null;
         }
         return reservation.paymentStatus.eq(paymentStatus);
+    }
+
+    private BooleanExpression eqReserveStatus(ReserveStatus status) {
+        if (status == null) {
+            return null;
+        }
+        return reservation.reserveStatus.eq(status);
     }
 
 }

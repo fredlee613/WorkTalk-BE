@@ -5,6 +5,7 @@ import com.golfzonTech4.worktalk.domain.ReserveStatus;
 import com.golfzonTech4.worktalk.dto.reservation.ReserveCheckDto;
 import com.golfzonTech4.worktalk.dto.reservation.ReserveSimpleDto;
 import com.golfzonTech4.worktalk.repository.ListResult;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.repository.query.Param;
 
@@ -15,13 +16,14 @@ import java.util.Optional;
 
 public interface ReservationSimpleRepositoryCustom {
 
-    ListResult findAllByUser(String name, Integer paid, PaymentStatus paymentStatus);
-    ListResult findAllByUserPage(String name, int pageNum, Integer paid, PaymentStatus paymentStatus);
+    public ListResult findAllByUser(String name, Integer paid, PaymentStatus paymentStatus, ReserveStatus reserveStatus);
+    PageImpl<ReserveSimpleDto> findAllByUserPage(String name, PageRequest pageRequest, Integer paid, PaymentStatus paymentStatus);
     List<ReserveSimpleDto> findAllByTime();
     Long countNoShow(Long memberId, ReserveStatus reserveStatus);
 
     List<ReserveCheckDto> findBookedOffice(Long roomId, LocalDate initDate, LocalDate endDate);
     List<ReserveCheckDto> findBookedRoom(Long roomId, LocalDate initDate, int initTime, int endTime);
+
 
     Optional<ReserveSimpleDto> findRoomName(Long reserveId);
 }

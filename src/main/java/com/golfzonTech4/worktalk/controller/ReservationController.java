@@ -92,45 +92,46 @@ public class ReservationController {
 //        return ResponseEntity.ok(reservationService.findAllByUser());
 //    }
 
-    /**
-     * 예약 리스트 조회 요청(유저 기준: QueryDsl)
-     * 전체 조회 개수와 리스트 반환
-     */
-    @GetMapping("/reservations/user")
-    public ResponseEntity<ListResult> findAllByUser(
-            @RequestBody() ReserveOrderSearch reserveOrderSearch) {
-        log.info("findAllByUser");
-        ListResult findReserves = reservationService.findAllByUser(reserveOrderSearch);
-        return ResponseEntity.ok(findReserves);
-    }
+//    /**
+//     * 예약 리스트 조회 요청(유저 기준: QueryDsl)
+//     * 전체 조회 개수와 리스트 반환
+//     */
+//    @GetMapping("/reservations/user")
+//    public ResponseEntity<ListResult> findAllByUser(
+//            @RequestBody() ReserveOrderSearch reserveOrderSearch) {
+//        log.info("findAllByUser");
+//        ListResult findReserves = reservationService.findAllByUser(reserveOrderSearch);
+//        return ResponseEntity.ok(findReserves);
+//    }
 
     /**
      * 예약 리스트 조회 페이징 요청(유저 기준: QueryDsl)
      */
     @GetMapping("/reservations/user/{pageNum}")
     public ResponseEntity<ListResult> findAllByUserPage(
-            @PathVariable(name = "pageNum") int pageNum,
+            @PathVariable(name = "pageNum", required = false) int pageNum,
             @RequestBody ReserveOrderSearch reserveOrderSearch) {
-        log.info("findAllByUser, {}, {}", pageNum, reserveOrderSearch);
-        return ResponseEntity.ok(reservationService.findAllByUserPage(pageNum, reserveOrderSearch));
+        PageRequest pageRequest = PageRequest.of(pageNum, 10);
+        log.info("findAllByUserPage, {}, {}", pageRequest, reserveOrderSearch);
+        return ResponseEntity.ok(reservationService.findAllByUserPage(pageRequest, reserveOrderSearch));
     }
 
-    /**
-     * 예약 리스트 조회 요청 (호스트 기준)
-     */
-    @GetMapping("/reservations/host")
-    public ResponseEntity<ListResult> findAllByHost() {
-        log.info("findAllByUser");
-        ListResult findReserve = reservationService.findAllByHost();
-        return ResponseEntity.ok(findReserve);
-    }
+//    /**
+//     * 예약 리스트 조회 요청 (호스트 기준)
+//     */
+//    @GetMapping("/reservations/host")
+//    public ResponseEntity<ListResult> findAllByHost() {
+//        log.info("findAllByUser");
+//        ListResult findReserve = reservationService.findAllByHost();
+//        return ResponseEntity.ok(findReserve);
+//    }
 
     /**
      * 예약 리스트 조회 요청 (호스트 기준)
      */
     @GetMapping("/reservations/host/{pageNum}")
     public ResponseEntity<ListResult> findAllByHostPage(
-            @PathVariable(name = "pageNum") int pageNum,
+            @PathVariable(name = "pageNum", required = false) int pageNum,
             @RequestBody ReserveOrderSearch reserveOrderSearch) {
         log.info("findAllByHostPage, {}, {}", pageNum, reserveOrderSearch);
         PageRequest pageRequest = PageRequest.of(pageNum, 10);

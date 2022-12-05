@@ -74,11 +74,11 @@ public class PayController {
         payService.postpaid(dto);
     }
 
-    @GetMapping("/payments/user")
-    public ResponseEntity<ListResult> findByUser() {
-        log.info("findByUser");
-        return ResponseEntity.ok(payService.findAllByUser());
-    }
+//    @GetMapping("/payments/user")
+//    public ResponseEntity<ListResult> findByUser() {
+//        log.info("findByUser");
+//        return ResponseEntity.ok(payService.findAllByUser());
+//    }
 
     @GetMapping("/payments/user/{pageNum}")
     public ResponseEntity<ListResult> findByUserPage(@PathVariable("pageNum") int pageNum,
@@ -87,11 +87,11 @@ public class PayController {
 
         return ResponseEntity.ok(payService.findAllByUserPage(pageNum, orderSearch));
     }
-    @GetMapping("/payments/host")
-    public ResponseEntity<ListResult> findByHost() {
-        log.info("findByHost");
-        return ResponseEntity.ok(payService.findAllByHost());
-    }
+//    @GetMapping("/payments/host")
+//    public ResponseEntity<ListResult> findByHost() {
+//        log.info("findByHost");
+//        return ResponseEntity.ok(payService.findAllByHost());
+//    }
 
     @GetMapping("/payments/host/{pageNum}")
     public ResponseEntity<ListResult> findByHostPage(@PathVariable("pageNum") int pageNum,

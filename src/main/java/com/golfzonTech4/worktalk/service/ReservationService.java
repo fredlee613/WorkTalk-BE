@@ -1,6 +1,7 @@
 package com.golfzonTech4.worktalk.service;
 
 import com.golfzonTech4.worktalk.domain.*;
+import com.golfzonTech4.worktalk.dto.penalty.PenaltyDto;
 import com.golfzonTech4.worktalk.dto.reservation.ReserveOrderSearch;
 import com.golfzonTech4.worktalk.dto.reservation.ReserveCheckDto;
 import com.golfzonTech4.worktalk.dto.reservation.ReserveDto;
@@ -14,6 +15,8 @@ import com.golfzonTech4.worktalk.util.SecurityUtil;
 import com.siot.IamportRestClient.exception.IamportResponseException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -33,6 +36,7 @@ public class ReservationService {
     private final RoomRepository roomRepository;
     private final ReservationRepository reservationRepository;
     private final ReservationSimpleRepository reservationSimpleRepository;
+    private final PenaltyService penaltyService;
 
     /**
      * 예약 기능
@@ -153,7 +157,7 @@ public class ReservationService {
     /**
      * 매 시 30분마다 미결제된 예약을 조회 후 NOSHOW로 수정
      * NOSHOW처리된 예약자의 NOSHOW 이력 조회
-     * 해당 이력건이 3회 이상일 경우 페널티 부여 (추후 예정)
+     * 해당 이력건이 3회 이상일 경우 페널티 부여
      */
 //    @Scheduled(cron = "0/15 * * * * *")
     @Transactional
@@ -174,7 +178,9 @@ public class ReservationService {
                 log.info("memberId: {}", memberId);
                 Long noShowCount = countNoShow(memberId);
                 if (noShowCount >= 3) {
-                    count++;
+                    PenaltyDto dto = new PenaltyDto(memberId, "지속적인 비결제로 인한 페널티 부여", PenaltyType.NOSHOW);
+                    Long result = penaltyService.addPenalty(dto);
+                    if (result != 0) count++;
                 }
                 log.info("memberName's count: {}", noShowCount);
             }
@@ -237,16 +243,17 @@ public class ReservationService {
     public ListResult findAllByUser(ReserveOrderSearch reserveOrderSearch) {
         String name = SecurityUtil.getCurrentUsername().get();
         log.info("findAllByUser : {}", name);
-        return reservationSimpleRepository.findAllByUser(name, reserveOrderSearch.getPaid(), reserveOrderSearch.getPaymentStatus());
+        return reservationSimpleRepository.findAllByUser(name, reserveOrderSearch.getPaid(), reserveOrderSearch.getPaymentStatus(), null);
     }
 
     /**
      * 접속자(USER)명을 기준으로 예약 리스트 페이징 조회(QueryDsl)
      */
-    public ListResult findAllByUserPage(int pageNum, ReserveOrderSearch reserveOrderSearch) {
+    public ListResult findAllByUserPage(PageRequest pageRequest, ReserveOrderSearch reserveOrderSearch) {
         String name = SecurityUtil.getCurrentUsername().get();
         log.info("findAllByUser : {}", name);
-        return reservationSimpleRepository.findAllByUserPage(name, pageNum, reserveOrderSearch.getPaid(), reserveOrderSearch.getPaymentStatus());
+        PageImpl<ReserveSimpleDto> result = reservationSimpleRepository.findAllByUserPage(name, pageRequest, reserveOrderSearch.getPaid(), reserveOrderSearch.getPaymentStatus());
+        return new ListResult(result.getTotalElements(), result.getContent());
     }
 
     /**
@@ -270,7 +277,7 @@ public class ReservationService {
         String currentUsername = SecurityUtil.getCurrentUsername().get();
         log.info("findAllByHost : {}", currentUsername);
         List<ReserveSimpleDto> result = reservationSimpleRepository.findAllByHost(currentUsername);
-        return new ListResult(result.size(), result);
+        return new ListResult((long) result.size(), result);
     }
 
     /**
@@ -282,24 +289,24 @@ public class ReservationService {
         if (reserveOrderSearch.getRoomType() != null) {
             if (reserveOrderSearch.getPaymentStatus() != null && reserveOrderSearch.getPaid() != null) {
                 log.info("findAllByHostPageBoth");
-                List<ReserveSimpleDto> result = reservationSimpleRepository.findAllByHostPageBoth(currentUsername, reserveOrderSearch.getPaid(), reserveOrderSearch.getRoomType(), reserveOrderSearch.getPaymentStatus(), pageRequest);
-                return new ListResult(result.size(), result);
+                Page<ReserveSimpleDto> result = reservationSimpleRepository.findAllByHostPageBoth(currentUsername, reserveOrderSearch.getPaid(), reserveOrderSearch.getRoomType(), reserveOrderSearch.getPaymentStatus(), pageRequest);
+                return new ListResult(result.getTotalElements(), result.getContent());
 
             } else {
                 log.info("findAllByHostPageRoom");
-                List<ReserveSimpleDto> result = reservationSimpleRepository.findAllByHostPageRoom(currentUsername, reserveOrderSearch.getRoomType(), pageRequest);
-                return new ListResult(result.size(), result);
+                Page<ReserveSimpleDto> result = reservationSimpleRepository.findAllByHostPageRoom(currentUsername, reserveOrderSearch.getRoomType(), pageRequest);
+                return new ListResult(result.getTotalElements(), result.getContent());
             }
         } else {
             if (reserveOrderSearch.getPaymentStatus() != null && reserveOrderSearch.getPaid() != null) {
                 log.info("findAllByHostPagePaid");
-                List<ReserveSimpleDto> result = reservationSimpleRepository.findAllByHostPagePaid(currentUsername, reserveOrderSearch.getPaid(), reserveOrderSearch.getPaymentStatus(), pageRequest);
-                return new ListResult(result.size(), result);
+                Page<ReserveSimpleDto> result = reservationSimpleRepository.findAllByHostPagePaid(currentUsername, reserveOrderSearch.getPaid(), reserveOrderSearch.getPaymentStatus(), pageRequest);
+                return new ListResult(result.getTotalElements(), result.getContent());
             }
         }
         log.info("findAllByHostPage");
-        List<ReserveSimpleDto> result = reservationSimpleRepository.findAllByHostPage(currentUsername, pageRequest);
-        return new ListResult(result.size(), result);
+        Page<ReserveSimpleDto> result = reservationSimpleRepository.findAllByHostPage(currentUsername, pageRequest);
+        return new ListResult(result.getTotalElements(), result.getContent());
     }
 
     public Optional<Reservation> findById(Long reserveId) {
