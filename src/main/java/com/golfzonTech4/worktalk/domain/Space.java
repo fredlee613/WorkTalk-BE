@@ -9,6 +9,7 @@ import org.hibernate.annotations.DynamicUpdate;
 
 import javax.persistence.*;
 import java.io.Serializable;
+import java.util.List;
 
 @Entity
 @Getter @Setter
@@ -49,5 +50,8 @@ public class Space implements Serializable {
     @ColumnDefault(value = "'no_setting'")
     @Column(name = "SPACE_STATUS", length = 20)
     private String spaceStatus;
+
+    @OneToMany(mappedBy = "space", cascade = CascadeType.ALL)
+    private List<SpaceImg> spaceImgList;
 
 }

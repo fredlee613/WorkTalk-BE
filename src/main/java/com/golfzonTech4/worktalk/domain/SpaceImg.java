@@ -1,6 +1,7 @@
 package com.golfzonTech4.worktalk.domain;
 
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import javax.persistence.*;
@@ -8,6 +9,7 @@ import javax.persistence.*;
 @Entity
 @Setter
 @Getter
+@NoArgsConstructor
 @Table(name = "SPACE_IMG")
 @SequenceGenerator(name = "SEQ_SPACE_IMG_GENERATOR", sequenceName = "SEQ_SPACE_IMG", initialValue = 1, allocationSize = 50)
 public class SpaceImg {
@@ -22,6 +24,11 @@ public class SpaceImg {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "SPACE_ID")
     private Space space;
+
+    public SpaceImg(String imgName, Space space) {
+        this.imgName = imgName;
+        this.space = space;
+    }
 
     public void updateSpaceImg(String imgName){
         this.imgName = imgName;
