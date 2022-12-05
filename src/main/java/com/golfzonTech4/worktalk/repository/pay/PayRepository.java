@@ -21,7 +21,7 @@ public interface PayRepository extends JpaRepository<Pay, Long>, PayRepositoryCu
 
     @Query("select " +
             "new com.golfzonTech4.worktalk.dto.pay.PaySimpleDto" +
-            "(b.reserveDate, s.spaceName, ro.roomName, p.payAmount, p.payStatus, r.reserveStatus) " +
+            "(b.reserveDate, s.spaceName, ro.roomName, p.payAmount, p.payStatus, r.reserveStatus, m.name) " +
             "from Pay p " +
             "join p.reservation r " +
             "join r.member m " +
@@ -34,7 +34,7 @@ public interface PayRepository extends JpaRepository<Pay, Long>, PayRepositoryCu
 
     @Query(value = "select " +
             "new com.golfzonTech4.worktalk.dto.pay.PaySimpleDto" +
-            "(b.reserveDate, s.spaceName, ro.roomName, p.payAmount, p.payStatus, r.reserveStatus) " +
+            "(b.reserveDate, s.spaceName, ro.roomName, p.payAmount, p.payStatus, r.reserveStatus, m.name) " +
             "from Pay p " +
             "join p.reservation r " +
             "join r.member m " +
@@ -57,7 +57,7 @@ public interface PayRepository extends JpaRepository<Pay, Long>, PayRepositoryCu
 
     @Query(value = "select " +
             "new com.golfzonTech4.worktalk.dto.pay.PaySimpleDto" +
-            "(b.reserveDate, s.spaceName, ro.roomName, p.payAmount, p.payStatus, r.reserveStatus) " +
+            "(b.reserveDate, s.spaceName, ro.roomName, p.payAmount, p.payStatus, r.reserveStatus, m.name) " +
             "from Pay p " +
             "join p.reservation r " +
             "join r.member m " +
@@ -82,7 +82,7 @@ public interface PayRepository extends JpaRepository<Pay, Long>, PayRepositoryCu
 
     @Query(value = "select " +
             "new com.golfzonTech4.worktalk.dto.pay.PaySimpleDto" +
-            "(b.reserveDate, s.spaceName, ro.roomName, p.payAmount, p.payStatus, r.reserveStatus) " +
+            "(b.reserveDate, s.spaceName, ro.roomName, p.payAmount, p.payStatus, r.reserveStatus, m.name) " +
             "from Pay p " +
             "join p.reservation r " +
             "join r.member m " +
@@ -107,7 +107,7 @@ public interface PayRepository extends JpaRepository<Pay, Long>, PayRepositoryCu
 
     @Query(value = "select " +
             "new com.golfzonTech4.worktalk.dto.pay.PaySimpleDto" +
-            "(b.reserveDate, s.spaceName, ro.roomName, p.payAmount, p.payStatus, r.reserveStatus) " +
+            "(b.reserveDate, s.spaceName, ro.roomName, p.payAmount, p.payStatus, r.reserveStatus, m.name) " +
             "from Pay p " +
             "join p.reservation r " +
             "join r.member m " +
@@ -136,7 +136,7 @@ public interface PayRepository extends JpaRepository<Pay, Long>, PayRepositoryCu
 
     @Query("select " +
             "new com.golfzonTech4.worktalk.dto.pay.PaySimpleDto" +
-            "(b.reserveDate, s.spaceName, ro.roomName, p.payAmount, p.payStatus, r.reserveStatus) " +
+            "(b.reserveDate, s.spaceName, ro.roomName, p.payAmount, p.payStatus, r.reserveStatus, m.name) " +
             "from Pay p " +
             "join p.reservation r " +
             "join r.member m " +
@@ -149,7 +149,7 @@ public interface PayRepository extends JpaRepository<Pay, Long>, PayRepositoryCu
 
     @Query(value = "select " +
             "new com.golfzonTech4.worktalk.dto.pay.PaySimpleDto" +
-            "(b.reserveDate, s.spaceName, ro.roomName, p.payAmount, p.payStatus, r.reserveStatus) " +
+            "(b.reserveDate, s.spaceName, ro.roomName, p.payAmount, p.payStatus, r.reserveStatus, m.name) " +
             "from Pay p " +
             "join p.reservation r " +
             "join r.member m " +
@@ -171,7 +171,7 @@ public interface PayRepository extends JpaRepository<Pay, Long>, PayRepositoryCu
 
     @Query(value = "select " +
             "new com.golfzonTech4.worktalk.dto.pay.PaySimpleDto" +
-            "(b.reserveDate, s.spaceName, ro.roomName, p.payAmount, p.payStatus, r.reserveStatus) " +
+            "(b.reserveDate, s.spaceName, ro.roomName, p.payAmount, p.payStatus, r.reserveStatus, m.name) " +
             "from Pay p " +
             "join p.reservation r " +
             "join r.member m " +

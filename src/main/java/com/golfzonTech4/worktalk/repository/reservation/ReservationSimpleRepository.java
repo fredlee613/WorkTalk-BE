@@ -11,6 +11,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.time.LocalDate;
 import java.util.List;
 
 public interface ReservationSimpleRepository extends JpaRepository<Reservation, Long>, ReservationSimpleRepositoryCustom {
@@ -40,6 +41,21 @@ public interface ReservationSimpleRepository extends JpaRepository<Reservation, 
             "order by r.reserveId desc"
     )
     List<ReserveSimpleDto> findAllByHost(@Param("name") String name);
+
+    @Query("select " +
+            "new com.golfzonTech4.worktalk.dto.reservation.ReserveSimpleDto" +
+            "(ro.roomName, r.paid, r.reserveId,m.id, ro.roomId, b, m.name, r.reserveStatus, r.paymentStatus, ro.roomType, r.reserveAmount)" +
+            "from Reservation r " +
+            "join r.member m " +
+            "join r.bookDate b " +
+            "join r.room ro " +
+            "join ro.space s " +
+            "where s.member.name = :name " +
+            "and b.checkOutDate > :date " +
+            "and r.reserveStatus = 'BOOKED'" +
+            "order by r.reserveId desc"
+    )
+    List<ReserveSimpleDto> findAllByHost(@Param("name") String name, @Param("date") LocalDate date);
 
     @Query(value = "select " +
             "new com.golfzonTech4.worktalk.dto.reservation.ReserveSimpleDto" +

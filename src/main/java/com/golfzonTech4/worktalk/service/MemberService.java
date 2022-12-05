@@ -2,9 +2,14 @@ package com.golfzonTech4.worktalk.service;
 
 import com.golfzonTech4.worktalk.domain.Member;
 import com.golfzonTech4.worktalk.domain.MemberType;
+import com.golfzonTech4.worktalk.domain.ReserveStatus;
 import com.golfzonTech4.worktalk.dto.member.MemberDetailDto;
+import com.golfzonTech4.worktalk.dto.member.MemberUpdateDto;
+import com.golfzonTech4.worktalk.dto.reservation.ReserveSimpleDto;
 import com.golfzonTech4.worktalk.exception.NotFoundMemberException;
+import com.golfzonTech4.worktalk.repository.ListResult;
 import com.golfzonTech4.worktalk.repository.MemberRepository;
+import com.golfzonTech4.worktalk.repository.reservation.ReservationSimpleRepository;
 import com.golfzonTech4.worktalk.util.SecurityUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -12,6 +17,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -22,6 +28,8 @@ import java.util.Optional;
 public class MemberService {
     private final MemberRepository memberRepository;
     private final PasswordEncoder passwordEncoder;
+
+    private final ReservationSimpleRepository reservationSimpleRepository;
 
     @Transactional
     public Long join(MemberDetailDto dto) {
@@ -54,6 +62,39 @@ public class MemberService {
     }
 
     /**
+     * 회원 정보 수정 로직
+     */
+    @Transactional
+    public Long update(MemberUpdateDto dto) {
+        log.info("update : {}", dto);
+        Member findMember = memberRepository.findById(dto.getId()).get();
+        if (dto.getTel() != null || !dto.getTel().trim().isEmpty())  findMember.setTel(dto.getTel());
+        if (dto.getPw() != null || !dto.getPw().trim().isEmpty()) findMember.setPw(passwordEncoder.encode(dto.getPw()));
+        return findMember.getId();
+    }
+
+    /**
+     * 회원 탈퇴 로직
+     * 사용자: 탈퇴 희망 회원이 진핸중인 예약건/ 결제건이 있을 경우 탈퇴 불가
+     * 호스트: 탈퇴 희망 회원이 진핸중인 예약건이 있을 경우 탈퇴 불가
+     */
+    public void leave(Long memberId) {
+        log.info("leave : {}", memberId);
+        String name = SecurityUtil.getCurrentUsername().get();
+        String role = SecurityUtil.getCurrentUserRole().get();
+        if (role.equals(MemberType.ROLE_USER)) {
+            ListResult findReserves = reservationSimpleRepository.findAllByUser(name, 0, null, ReserveStatus.BOOKED);
+            if (findReserves.getCount() != 0) throw new IllegalStateException("진행 중인 예약/결제건이 있는 회원입니다.");
+        } else if (role.equals(MemberType.ROLE_HOST)) {
+            List<ReserveSimpleDto> findReserves = reservationSimpleRepository.findAllByHost(name, LocalDate.now());
+            if (findReserves.size() != 0) throw new IllegalStateException("진행 중인 예약건이 있는 회원입니다.");
+        }
+        Member deleteMember = memberRepository.findById(memberId).get();
+        memberRepository.delete(deleteMember);
+
+    }
+
+    /**
      * 회원명 중복 확인 서비스 로직
      * 중복 시 예외 처리
      */
@@ -64,20 +105,6 @@ public class MemberService {
             throw new IllegalArgumentException("이미 존재하는 회원입니다.");
         }
     }
-
-//    /**
-//     * 회원명 중복 확인 비동기 처리 로직
-//     * 중복 시 1, 비중복 시 0 반환
-//     */
-//    public Integer checkName(Member member) {
-//        log.info("checkName : {}", member);
-//        Optional<Member> result = memberRepositoryJpa.findByName(member.getName());
-//        if (!findMembers.isEmpty()) {
-//            return 1;
-//        } else {
-//            return 0;
-//        }
-//    }
 
     /**
      * 회원 단건 조회(이름 기준)
@@ -108,30 +135,7 @@ public class MemberService {
         return memberRepository.findAll();
     }
 
-    /**
-     * username을 기준으로 정보를 가져오는 메서드
-     */
 
-    public MemberDetailDto getUserWithAuthorities(String username) {
-        log.info("getUserWithAuthorities : {}", username);
-
-        Optional<Member> result = memberRepository.findByName(username);
-
-        MemberDetailDto dto = getMemberDetailDto(result.get());
-
-        return dto;
-    }
-
-    /**
-     * SecurityContext에 저장된 username의 정보만 가져온다.
-     */
-    public MemberDetailDto getMyUserWithAuthorities() {
-        log.info("getMyUserWithAuthorities");
-
-        Optional<String> currentUsername = SecurityUtil.getCurrentUsername();
-        if (currentUsername.isEmpty()) throw new NotFoundMemberException("Member not found");
-        return getMemberDetailDto(memberRepository.findByName(currentUsername.get()).get());
-    }
 
     // member -> memberDetailDto
     private static MemberDetailDto getMemberDetailDto(Member member) {

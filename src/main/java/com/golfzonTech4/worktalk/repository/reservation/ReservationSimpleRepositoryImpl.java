@@ -33,7 +33,7 @@ public class ReservationSimpleRepositoryImpl implements ReservationSimpleReposit
     }
 
     @Override
-    public ListResult findAllByUser(String name, Integer paid, PaymentStatus paymentStatus) {
+    public ListResult findAllByUser(String name, Integer paid, PaymentStatus paymentStatus, ReserveStatus reserveStatus) {
         log.info("findAllByUser : {}", name);
 
         List<ReserveSimpleDto> result = queryFactory.select(new QReserveSimpleDto(
@@ -50,7 +50,7 @@ public class ReservationSimpleRepositoryImpl implements ReservationSimpleReposit
                         reservation.reserveAmount)
                 )
                 .from(reservation)
-                .where(reservation.member.name.eq(name), eqPaid(paid), eqPayStatus(paymentStatus))
+                .where(reservation.member.name.eq(name), eqPaid(paid), eqPayStatus(paymentStatus), eqReserveStatus(reserveStatus))
                 .fetch();
 
         return new ListResult((long) result.size(), result);
@@ -183,6 +183,13 @@ public class ReservationSimpleRepositoryImpl implements ReservationSimpleReposit
             return null;
         }
         return reservation.paymentStatus.eq(paymentStatus);
+    }
+
+    private BooleanExpression eqReserveStatus(ReserveStatus status) {
+        if (status == null) {
+            return null;
+        }
+        return reservation.reserveStatus.eq(status);
     }
 
 }

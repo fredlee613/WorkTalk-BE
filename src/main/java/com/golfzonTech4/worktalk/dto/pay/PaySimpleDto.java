@@ -12,6 +12,8 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 public class PaySimpleDto {
     private LocalDateTime reserveDate; // 예약 날짜
+
+    private String name; // 예약자명
     private String spaceName; // 공간명
     private String roomName; // 세부 공간명
     private int payAmount; // 결제 금액
@@ -25,6 +27,16 @@ public class PaySimpleDto {
         this.payAmount = payAmount;
         this.payStatus = payStatus;
         this.reserveStatus = reserveStatus;
+    }
+
+    public PaySimpleDto(LocalDateTime reserveDate, String spaceName, String roomName, int payAmount, PaymentStatus payStatus, ReserveStatus reserveStatus, String name) {
+        this.reserveDate = reserveDate;
+        this.spaceName = spaceName;
+        this.roomName = roomName;
+        this.payAmount = payAmount;
+        this.payStatus = payStatus;
+        this.reserveStatus = reserveStatus;
+        this.name = name;
     }
 }
 

@@ -243,7 +243,7 @@ public class ReservationService {
     public ListResult findAllByUser(ReserveOrderSearch reserveOrderSearch) {
         String name = SecurityUtil.getCurrentUsername().get();
         log.info("findAllByUser : {}", name);
-        return reservationSimpleRepository.findAllByUser(name, reserveOrderSearch.getPaid(), reserveOrderSearch.getPaymentStatus());
+        return reservationSimpleRepository.findAllByUser(name, reserveOrderSearch.getPaid(), reserveOrderSearch.getPaymentStatus(), null);
     }
 
     /**
