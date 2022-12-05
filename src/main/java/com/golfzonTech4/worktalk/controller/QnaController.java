@@ -1,11 +1,8 @@
 package com.golfzonTech4.worktalk.controller;
 
 import com.golfzonTech4.worktalk.domain.Qna;
-import com.golfzonTech4.worktalk.domain.Room;
-import com.golfzonTech4.worktalk.domain.Space;
 import com.golfzonTech4.worktalk.dto.qna.QnaInsertDto;
 import com.golfzonTech4.worktalk.dto.qna.QnaUpdateDto;
-import com.golfzonTech4.worktalk.dto.room.RoomInsertDto;
 import com.golfzonTech4.worktalk.service.QnaService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

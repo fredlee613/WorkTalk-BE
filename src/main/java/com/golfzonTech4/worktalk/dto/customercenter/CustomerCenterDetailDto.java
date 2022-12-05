@@ -5,6 +5,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.time.LocalDateTime;
+
 @Getter
 @Setter
 @NoArgsConstructor
@@ -20,5 +22,20 @@ public class CustomerCenterDetailDto {
 
     private CcType type;
 
+    private LocalDateTime lastModifiedDate;
 
+    private String ccContent;
+
+    private LocalDateTime ccLastModifiedDate;
+
+    public CustomerCenterDetailDto(Long ccId, Long memberId, String title, String content, CcType type, LocalDateTime lastModifiedDate, String ccContent, LocalDateTime ccLastModifiedDate) {
+        this.ccId = ccId;
+        this.memberId = memberId;
+        this.title = title;
+        this.content = content;
+        this.type = type;
+        this.lastModifiedDate = lastModifiedDate;
+        this.ccContent = ccContent;
+        this.ccLastModifiedDate = ccLastModifiedDate;
+    }
 }

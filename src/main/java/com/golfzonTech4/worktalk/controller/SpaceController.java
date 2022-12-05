@@ -1,28 +1,24 @@
 package com.golfzonTech4.worktalk.controller;
 
 import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.AmazonS3Client;
 import com.amazonaws.services.s3.model.CannedAccessControlList;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
-import com.golfzonTech4.worktalk.domain.Member;
 import com.golfzonTech4.worktalk.domain.Space;
-import com.golfzonTech4.worktalk.dto.space.SpaceUpdateDto;
+import com.golfzonTech4.worktalk.dto.space.SpaceImgDto;
+import com.golfzonTech4.worktalk.dto.space.SpaceInsertDto;
 import com.golfzonTech4.worktalk.service.AwsS3Service;
 import com.golfzonTech4.worktalk.service.RoomService;
 import com.golfzonTech4.worktalk.service.SpaceService;
-import com.golfzonTech4.worktalk.dto.space.SpaceInsertDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 
 import javax.validation.Valid;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -37,10 +33,11 @@ public class SpaceController {
     private final AmazonS3 amazonS3;
     private String S3Bucket = "worktalk-img";
 
-    //유저-사무공간 전체리스트 조회
+    //유저-사무공간 전체리스트 조회->Main컨트롤러로 분리
     @GetMapping("/user/spaceAll")
     public ResponseEntity findSpaces(){
-        return ResponseEntity.ok(spaceService.selectSpaceAll());
+        log.info("findSpaces()");
+        return ResponseEntity.ok(spaceService.findAllBySpaceStatus());
     }
 
     //호스트가 등록한 사무공간리스트 조회
@@ -68,14 +65,12 @@ public class SpaceController {
     }
 
     //호스트의 사무공간 등록-다중이미지
-    @PostMapping("/host/space_createi")
+    @PostMapping("/host/spaceImg")
     public ResponseEntity<Space> createiSpace(
-            @Valid @RequestBody SpaceInsertDto dto, @RequestParam("SpaceImgFile") List<MultipartFile> multipartFileList, MultipartHttpServletRequest req /*, BindingResult result*/) {
-//        if(result.hasErrors()){
-//            return new ResponseEntity("null값이 있습니다", HttpStatus.BAD_REQUEST) ;
-//        }
+            @Valid @RequestBody SpaceImgDto dto, @RequestParam("SpaceImgFile") List<MultipartFile> multipartFileList) {
+
         try {
-            spaceService.createiSpace(dto,multipartFileList);
+            spaceService.uploadImage(dto,multipartFileList);
         } catch (Exception e){
             log.info("등록 중 에러 발생");
         }
@@ -108,7 +103,7 @@ public class SpaceController {
     //이미지 업로드
     @PostMapping("/upload")
     public ResponseEntity<Object> upload(
-            @Valid @RequestBody SpaceInsertDto dto, @RequestParam("SpaceImgFile") List<MultipartFile> multipartFileList, MultipartHttpServletRequest req) throws Exception {
+            @Valid @RequestParam("SpaceImg") List<MultipartFile> multipartFileList, MultipartHttpServletRequest req) throws Exception {
         List<String> imagePathList = new ArrayList<>();
         if(multipartFileList.size()>0) {
             for (MultipartFile multipartFile : multipartFileList) {
