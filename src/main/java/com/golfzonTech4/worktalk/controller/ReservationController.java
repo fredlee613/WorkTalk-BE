@@ -69,6 +69,7 @@ public class ReservationController {
                 count = payService.cancelPrepaid((Long) result.get("reserveId"), 0);
             else count = payService.cancelPostPaid((Long) result.get("reserveId"), 0);
         }
+        // 성공 시 200 반환
         return ResponseEntity.ok(count);
     }
 
@@ -146,7 +147,6 @@ public class ReservationController {
         log.info("findBookedRoom : {}", reserveCheckDto);
         return ResponseEntity.ok(reservationService.findBookedReservation(reserveCheckDto));
     }
-
     @Data
     @AllArgsConstructor
     private class Result<T> {
