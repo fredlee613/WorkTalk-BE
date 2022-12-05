@@ -20,6 +20,7 @@ import com.siot.IamportRestClient.response.Payment;
 import com.siot.IamportRestClient.response.Schedule;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -324,7 +325,7 @@ public class PayService {
         log.info("findAllByUser");
         String name = SecurityUtil.getCurrentUsername().get();
         List<PaySimpleDto> result = payRepository.findAllByUser(name);
-        return new ListResult(result.size(), result);
+        return new ListResult((long) result.size(), result);
     }
 
     /**
@@ -337,23 +338,23 @@ public class PayService {
         if (orderSearch.getPayStatus() != null) {
             if (orderSearch.getReserveDate() != null) {
                 log.info("Both");
-                List<PaySimpleDto> result = payRepository.findAllByUser(name, orderSearch.getReserveDate(), orderSearch.getPayStatus(), pageRequest);
-                return new ListResult(result.size(), result);
+                Page<PaySimpleDto> result = payRepository.findAllByUser(name, orderSearch.getReserveDate(), orderSearch.getPayStatus(), pageRequest);
+                return new ListResult(result.getTotalElements(), result.getContent());
             } else {
                 log.info("Status");
-                List<PaySimpleDto> result = payRepository.findAllByUser(name, orderSearch.getPayStatus(), pageRequest);
-                return new ListResult(result.size(), result);
+                Page<PaySimpleDto> result = payRepository.findAllByUser(name, orderSearch.getPayStatus(), pageRequest);
+                return new ListResult(result.getTotalElements(), result.getContent());
             }
         } else {
             if (orderSearch.getReserveDate() != null) {
                 log.info("Time");
-                List<PaySimpleDto> result = payRepository.findAllByUser(name, orderSearch.getReserveDate(), pageRequest);
-                return new ListResult(result.size(), result);
+                Page<PaySimpleDto> result = payRepository.findAllByUser(name, orderSearch.getReserveDate(), pageRequest);
+                return new ListResult(result.getTotalElements(), result.getContent());
             }
         }
         log.info("Default");
-        List<PaySimpleDto> result = payRepository.findAllByUser(name, pageRequest);
-        return new ListResult(result.size(), result);
+        Page<PaySimpleDto> result = payRepository.findAllByUser(name, pageRequest);
+        return new ListResult(result.getTotalElements(), result.getContent());
     }
 
     /**
@@ -363,7 +364,7 @@ public class PayService {
         log.info("findAllByUser");
         String name = SecurityUtil.getCurrentUsername().get();
         List<PaySimpleDto> result = payRepository.findAllByHost(name);
-        return new ListResult(result.size(), result);
+        return new ListResult((long) result.size(), result);
     }
 
     /**
@@ -374,12 +375,12 @@ public class PayService {
         String name = SecurityUtil.getCurrentUsername().get();
         PageRequest pageRequest = PageRequest.of(pageNum, 10);
         if (orderSearch.getReserveDate() != null) {
-            List<PaySimpleDto> result = payRepository.findAllByHost(name, orderSearch.getReserveDate(), pageRequest);
-            return new ListResult(result.size(), result);
+            Page<PaySimpleDto> result = payRepository.findAllByHost(name, orderSearch.getReserveDate(), pageRequest);
+            return new ListResult(result.getTotalElements(), result.getContent());
         }
         log.info("Default");
-        List<PaySimpleDto> result = payRepository.findAllByHost(name, pageRequest);
-        return new ListResult(result.size(), result);
+        Page<PaySimpleDto> result = payRepository.findAllByHost(name, pageRequest);
+        return new ListResult(result.getTotalElements(), result.getContent());
     }
 
     /**
