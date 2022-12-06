@@ -11,6 +11,7 @@ import com.golfzonTech4.worktalk.repository.ListResult;
 import com.golfzonTech4.worktalk.repository.RoomRepository;
 import com.golfzonTech4.worktalk.repository.reservation.ReservationRepository;
 import com.golfzonTech4.worktalk.repository.reservation.ReservationSimpleRepository;
+import com.golfzonTech4.worktalk.repository.reservation.query.ReservationRepositoryQuery;
 import com.golfzonTech4.worktalk.util.SecurityUtil;
 import com.siot.IamportRestClient.exception.IamportResponseException;
 import lombok.RequiredArgsConstructor;
@@ -38,6 +39,7 @@ public class ReservationService {
     private final ReservationRepository reservationRepository;
     private final ReservationSimpleRepository reservationSimpleRepository;
     private final PenaltyService penaltyService;
+    private final ReservationRepositoryQuery reservationRepositoryQuery;
 
     /**
      * 예약 기능
@@ -202,7 +204,6 @@ public class ReservationService {
         return result;
     }
 
-
     /**
      * 결제 생태가 미결제인 예약 건에 대하여 예약 상태를 NOSHOW로 변경
      */
@@ -223,39 +224,20 @@ public class ReservationService {
         return reservationSimpleRepository.countNoShow(memberId, ReserveStatus.NOSHOW);
     }
 
-    public List<Reservation> findAllByName() {
+    public ListResult findAllByName(ReserveOrderSearch dto, PageRequest pageRequest) {
+        log.info("findAllByName : {}, {}", dto, pageRequest);
         String name = SecurityUtil.getCurrentUsername().get();
-        log.info("findByName : {}", name);
-        return reservationRepository.findAllByName(name);
+        String role = SecurityUtil.getCurrentUserRole().get();
+        log.info("name: {}, role : {}", name, role);
+        if (role.equals(MemberType.ROLE_USER.toString())) {
+            PageImpl<ReserveSimpleDto> result = reservationSimpleRepository.findAllByUserPage(name, pageRequest, dto.getPaid(), dto.getPaymentStatus());
+            return new ListResult(result.getTotalElements(), result.getContent());
+        } else {
+            PageImpl<ReserveSimpleDto> result = reservationRepositoryQuery.findAllByHost(name, dto.getPaid(), dto.getRoomType(), dto.getPaymentStatus(), pageRequest);
+            return new ListResult(result.getTotalElements(), result.getContent());
+        }
     }
 
-//    /**
-//     * 접속자(USER)명을 기준으로 예약 리스트 조회(Spring Data Jpa + JPQL)
-//     */
-//    public List<ReserveSimpleDto> findAllByUser() {
-//        String name = SecurityUtil.getCurrentUsername().get();
-//        log.info("findAllByUser : {}", name);
-//        return reservationSimpleRepository.findAllByUser(name);
-//    }
-
-    /**
-     * 접속자(USER)명을 기준으로 예약 리스트 조회(QueryDsl)
-     */
-    public ListResult findAllByUser(ReserveOrderSearch reserveOrderSearch) {
-        String name = SecurityUtil.getCurrentUsername().get();
-        log.info("findAllByUser : {}", name);
-        return reservationSimpleRepository.findAllByUser(name, reserveOrderSearch.getPaid(), reserveOrderSearch.getPaymentStatus(), null);
-    }
-
-    /**
-     * 접속자(USER)명을 기준으로 예약 리스트 페이징 조회(QueryDsl)
-     */
-    public ListResult findAllByUserPage(PageRequest pageRequest, ReserveOrderSearch reserveOrderSearch) {
-        String name = SecurityUtil.getCurrentUsername().get();
-        log.info("findAllByUser : {}", name);
-        PageImpl<ReserveSimpleDto> result = reservationSimpleRepository.findAllByUserPage(name, pageRequest, reserveOrderSearch.getPaid(), reserveOrderSearch.getPaymentStatus());
-        return new ListResult(result.getTotalElements(), result.getContent());
-    }
 
     /**
      * 선택 일자를 기준으로 예약 리스트 조회
@@ -271,44 +253,6 @@ public class ReservationService {
         }
     }
 
-    /**
-     * 호스트가 관리하는 공간 들에 대한 예약 리스트 조회
-     */
-    public ListResult findAllByHost() {
-        String currentUsername = SecurityUtil.getCurrentUsername().get();
-        log.info("findAllByHost : {}", currentUsername);
-        List<ReserveSimpleDto> result = reservationSimpleRepository.findAllByHost(currentUsername);
-        return new ListResult((long) result.size(), result);
-    }
-
-    /**
-     * 호스트가 관리하는 공간 들에 대한 예약 리스트 페이지 조회
-     */
-    public ListResult findAllByHostPage(ReserveOrderSearch reserveOrderSearch, PageRequest pageRequest) {
-        String currentUsername = SecurityUtil.getCurrentUsername().get();
-        log.info("findAllByHost : {}, {}, {}", currentUsername, reserveOrderSearch, pageRequest);
-        if (reserveOrderSearch.getRoomType() != null) {
-            if (reserveOrderSearch.getPaymentStatus() != null && reserveOrderSearch.getPaid() != null) {
-                log.info("findAllByHostPageBoth");
-                Page<ReserveSimpleDto> result = reservationSimpleRepository.findAllByHostPageBoth(currentUsername, reserveOrderSearch.getPaid(), reserveOrderSearch.getRoomType(), reserveOrderSearch.getPaymentStatus(), pageRequest);
-                return new ListResult(result.getTotalElements(), result.getContent());
-
-            } else {
-                log.info("findAllByHostPageRoom");
-                Page<ReserveSimpleDto> result = reservationSimpleRepository.findAllByHostPageRoom(currentUsername, reserveOrderSearch.getRoomType(), pageRequest);
-                return new ListResult(result.getTotalElements(), result.getContent());
-            }
-        } else {
-            if (reserveOrderSearch.getPaymentStatus() != null && reserveOrderSearch.getPaid() != null) {
-                log.info("findAllByHostPagePaid");
-                Page<ReserveSimpleDto> result = reservationSimpleRepository.findAllByHostPagePaid(currentUsername, reserveOrderSearch.getPaid(), reserveOrderSearch.getPaymentStatus(), pageRequest);
-                return new ListResult(result.getTotalElements(), result.getContent());
-            }
-        }
-        log.info("findAllByHostPage");
-        Page<ReserveSimpleDto> result = reservationSimpleRepository.findAllByHostPage(currentUsername, pageRequest);
-        return new ListResult(result.getTotalElements(), result.getContent());
-    }
 
     public Optional<Reservation> findById(Long reserveId) {
         return reservationRepository.findById(reserveId);

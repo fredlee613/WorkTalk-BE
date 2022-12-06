@@ -8,6 +8,7 @@ import com.golfzonTech4.worktalk.dto.pay.PaySimpleDto;
 import com.golfzonTech4.worktalk.dto.pay.PayWebhookDto;
 import com.golfzonTech4.worktalk.repository.ListResult;
 import com.golfzonTech4.worktalk.repository.pay.PayRepository;
+import com.golfzonTech4.worktalk.repository.pay.query.PayRepositoryQuery;
 import com.golfzonTech4.worktalk.util.SecurityUtil;
 import com.siot.IamportRestClient.IamportClient;
 import com.siot.IamportRestClient.exception.IamportResponseException;
@@ -20,7 +21,7 @@ import com.siot.IamportRestClient.response.Payment;
 import com.siot.IamportRestClient.response.Schedule;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -41,8 +42,8 @@ public class PayService {
     private final ReservationService reservationService;
     private final MileageService mileageService;
     private final MyIamport myIamport;
-
     private final MailService mailService;
+    private final PayRepositoryQuery payRepositoryQuery;
 
     /**
      * 결제 데이터 검증 및 저장 로직
@@ -321,66 +322,17 @@ public class PayService {
     /**
      * 사용자 결제 내역 전체 조회
      */
-    public ListResult findAllByUser() {
-        log.info("findAllByUser");
+    public ListResult findByName(PayOrderSearch dto, PageRequest pageRequest) {
+        log.info("findByName: {}, {}");
         String name = SecurityUtil.getCurrentUsername().get();
-        List<PaySimpleDto> result = payRepository.findAllByUser(name);
-        return new ListResult((long) result.size(), result);
-    }
-
-    /**
-     * 사용자 결제 내역 페이징 조회 및 조건 검색
-     */
-    public ListResult findAllByUserPage(int pageNum, PayOrderSearch orderSearch) {
-        log.info("findAllByUserPage");
-        String name = SecurityUtil.getCurrentUsername().get();
-        PageRequest pageRequest = PageRequest.of(pageNum, 10);
-        if (orderSearch.getPayStatus() != null) {
-            if (orderSearch.getReserveDate() != null) {
-                log.info("Both");
-                Page<PaySimpleDto> result = payRepository.findAllByUser(name, orderSearch.getReserveDate(), orderSearch.getPayStatus(), pageRequest);
-                return new ListResult(result.getTotalElements(), result.getContent());
-            } else {
-                log.info("Status");
-                Page<PaySimpleDto> result = payRepository.findAllByUser(name, orderSearch.getPayStatus(), pageRequest);
-                return new ListResult(result.getTotalElements(), result.getContent());
-            }
+        String role = SecurityUtil.getCurrentUserRole().get();
+        if (role.equals(MemberType.ROLE_USER.toString())) {
+            PageImpl<PaySimpleDto> result = payRepositoryQuery.findAllByUser(name, dto.getReserveDate(), dto.getPayStatus(), pageRequest);
+            return new ListResult<>(result.getTotalElements(), result.getContent());
         } else {
-            if (orderSearch.getReserveDate() != null) {
-                log.info("Time");
-                Page<PaySimpleDto> result = payRepository.findAllByUser(name, orderSearch.getReserveDate(), pageRequest);
-                return new ListResult(result.getTotalElements(), result.getContent());
-            }
+            PageImpl<PaySimpleDto> result = payRepositoryQuery.findAllByHost(name, dto.getReserveDate(), pageRequest);
+            return new ListResult<>(result.getTotalElements(), result.getContent());
         }
-        log.info("Default");
-        Page<PaySimpleDto> result = payRepository.findAllByUser(name, pageRequest);
-        return new ListResult(result.getTotalElements(), result.getContent());
-    }
-
-    /**
-     * 호스트 결제 내역 전체 조회
-     */
-    public ListResult findAllByHost() {
-        log.info("findAllByUser");
-        String name = SecurityUtil.getCurrentUsername().get();
-        List<PaySimpleDto> result = payRepository.findAllByHost(name);
-        return new ListResult((long) result.size(), result);
-    }
-
-    /**
-     * 호스트 결제 내역 페이징 조회 및 조건 검색
-     */
-    public ListResult findAllByHostPage(int pageNum, PayOrderSearch orderSearch) {
-        log.info("findAllByUserPage");
-        String name = SecurityUtil.getCurrentUsername().get();
-        PageRequest pageRequest = PageRequest.of(pageNum, 10);
-        if (orderSearch.getReserveDate() != null) {
-            Page<PaySimpleDto> result = payRepository.findAllByHost(name, orderSearch.getReserveDate(), pageRequest);
-            return new ListResult(result.getTotalElements(), result.getContent());
-        }
-        log.info("Default");
-        Page<PaySimpleDto> result = payRepository.findAllByHost(name, pageRequest);
-        return new ListResult(result.getTotalElements(), result.getContent());
     }
 
     /**

@@ -14,6 +14,7 @@ import com.siot.IamportRestClient.response.Payment;
 import com.siot.IamportRestClient.response.Schedule;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -74,30 +75,15 @@ public class PayController {
         payService.postpaid(dto);
     }
 
-//    @GetMapping("/payments/user")
-//    public ResponseEntity<ListResult> findByUser() {
-//        log.info("findByUser");
-//        return ResponseEntity.ok(payService.findAllByUser());
-//    }
-
-    @GetMapping("/payments/user/{pageNum}")
-    public ResponseEntity<ListResult> findByUserPage(@PathVariable("pageNum") int pageNum,
+    /**
+     * 결제 이력 조회 요청
+     */
+    @GetMapping("/payments/{pageNum}")
+    public ResponseEntity<ListResult> findByName(@PathVariable("pageNum") int pageNum,
                                                      @RequestBody PayOrderSearch orderSearch) {
         log.info("findByUserPage : {} , {}", pageNum, orderSearch);
+        PageRequest pageRequest = PageRequest.of(pageNum, 10);
 
-        return ResponseEntity.ok(payService.findAllByUserPage(pageNum, orderSearch));
-    }
-//    @GetMapping("/payments/host")
-//    public ResponseEntity<ListResult> findByHost() {
-//        log.info("findByHost");
-//        return ResponseEntity.ok(payService.findAllByHost());
-//    }
-
-    @GetMapping("/payments/host/{pageNum}")
-    public ResponseEntity<ListResult> findByHostPage(@PathVariable("pageNum") int pageNum,
-                                                     @RequestBody PayOrderSearch orderSearch) {
-        log.info("findByHostPage : {} , {}", pageNum, orderSearch);
-
-        return ResponseEntity.ok(payService.findAllByHostPage(pageNum, orderSearch));
+        return ResponseEntity.ok(payService.findByName(orderSearch, pageRequest));
     }
 }

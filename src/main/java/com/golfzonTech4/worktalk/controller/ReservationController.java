@@ -10,8 +10,6 @@ import com.golfzonTech4.worktalk.service.PayService;
 import com.golfzonTech4.worktalk.service.ReservationService;
 import com.golfzonTech4.worktalk.util.SecurityUtil;
 import com.siot.IamportRestClient.exception.IamportResponseException;
-import lombok.AllArgsConstructor;
-import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
@@ -83,76 +81,23 @@ public class ReservationController {
         return ResponseEntity.ok().build();
     }
 
-//    /**
-//     * 예약 리스트 조회 요청 (유저 기준: Spring Data JPA + JPQL)
-//     */
-//    @GetMapping("/reservations/user")
-//    public ResponseEntity<List<ReserveSimpleDto>> findAllByUser() {
-//        log.info("findAllByUser");
-//        return ResponseEntity.ok(reservationService.findAllByUser());
-//    }
-
-//    /**
-//     * 예약 리스트 조회 요청(유저 기준: QueryDsl)
-//     * 전체 조회 개수와 리스트 반환
-//     */
-//    @GetMapping("/reservations/user")
-//    public ResponseEntity<ListResult> findAllByUser(
-//            @RequestBody() ReserveOrderSearch reserveOrderSearch) {
-//        log.info("findAllByUser");
-//        ListResult findReserves = reservationService.findAllByUser(reserveOrderSearch);
-//        return ResponseEntity.ok(findReserves);
-//    }
-
     /**
-     * 예약 리스트 조회 페이징 요청(유저 기준: QueryDsl)
+     * 예약 리스트 조회
      */
-    @GetMapping("/reservations/user/{pageNum}")
-    public ResponseEntity<ListResult> findAllByUserPage(
-            @PathVariable(name = "pageNum", required = false) int pageNum,
-            @RequestBody ReserveOrderSearch reserveOrderSearch) {
+    @GetMapping("/reservation/{pageNum}")
+    public ResponseEntity<ListResult> findByName(
+            @PathVariable(value = "pageNum") int pageNum,
+            @RequestBody ReserveOrderSearch dto) {
         PageRequest pageRequest = PageRequest.of(pageNum, 10);
-        log.info("findAllByUserPage, {}, {}", pageRequest, reserveOrderSearch);
-        return ResponseEntity.ok(reservationService.findAllByUserPage(pageRequest, reserveOrderSearch));
+        return ResponseEntity.ok(reservationService.findAllByName(dto, pageRequest));
     }
 
-//    /**
-//     * 예약 리스트 조회 요청 (호스트 기준)
-//     */
-//    @GetMapping("/reservations/host")
-//    public ResponseEntity<ListResult> findAllByHost() {
-//        log.info("findAllByUser");
-//        ListResult findReserve = reservationService.findAllByHost();
-//        return ResponseEntity.ok(findReserve);
-//    }
-
     /**
-     * 예약 리스트 조회 요청 (호스트 기준)
-     */
-    @GetMapping("/reservations/host/{pageNum}")
-    public ResponseEntity<ListResult> findAllByHostPage(
-            @PathVariable(name = "pageNum", required = false) int pageNum,
-            @RequestBody ReserveOrderSearch reserveOrderSearch) {
-        log.info("findAllByHostPage, {}, {}", pageNum, reserveOrderSearch);
-        PageRequest pageRequest = PageRequest.of(pageNum, 10);
-        ListResult findReserve = reservationService.findAllByHostPage(reserveOrderSearch, pageRequest);
-        return ResponseEntity.ok(findReserve);
-    }
-
-
-    /**
-     * 예약 리스트 조회 요청(선택된 기간/시간 기준)
+     * 해당 공간의 예약된 리스트 조회 요청(선택된 기간/시간 기준)
      */
     @GetMapping("/reservations/isBooked")
     public ResponseEntity<List<ReserveCheckDto>> findBookedRoom(@RequestBody ReserveCheckDto reserveCheckDto) {
         log.info("findBookedRoom : {}", reserveCheckDto);
         return ResponseEntity.ok(reservationService.findBookedReservation(reserveCheckDto));
     }
-    @Data
-    @AllArgsConstructor
-    private class Result<T> {
-        private int count;
-        private T data;
-    }
-
 }
