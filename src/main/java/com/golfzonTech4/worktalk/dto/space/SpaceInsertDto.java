@@ -3,6 +3,7 @@ package com.golfzonTech4.worktalk.dto.space;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.constraints.NotEmpty;
 
@@ -34,6 +35,6 @@ public class SpaceInsertDto {
 
     private int spaceType;
 
-    private String spaceImg;
+    MultipartFile multipartFile;
 
 }

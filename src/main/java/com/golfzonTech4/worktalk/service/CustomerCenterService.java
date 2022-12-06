@@ -23,6 +23,7 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.persistence.EntityNotFoundException;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -93,13 +94,13 @@ public class CustomerCenterService {
         return customerCenterRepository.findCCDtoListByMember(currentUsername.get());
     }
 
-    public List<CustomerCenter> CustomerCenterMasterPage() {
+    public List<CustomerCenterDetailDto> CustomerCenterMasterPage() {
         log.info("CustomerCenterMasterPage()....");
 
         Optional<String> currentUsername = SecurityUtil.getCurrentUsername();
         if (currentUsername.isEmpty()) throw new EntityNotFoundException("Member not found");
 
-        return customerCenterRepository.findAll();
+        return customerCenterRepository.findAllCC();
     }
 
 }

@@ -3,18 +3,25 @@ package com.golfzonTech4.worktalk.service;
 import com.golfzonTech4.worktalk.domain.Member;
 import com.golfzonTech4.worktalk.domain.Space;
 import com.golfzonTech4.worktalk.domain.SpaceImg;
+import com.golfzonTech4.worktalk.dto.space.SpaceImgDto;
 import com.golfzonTech4.worktalk.dto.space.SpaceInsertDto;
+import com.golfzonTech4.worktalk.dto.space.SpaceMainDto;
 import com.golfzonTech4.worktalk.dto.space.SpaceUpdateDto;
 import com.golfzonTech4.worktalk.repository.member.MemberRepository;
+import com.golfzonTech4.worktalk.repository.SpaceImgRepository;
 import com.golfzonTech4.worktalk.repository.SpaceRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.persistence.EntityNotFoundException;
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -29,13 +36,16 @@ public class SpaceService {
     private final MemberService memberService;
 
     private final SpaceRepository spaceRepository;
+    private final SpaceImgRepository spaceImgRepository;
 
     private final SpaceImgService spaceImgService;
+
+    private final AwsS3Service awsS3Service;
 
 
     //사무공간 등록
     @Transactional
-    public Space createSpace(SpaceInsertDto dto){
+    public Space createSpace(SpaceInsertDto dto) {
 
         Optional<Member> member = memberRepository.findByName(dto.getName());
 
@@ -47,28 +57,33 @@ public class SpaceService {
         BeanUtils.copyProperties(dto, spaceToCreate);
         spaceToCreate.setMember(member.get());
         return spaceRepository.save(spaceToCreate);
+
     }
     //사무공간 등록-다중이미지추가
     @Transactional
-    public Long createiSpace(SpaceInsertDto dto,
-                             List<MultipartFile> multipartFileList) throws Exception{
-        Optional<Member> member = memberRepository.findByName(dto.getName());
-        if(!member.isPresent()){
-            throw new EntityNotFoundException("Member Not Found");
+    public Long uploadImage(SpaceImgDto dto, List<MultipartFile> multipartFileList) throws Exception{
+
+        Space findSpace = spaceRepository.findBySpaceId(dto.getSpaceId());
+        List<String> imageurlList = new ArrayList<>();
+        if (multipartFileList.size() > 0){
+            try {
+                imageurlList.addAll(awsS3Service.upload(multipartFileList));
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        } else {
+            imageurlList.add(null);
         }
+        Space space = new Space();
 
-        Space spaceToCreate = new Space();
-        BeanUtils.copyProperties(dto, spaceToCreate);
-        spaceToCreate.setMember(member.get());
-        spaceRepository.save(spaceToCreate);
-
-        //이미지 등록
-        for (int i=0; i< multipartFileList.size();i++){
+        for (String imageurl : imageurlList){
             SpaceImg spaceImg = new SpaceImg();
-            spaceImg.setSpace(spaceToCreate);
-            spaceImgService.saveSpaceImg(spaceImg, multipartFileList.get(i));
+            spaceImg.setSpace(findSpace);
+            spaceImg.setImgName(imageurl);
+            spaceImgRepository.save(spaceImg);
         }
-        return spaceToCreate.getSpaceId();
+
+        return findSpace.getSpaceId();
 
     }
 
@@ -117,8 +132,18 @@ public class SpaceService {
     }
 
     //유저-사무공간 리스트 조회
-    public List<Space> selectSpaceAll(){
-        return spaceRepository.findAll();
+    public Page<SpaceMainDto> getMainSpacePage(Pageable pageable, Integer spaceType, String spaceName, String address){
+        return spaceRepository.getMainSpacePage(pageable, spaceType, spaceName, address);
+    }
+
+    //유저-사무공간 리스트 조회
+    public List<SpaceMainDto> getMainPage(Integer spaceType, String spaceName, String address){
+        return spaceRepository.getMainPage(spaceType, spaceName, address);
+    }
+    //유저-사무공간 리스트 조회
+    public List<SpaceMainDto> findAllBySpaceStatus(){
+        log.info("findAllBySpaceStatus()....");
+        return spaceRepository.findAllBySpaceStatus();
     }
 
     @Transactional

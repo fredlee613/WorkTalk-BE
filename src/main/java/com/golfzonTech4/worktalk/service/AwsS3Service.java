@@ -27,17 +27,28 @@ public class AwsS3Service {
 
     private final AmazonS3 amazonS3;
 
-    public String upload(MultipartFile multipartFile) throws IOException {
-        String s3FileName = UUID.randomUUID() + "-" + multipartFile.getOriginalFilename();// UUID + 파일이름
+    public List<String> upload(List<MultipartFile> multipartFileList) throws IOException {
+        List<String> imageUrlList = new ArrayList<>();
+        for (MultipartFile multipartFile : multipartFileList) {
+            String s3FileName = UUID.randomUUID() + "-" + multipartFile.getOriginalFilename();// UUID + 파일이름
 
-        ObjectMetadata objMeta = new ObjectMetadata(); //S3에 파일사이즈 알려주기 위해 ObjectMetadata 사용
-        objMeta.setContentLength(multipartFile.getInputStream().available());
+            ObjectMetadata objMeta = new ObjectMetadata(); //S3에 파일사이즈 알려주기 위해 ObjectMetadata 사용
 
-        // putObject(S3 API 메소드)를 이용해 파일 Stream 열어서 S3에 파일 업로드
-        amazonS3.putObject(bucket, s3FileName, multipartFile.getInputStream(), objMeta);
+            objMeta.setContentLength(multipartFile.getSize());
+            objMeta.setContentType(multipartFile.getContentType());
+//        return amazonS3.getUrl(bucket, s3FileName).toString(); // getUrl메소드로 S3에 업로드된 사진 url 가져오기
+            try (InputStream inputStream = multipartFile.getInputStream()) {
+                // putObject(S3 API 메소드)를 이용해 파일 Stream 열어서 S3에 파일 업로드
+                amazonS3.putObject(new PutObjectRequest(bucket, s3FileName, inputStream, objMeta)
+                        .withCannedAcl(CannedAccessControlList.PublicRead));
+                imageUrlList.add(amazonS3.getUrl(bucket, s3FileName).toString());
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
 
-        return amazonS3.getUrl(bucket, s3FileName).toString(); // getUrl메소드로 S3에 업로드된 사진 url 가져오기
+        return imageUrlList;
+
+
     }
-
-
 }
