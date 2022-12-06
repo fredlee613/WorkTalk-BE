@@ -2,13 +2,10 @@ package com.golfzonTech4.worktalk.service;
 
 import com.golfzonTech4.worktalk.domain.Member;
 import com.golfzonTech4.worktalk.domain.Qna;
-import com.golfzonTech4.worktalk.domain.Room;
 import com.golfzonTech4.worktalk.domain.Space;
 import com.golfzonTech4.worktalk.dto.qna.QnaDetailDto;
 import com.golfzonTech4.worktalk.dto.qna.QnaInsertDto;
 import com.golfzonTech4.worktalk.dto.qna.QnaUpdateDto;
-import com.golfzonTech4.worktalk.exception.NotFoundMemberException;
-import com.golfzonTech4.worktalk.repository.MemberRepository;
 import com.golfzonTech4.worktalk.repository.QnaRepository;
 import com.golfzonTech4.worktalk.repository.SpaceRepository;
 import com.golfzonTech4.worktalk.util.SecurityUtil;

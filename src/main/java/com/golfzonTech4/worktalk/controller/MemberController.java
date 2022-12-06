@@ -4,14 +4,12 @@ import com.golfzonTech4.worktalk.domain.Member;
 import com.golfzonTech4.worktalk.domain.MemberType;
 import com.golfzonTech4.worktalk.dto.member.MemberDetailDto;
 import com.golfzonTech4.worktalk.dto.member.MemberUpdateDto;
+import com.golfzonTech4.worktalk.repository.ListResult;
 import com.golfzonTech4.worktalk.service.MemberService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import retrofit2.http.Path;
 
 import javax.validation.Valid;
@@ -65,5 +63,16 @@ public class MemberController {
         memberService.findDuplicatesName(member); // 중복 회원 존재 시 Exception 발생
 
         return ResponseEntity.ok().build(); // 종복 회원이 존재하지 않을 시 성공 메세지
+    }
+
+    @GetMapping("/member/deactivated")
+    public ResponseEntity<ListResult> findDeactMemeber() {
+        log.info("findDeactMemeber");
+        return ResponseEntity.ok(memberService.findDeactMemeber());
+    }
+    @GetMapping("/member/approve/{memberId}")
+    public ResponseEntity<Integer> approve(@PathVariable(value = "memberId") Long memberId) {
+        log.info("approve : {}", memberId);
+        return ResponseEntity.ok(memberService.approve(memberId));
     }
 }

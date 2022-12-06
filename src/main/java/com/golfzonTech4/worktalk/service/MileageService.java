@@ -7,7 +7,7 @@ import com.golfzonTech4.worktalk.domain.Pay;
 import com.golfzonTech4.worktalk.dto.mileage.MileageDto;
 import com.golfzonTech4.worktalk.dto.mileage.MileageFindDto;
 import com.golfzonTech4.worktalk.repository.ListResult;
-import com.golfzonTech4.worktalk.repository.MemberRepository;
+import com.golfzonTech4.worktalk.repository.member.MemberRepository;
 import com.golfzonTech4.worktalk.repository.mileage.MileageRepository;
 import com.golfzonTech4.worktalk.repository.pay.PayRepository;
 import com.golfzonTech4.worktalk.util.SecurityUtil;
