@@ -7,7 +7,7 @@ import com.golfzonTech4.worktalk.dto.space.SpaceImgDto;
 import com.golfzonTech4.worktalk.dto.space.SpaceInsertDto;
 import com.golfzonTech4.worktalk.dto.space.SpaceMainDto;
 import com.golfzonTech4.worktalk.dto.space.SpaceUpdateDto;
-import com.golfzonTech4.worktalk.repository.MemberRepository;
+import com.golfzonTech4.worktalk.repository.member.MemberRepository;
 import com.golfzonTech4.worktalk.repository.SpaceImgRepository;
 import com.golfzonTech4.worktalk.repository.SpaceRepository;
 import lombok.RequiredArgsConstructor;

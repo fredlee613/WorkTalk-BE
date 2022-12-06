@@ -21,7 +21,7 @@ public class PenaltyController {
     /**
      * 페널티 부여 요청
      */
-    @PostMapping("penalty/add")
+    @PostMapping("/penalty/add")
     public ResponseEntity<Long> addPenalty(@RequestBody PenaltyDto dto) {
         log.info("addPenalty : {}", dto);
         Long result = penaltyService.addPenalty(dto);
@@ -31,7 +31,7 @@ public class PenaltyController {
     /**
      * 페널티 회수 요청
      */
-    @GetMapping("penalty/remove/{penaltyId}")
+    @GetMapping("/penalty/remove/{penaltyId}")
     public ResponseEntity removePenalty(@PathVariable(name = "penaltyId") Long penaltyId) {
         log.info("removePenalty : {}", penaltyId);
         penaltyService.removePenalty(penaltyId);
@@ -41,7 +41,7 @@ public class PenaltyController {
     /**
      * 페널티 리스트 요청
      */
-    @GetMapping("penalty/")
+    @GetMapping("/penalty/")
     public ResponseEntity<ListResult> findPenalties() {
         log.info("findPenalties");
         return ResponseEntity.ok(penaltyService.findPenalties());

@@ -4,11 +4,11 @@ import com.golfzonTech4.worktalk.domain.Member;
 import com.golfzonTech4.worktalk.domain.MemberType;
 import com.golfzonTech4.worktalk.domain.ReserveStatus;
 import com.golfzonTech4.worktalk.dto.member.MemberDetailDto;
+import com.golfzonTech4.worktalk.dto.member.MemberDto;
 import com.golfzonTech4.worktalk.dto.member.MemberUpdateDto;
 import com.golfzonTech4.worktalk.dto.reservation.ReserveSimpleDto;
-import com.golfzonTech4.worktalk.exception.NotFoundMemberException;
 import com.golfzonTech4.worktalk.repository.ListResult;
-import com.golfzonTech4.worktalk.repository.MemberRepository;
+import com.golfzonTech4.worktalk.repository.member.MemberRepository;
 import com.golfzonTech4.worktalk.repository.reservation.ReservationSimpleRepository;
 import com.golfzonTech4.worktalk.util.SecurityUtil;
 import lombok.RequiredArgsConstructor;
@@ -78,6 +78,7 @@ public class MemberService {
      * 사용자: 탈퇴 희망 회원이 진핸중인 예약건/ 결제건이 있을 경우 탈퇴 불가
      * 호스트: 탈퇴 희망 회원이 진핸중인 예약건이 있을 경우 탈퇴 불가
      */
+    @Transactional
     public void leave(Long memberId) {
         log.info("leave : {}", memberId);
         String name = SecurityUtil.getCurrentUsername().get();
@@ -135,7 +136,25 @@ public class MemberService {
         return memberRepository.findAll();
     }
 
+    /**
+     * 미승인 호스트 리스트 조회
+     */
+    public ListResult findDeactMemeber() {
+        log.info("findDeactMemeber");
+        List<MemberDto> findMembers = memberRepository.findDeactMemeber();
+        return new ListResult((long) findMembers.size(), findMembers);
+    }
 
+    /**
+     * 미승인 호스트 사용인가
+     */
+    @Transactional
+    public int approve(Long memberId) {
+        log.info("approve");
+        Member findMember = memberRepository.findById(memberId).get();
+        findMember.setActivated(1);
+        return findMember.getActivated();
+    }
 
     // member -> memberDetailDto
     private static MemberDetailDto getMemberDetailDto(Member member) {

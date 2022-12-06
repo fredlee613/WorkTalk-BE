@@ -4,7 +4,7 @@ import com.golfzonTech4.worktalk.domain.Member;
 import com.golfzonTech4.worktalk.domain.Penalty;
 import com.golfzonTech4.worktalk.dto.penalty.PenaltyDto;
 import com.golfzonTech4.worktalk.repository.ListResult;
-import com.golfzonTech4.worktalk.repository.MemberRepository;
+import com.golfzonTech4.worktalk.repository.member.MemberRepository;
 import com.golfzonTech4.worktalk.repository.penalty.PenaltyRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
