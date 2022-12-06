@@ -16,8 +16,13 @@ public interface CustomerCenterRepository extends JpaRepository<CustomerCenter, 
 
     CustomerCenter findByCcId(Long ccId); //문의 선택
 
-    @Query("select new com.golfzonTech4.worktalk.dto.qna.QnaDetailDto" +
-            "(q.qnaId, q.space.spaceId, q.member.id, q.type, q.content, q.lastModifiedDate, qc.qnacomment, qc.lastModifiedDate) " +
-            "from Qna q left join QnaComment qc on q.qnaId = qc.qnaId left join q.member m on m.name = :name")
-    List<CustomerCenterDetailDto> findCCDtoListByMember(@Param("name") String name);//접속자의 QnA 리스트
+    @Query("select new com.golfzonTech4.worktalk.dto.customercenter.CustomerCenterDetailDto" +
+            "(c.ccId, c.member.id, c.title, c.content, c.type, c.lastModifiedDate, cc.content, cc.lastModifiedDate) " +
+            "from CustomerCenter c left join CustomerComment cc on c.ccId = cc.ccId left join c.member m on m.name = :name")
+    List<CustomerCenterDetailDto> findCCDtoListByMember(@Param("name") String name);//접속자의 1대1문의 내역 리스트
+
+    @Query("select new com.golfzonTech4.worktalk.dto.customercenter.CustomerCenterDetailDto" +
+            "(c.ccId, c.member.id, c.title, c.content, c.type, c.lastModifiedDate, cc.content, cc.lastModifiedDate) " +
+            "from CustomerCenter c left join CustomerComment cc on c.ccId = cc.ccId")
+    List<CustomerCenterDetailDto> findAllCC();//마스터용 전체 1대1문의 리스트
 }
