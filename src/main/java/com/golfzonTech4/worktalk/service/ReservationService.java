@@ -11,6 +11,7 @@ import com.golfzonTech4.worktalk.repository.ListResult;
 import com.golfzonTech4.worktalk.repository.RoomRepository;
 import com.golfzonTech4.worktalk.repository.reservation.ReservationRepository;
 import com.golfzonTech4.worktalk.repository.reservation.ReservationSimpleRepository;
+import com.golfzonTech4.worktalk.repository.reservation.query.ReservationRepositoryQuery;
 import com.golfzonTech4.worktalk.util.SecurityUtil;
 import com.siot.IamportRestClient.exception.IamportResponseException;
 import lombok.RequiredArgsConstructor;
@@ -38,6 +39,7 @@ public class ReservationService {
     private final ReservationRepository reservationRepository;
     private final ReservationSimpleRepository reservationSimpleRepository;
     private final PenaltyService penaltyService;
+    private final ReservationRepositoryQuery reservationRepositoryQuery;
 
     /**
      * 예약 기능
@@ -160,7 +162,7 @@ public class ReservationService {
      * NOSHOW처리된 예약자의 NOSHOW 이력 조회
      * 해당 이력건이 3회 이상일 경우 페널티 부여
      */
-    @Scheduled(cron = "* 30 * * * *")
+    @Scheduled(cron = "30 * * * *")
     @Transactional
     public int updateNoShow() {
         log.info("updateNoShow");
@@ -223,29 +225,24 @@ public class ReservationService {
         return reservationSimpleRepository.countNoShow(memberId, ReserveStatus.NOSHOW);
     }
 
-    public List<Reservation> findAllByName() {
-        String name = SecurityUtil.getCurrentUsername().get();
-        log.info("findByName : {}", name);
-        return reservationRepository.findAllByName(name);
-    }
-
-//    /**
-//     * 접속자(USER)명을 기준으로 예약 리스트 조회(Spring Data Jpa + JPQL)
-//     */
-//    public List<ReserveSimpleDto> findAllByUser() {
-//        String name = SecurityUtil.getCurrentUsername().get();
-//        log.info("findAllByUser : {}", name);
-//        return reservationSimpleRepository.findAllByUser(name);
-//    }
 
     /**
-     * 접속자(USER)명을 기준으로 예약 리스트 조회(QueryDsl)
+     * 접속자(USER/HOST)명을 기준으로 예약 리스트 페이징 조회(QueryDsl + JPQL/Criteria)
      */
-    public ListResult findAllByUser(ReserveOrderSearch reserveOrderSearch) {
+    public ListResult findAllByName(PageRequest pageRequest, ReserveOrderSearch dto) {
+        log.info("findAllByName: {}, {}", pageRequest, dto);
         String name = SecurityUtil.getCurrentUsername().get();
-        log.info("findAllByUser : {}", name);
-        return reservationSimpleRepository.findAllByUser(name, reserveOrderSearch.getPaid(), reserveOrderSearch.getPaymentStatus(), null);
+        String role = SecurityUtil.getCurrentUserRole().get();
+        if (role.equals(MemberType.ROLE_USER)) {
+            PageImpl<ReserveSimpleDto> result = reservationSimpleRepository.findAllByUserPage(name, pageRequest, dto.getPaid(), dto.getPaymentStatus());
+            return new ListResult<>((long)result.getSize(), result);
+
+        } else {
+            PageImpl<ReserveSimpleDto> result = reservationRepositoryQuery.findAllByHost(name, dto.getPaid(), dto.getRoomType(), dto.getPaymentStatus(), pageRequest);
+            return new ListResult<>((long)result.getSize(), result);
+        }
     }
+
 
     /**
      * 접속자(USER)명을 기준으로 예약 리스트 페이징 조회(QueryDsl)
@@ -269,16 +266,6 @@ public class ReservationService {
         } else {
             return reservationSimpleRepository.findBookedRoom(dto.getRoomId(), dto.getInitDate(), dto.getInitTime(), dto.getEndTime());
         }
-    }
-
-    /**
-     * 호스트가 관리하는 공간 들에 대한 예약 리스트 조회
-     */
-    public ListResult findAllByHost() {
-        String currentUsername = SecurityUtil.getCurrentUsername().get();
-        log.info("findAllByHost : {}", currentUsername);
-        List<ReserveSimpleDto> result = reservationSimpleRepository.findAllByHost(currentUsername);
-        return new ListResult((long) result.size(), result);
     }
 
     /**
