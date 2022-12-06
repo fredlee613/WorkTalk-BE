@@ -18,6 +18,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -159,7 +160,7 @@ public class ReservationService {
      * NOSHOW처리된 예약자의 NOSHOW 이력 조회
      * 해당 이력건이 3회 이상일 경우 페널티 부여
      */
-//    @Scheduled(cron = "0/15 * * * * *")
+    @Scheduled(cron = "30 * * * * *")
     @Transactional
     public int updateNoShow() {
         log.info("updateNoShow");
