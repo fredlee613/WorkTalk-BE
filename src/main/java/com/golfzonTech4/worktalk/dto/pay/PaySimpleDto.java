@@ -20,6 +20,7 @@ public class PaySimpleDto {
     private PaymentStatus payStatus; // 결제 유형
     private ReserveStatus reserveStatus; // 예약 상태
     private String tel; // 예약자 연락처
+    private int reserveAmount; // 예약 총 금액
 
     public PaySimpleDto(LocalDateTime reserveDate, String spaceName, String roomName, int payAmount, PaymentStatus payStatus, ReserveStatus reserveStatus) {
         this.reserveDate = reserveDate;
@@ -30,7 +31,7 @@ public class PaySimpleDto {
         this.reserveStatus = reserveStatus;
     }
 
-    public PaySimpleDto(LocalDateTime reserveDate, String spaceName, String roomName, int payAmount, PaymentStatus payStatus, ReserveStatus reserveStatus, String name) {
+    public PaySimpleDto(LocalDateTime reserveDate, String spaceName, String roomName, int payAmount, PaymentStatus payStatus, ReserveStatus reserveStatus, String name, int reserveAmount) {
         this.reserveDate = reserveDate;
         this.spaceName = spaceName;
         this.roomName = roomName;
@@ -38,9 +39,10 @@ public class PaySimpleDto {
         this.payStatus = payStatus;
         this.reserveStatus = reserveStatus;
         this.name = name;
+        this.reserveAmount = reserveAmount;
     }
 
-    public PaySimpleDto(LocalDateTime reserveDate, String spaceName, String roomName, int payAmount, PaymentStatus payStatus, ReserveStatus reserveStatus, String name, String tel) {
+    public PaySimpleDto(LocalDateTime reserveDate, String spaceName, String roomName, int payAmount, PaymentStatus payStatus, ReserveStatus reserveStatus, String name, String tel, int reserveAmount) {
         this.reserveDate = reserveDate;
         this.spaceName = spaceName;
         this.roomName = roomName;
@@ -49,6 +51,7 @@ public class PaySimpleDto {
         this.reserveStatus = reserveStatus;
         this.name = name;
         this.tel = tel;
+        this.reserveAmount = reserveAmount;
     }
 
 }
