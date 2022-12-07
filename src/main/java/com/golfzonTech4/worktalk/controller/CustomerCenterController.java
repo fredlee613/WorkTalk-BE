@@ -24,14 +24,14 @@ public class CustomerCenterController {
 
     //마스터페이지에서 1대1문의 리스트 출력
     @GetMapping("/customerCenter")
-    public ResponseEntity CustomerCenterMasterPage(){
-        return ResponseEntity.ok(customerCenterService.CustomerCenterMasterPage());
+    public ResponseEntity customerCenterPage(){
+        return ResponseEntity.ok(customerCenterService.getAllCustomerCenterList());
     }
 
     //마이페이지에서 1대1문의 리스트 출력
     @GetMapping("/myCustomerCenter")
-    public ResponseEntity MypageQnas(){
-        return ResponseEntity.ok(customerCenterService.CustomerCenterListPage());
+    public ResponseEntity myPageQnas(){
+        return ResponseEntity.ok(customerCenterService.getMyCustomerCenterList());
     }
 
     //1대1문의 작성

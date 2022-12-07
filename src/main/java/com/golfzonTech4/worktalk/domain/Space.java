@@ -51,7 +51,12 @@ public class Space implements Serializable {
     @Column(name = "SPACE_STATUS", length = 20)
     private String spaceStatus;
 
-    @OneToMany(mappedBy = "space", cascade = CascadeType.ALL)
-    private List<SpaceImg> spaceImgList;
+//    @ColumnDefault("'space.jpg'")
+//    @Column(name = "SPACE_IMG", nullable = true, length = 100)
+//    private String spaceImg;
+
+//    @OneToMany(mappedBy = "space", cascade = CascadeType.ALL)
+//    private List<SpaceImg> spaceImgList;
+
 
 }

@@ -2,15 +2,12 @@ package com.golfzonTech4.worktalk.service;
 
 import com.golfzonTech4.worktalk.domain.Member;
 import com.golfzonTech4.worktalk.domain.Qna;
-import com.golfzonTech4.worktalk.domain.Room;
 import com.golfzonTech4.worktalk.domain.Space;
 import com.golfzonTech4.worktalk.dto.qna.QnaDetailDto;
 import com.golfzonTech4.worktalk.dto.qna.QnaInsertDto;
 import com.golfzonTech4.worktalk.dto.qna.QnaUpdateDto;
-import com.golfzonTech4.worktalk.exception.NotFoundMemberException;
-import com.golfzonTech4.worktalk.repository.MemberRepository;
 import com.golfzonTech4.worktalk.repository.QnaRepository;
-import com.golfzonTech4.worktalk.repository.SpaceRepository;
+import com.golfzonTech4.worktalk.repository.space.SpaceRepository;
 import com.golfzonTech4.worktalk.util.SecurityUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -88,13 +85,13 @@ public class QnaService {
             throw new EntityNotFoundException("삭제 권한이 없습니다.");
     }
 
-    public List<QnaDetailDto> getQnas(Long spaceId) {
-        log.info("getQnas()....");
+    public List<QnaDetailDto> getQnasBySpace(Long spaceId) {
+        log.info("getQnasBySpace()....");
         return qnaRepository.findQnaDtoListBySpaceId(spaceId);
     }
 
-    public List<QnaDetailDto> QnaListPage() {
-        log.info("QnaListPage()....");
+    public List<QnaDetailDto> getMyQnas() {
+        log.info("getMyQnas()....");
 
         Optional<String> currentUsername = SecurityUtil.getCurrentUsername();
         if (currentUsername.isEmpty()) throw new EntityNotFoundException("Member not found");

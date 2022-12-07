@@ -1,20 +1,22 @@
 package com.golfzonTech4.worktalk.service;
 
 import com.golfzonTech4.worktalk.domain.Member;
+import com.golfzonTech4.worktalk.domain.Review;
 import com.golfzonTech4.worktalk.domain.Space;
 import com.golfzonTech4.worktalk.domain.SpaceImg;
-import com.golfzonTech4.worktalk.dto.space.SpaceImgDto;
-import com.golfzonTech4.worktalk.dto.space.SpaceInsertDto;
-import com.golfzonTech4.worktalk.dto.space.SpaceMainDto;
-import com.golfzonTech4.worktalk.dto.space.SpaceUpdateDto;
+import com.golfzonTech4.worktalk.dto.space.*;
+import com.golfzonTech4.worktalk.repository.ListResult;
 import com.golfzonTech4.worktalk.repository.MemberRepository;
-import com.golfzonTech4.worktalk.repository.SpaceImgRepository;
-import com.golfzonTech4.worktalk.repository.SpaceRepository;
+import com.golfzonTech4.worktalk.repository.ReviewRepository;
+import com.golfzonTech4.worktalk.repository.space.SpaceImgRepository;
+import com.golfzonTech4.worktalk.repository.space.SpaceRepository;
+import com.golfzonTech4.worktalk.service.AwsS3Service;
+import com.golfzonTech4.worktalk.service.MemberService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -37,11 +39,9 @@ public class SpaceService {
 
     private final SpaceRepository spaceRepository;
     private final SpaceImgRepository spaceImgRepository;
-
-    private final SpaceImgService spaceImgService;
+    private final ReviewRepository reviewRepository;
 
     private final AwsS3Service awsS3Service;
-
 
     //사무공간 등록
     @Transactional
@@ -51,6 +51,9 @@ public class SpaceService {
 
         if(!member.isPresent()){
             throw new EntityNotFoundException("Member Not Found");
+        }
+        if(member.get().getActivated() == 1){
+            throw new EntityNotFoundException("계정 승인이 완료되면 이용할 수 있어요");
         }
 
         Space spaceToCreate = new Space();
@@ -132,19 +135,21 @@ public class SpaceService {
     }
 
     //유저-사무공간 리스트 조회
-    public Page<SpaceMainDto> getMainSpacePage(Pageable pageable, Integer spaceType, String spaceName, String address){
-        return spaceRepository.getMainSpacePage(pageable, spaceType, spaceName, address);
+    public ListResult getMainSpacePage(PageRequest pageRequest, SpaceSearchDto dto){
+        PageImpl<SpaceMainDto> result = spaceRepository.getMainSpacePage(pageRequest, dto.getSearchSpaceType(), dto.getSearchSpaceName(), dto.getSearchAddress());
+        return new ListResult(result.getTotalElements(), result.getContent());
     }
 
-    //유저-사무공간 리스트 조회
-    public List<SpaceMainDto> getMainPage(Integer spaceType, String spaceName, String address){
-        return spaceRepository.getMainPage(spaceType, spaceName, address);
-    }
-    //유저-사무공간 리스트 조회
-    public List<SpaceMainDto> findAllBySpaceStatus(){
-        log.info("findAllBySpaceStatus()....");
-        return spaceRepository.findAllBySpaceStatus();
-    }
+//    //유저-사무공간 리스트 조회
+//    public List<SpaceMainDto> getMainPage(SpaceSearchDto dto){
+//        return spaceRepository.getMainPage(dto.getSearchSpaceType(), dto.getSearchSpaceName(), dto.getSearchAddress());
+//    }
+//
+//    //유저-사무공간 리스트 조회
+//    public List<Space> findAllBySpaceStatus(){
+//        log.info("findAllBySpaceStatus()....");
+//        return spaceRepository.findAllBySpaceStatus();
+//    }
 
     @Transactional
     public void deleteSpace(Long spaceId){
@@ -158,6 +163,15 @@ public class SpaceService {
         Space space = selectSpace(spaceId);
         log.info(String.valueOf(spaceId));
         space.setSpaceStatus("approved");    //변경감지
+        return space;
+    }
+
+    @Transactional
+    public Space RejectedSpace(Long spaceId){
+        log.info("RejectedSpace()....");
+        Space space = selectSpace(spaceId);
+        log.info(String.valueOf(spaceId));
+        space.setSpaceStatus("rejected");    //변경감지
         return space;
     }
 

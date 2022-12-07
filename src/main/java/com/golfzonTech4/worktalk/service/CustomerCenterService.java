@@ -2,17 +2,10 @@ package com.golfzonTech4.worktalk.service;
 
 import com.golfzonTech4.worktalk.domain.CustomerCenter;
 import com.golfzonTech4.worktalk.domain.Member;
-import com.golfzonTech4.worktalk.domain.Qna;
-import com.golfzonTech4.worktalk.domain.Space;
 import com.golfzonTech4.worktalk.dto.customercenter.CustomerCenterDetailDto;
 import com.golfzonTech4.worktalk.dto.customercenter.CustomerCenterInsertDto;
 import com.golfzonTech4.worktalk.dto.customercenter.CustomerCenterUpdateDto;
-import com.golfzonTech4.worktalk.dto.qna.QnaDetailDto;
-import com.golfzonTech4.worktalk.dto.qna.QnaInsertDto;
-import com.golfzonTech4.worktalk.dto.qna.QnaUpdateDto;
 import com.golfzonTech4.worktalk.repository.CustomerCenterRepository;
-import com.golfzonTech4.worktalk.repository.QnaRepository;
-import com.golfzonTech4.worktalk.repository.SpaceRepository;
 import com.golfzonTech4.worktalk.util.SecurityUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -23,7 +16,6 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.persistence.EntityNotFoundException;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -85,22 +77,22 @@ public class CustomerCenterService {
             throw new EntityNotFoundException("삭제 권한이 없습니다.");
     }
 
-    public List<CustomerCenterDetailDto> CustomerCenterListPage() {
-        log.info("CustomerCenterListPage()....");
+    public List<CustomerCenterDetailDto> getMyCustomerCenterList() {
+        log.info("getMyCustomerCenterList()....");
 
         Optional<String> currentUsername = SecurityUtil.getCurrentUsername();
         if (currentUsername.isEmpty()) throw new EntityNotFoundException("Member not found");
 
-        return customerCenterRepository.findCCDtoListByMember(currentUsername.get());
+        return customerCenterRepository.findccDtoListByMember(currentUsername.get());
     }
 
-    public List<CustomerCenterDetailDto> CustomerCenterMasterPage() {
-        log.info("CustomerCenterMasterPage()....");
+    public List<CustomerCenterDetailDto> getAllCustomerCenterList() {
+        log.info("getAllCustomerCenterList()....");
 
         Optional<String> currentUsername = SecurityUtil.getCurrentUsername();
         if (currentUsername.isEmpty()) throw new EntityNotFoundException("Member not found");
 
-        return customerCenterRepository.findAllCC();
+        return customerCenterRepository.findAllcc();
     }
 
 }

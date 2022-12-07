@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 import java.util.List;
 
 @Data
+@NoArgsConstructor
 public class SpaceMainDto {
 
     private Long spaceId;
@@ -17,14 +18,26 @@ public class SpaceMainDto {
 
     private int spaceType;
 
-    private String spaceImg;
+//    private String spaceImg;
+    private Double gradeSum;
+
+    private int count;
 
     @QueryProjection
-    public SpaceMainDto(Long spaceId, String spaceName, String address, int spaceType, String spaceImg) {
+    public SpaceMainDto(Long spaceId, String spaceName, String address, int spaceType) {
         this.spaceId = spaceId;
         this.spaceName = spaceName;
         this.address = address;
         this.spaceType = spaceType;
-        this.spaceImg = spaceImg;
+    }
+
+    @QueryProjection
+    public SpaceMainDto(Long spaceId, String spaceName, String address, int spaceType, Double gradeSum, int count) {
+        this.spaceId = spaceId;
+        this.spaceName = spaceName;
+        this.address = address;
+        this.spaceType = spaceType;
+        this.gradeSum = gradeSum;
+        this.count = count;
     }
 }

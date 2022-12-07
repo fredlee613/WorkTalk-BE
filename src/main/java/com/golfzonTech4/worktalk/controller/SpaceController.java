@@ -7,8 +7,6 @@ import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.golfzonTech4.worktalk.domain.Space;
 import com.golfzonTech4.worktalk.dto.space.SpaceImgDto;
 import com.golfzonTech4.worktalk.dto.space.SpaceInsertDto;
-import com.golfzonTech4.worktalk.service.AwsS3Service;
-import com.golfzonTech4.worktalk.service.RoomService;
 import com.golfzonTech4.worktalk.service.SpaceService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -28,17 +26,16 @@ import java.util.List;
 public class SpaceController {
 
     private final SpaceService spaceService;
-    private final RoomService roomService;
-    private final AwsS3Service awsS3Service;
+
     private final AmazonS3 amazonS3;
     private String S3Bucket = "worktalk-img";
 
     //유저-사무공간 전체리스트 조회->Main컨트롤러로 분리
-    @GetMapping("/user/spaceAll")
-    public ResponseEntity findSpaces(){
-        log.info("findSpaces()");
-        return ResponseEntity.ok(spaceService.findAllBySpaceStatus());
-    }
+//    @GetMapping("/user/spaceAll")
+//    public ResponseEntity findSpaces(){
+//        log.info("findSpaces()");
+//        return ResponseEntity.ok(spaceService.findAllBySpaceStatus());
+//    }
 
     //호스트가 등록한 사무공간리스트 조회
     @GetMapping("/host/spaceAll/{name}")
@@ -67,7 +64,7 @@ public class SpaceController {
     //호스트의 사무공간 등록-다중이미지
     @PostMapping("/host/spaceImg")
     public ResponseEntity<Space> createiSpace(
-            @Valid @RequestBody SpaceImgDto dto, @RequestParam("SpaceImgFile") List<MultipartFile> multipartFileList) {
+            @PathVariable SpaceImgDto dto, @RequestParam("multipartFileList") List<MultipartFile> multipartFileList) {
 
         try {
             spaceService.uploadImage(dto,multipartFileList);
@@ -97,7 +94,14 @@ public class SpaceController {
     @PostMapping("/spaceApproved/{spaceId}")
     public ResponseEntity spaceApproved(@PathVariable("spaceId") final Long spaceId){
         spaceService.ApprovedSpace(spaceId);
-        return new ResponseEntity("승인완료",HttpStatus.OK);
+        return new ResponseEntity("승인완료하였습니다",HttpStatus.OK);
+    }
+
+    //마스터의 사무공간 승인거절
+    @PostMapping("/spaceRejected/{spaceId}")
+    public ResponseEntity spaceRejected(@PathVariable("spaceId") final Long spaceId){
+        spaceService.RejectedSpace(spaceId);
+        return new ResponseEntity("승인거절하였습니다",HttpStatus.OK);
     }
 
     //이미지 업로드

@@ -1,4 +1,4 @@
-package com.golfzonTech4.worktalk.repository;
+package com.golfzonTech4.worktalk.repository.space;
 
 import com.golfzonTech4.worktalk.domain.SpaceImg;
 import org.springframework.data.jpa.repository.JpaRepository;
