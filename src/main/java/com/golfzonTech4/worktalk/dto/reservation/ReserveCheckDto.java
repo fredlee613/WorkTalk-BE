@@ -21,11 +21,11 @@ public class ReserveCheckDto {
     //    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd", timezone = "Asia/Seoul")
     @DateTimeFormat(pattern = "yyyy-MM-dd")
     private LocalDate endDate;
-    private int initTime;
-    private int endTime;
+    private Integer initTime;
+    private Integer endTime;
 
     @QueryProjection
-    public ReserveCheckDto(Long roomId, LocalDate initDate, LocalDate endDate, int initTime, int endTime) {
+    public ReserveCheckDto(Long roomId, LocalDate initDate, LocalDate endDate, Integer initTime, Integer endTime) {
         this.roomId = roomId;
         this.initDate = initDate;
         this.endDate = endDate;
