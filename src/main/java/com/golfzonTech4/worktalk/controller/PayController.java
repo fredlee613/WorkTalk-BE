@@ -43,10 +43,10 @@ public class PayController {
     /**
      * 결제 이력 조회 요청
      */
-    @GetMapping("/payments/history/{pageNum}")
-    public ResponseEntity<ListResult> findByName(@PathVariable("pageNum") int pageNum, @RequestBody PayOrderSearch orderSearch) {
-        log.info("findByUserPage : {} , {}", pageNum, orderSearch);
-        PageRequest pageRequest = PageRequest.of(pageNum, 10);
-        return ResponseEntity.ok(payService.findByName(orderSearch, pageRequest));
+    @GetMapping("/payments/history")
+    public ResponseEntity<ListResult> findByName( @RequestBody PayOrderSearch dto) {
+        log.info("findByUserPage : {}", dto);
+        PageRequest pageRequest = PageRequest.of(dto.getPageNum(), 10);
+        return ResponseEntity.ok(payService.findByName(dto, pageRequest));
     }
 }

@@ -80,10 +80,8 @@ public class ReservationController {
      * 예약 리스트 조회
      */
     @GetMapping("/reservation/find/{pageNum}")
-    public ResponseEntity<ListResult> findByName(
-            @PathVariable(value = "pageNum") int pageNum,
-            @RequestBody ReserveOrderSearch dto) {
-        PageRequest pageRequest = PageRequest.of(pageNum, 10);
+    public ResponseEntity<ListResult> findByName(@RequestBody ReserveOrderSearch dto) {
+        PageRequest pageRequest = PageRequest.of(dto.getPageNum(), 10);
         return ResponseEntity.ok(reservationService.findAllByName(dto, pageRequest));
     }
 
@@ -91,7 +89,7 @@ public class ReservationController {
      * 해당 공간의 예약된 리스트 조회 요청(선택된 기간/시간 기준)
      */
     @GetMapping("/reservations/isBooked")
-    public ResponseEntity<List<ReserveCheckDto>> findBookedRoom(@RequestBody ReserveCheckDto reserveCheckDto) {
+    public ResponseEntity<List<ReserveCheckDto>> findBookedRoom(@RequestParam ReserveCheckDto reserveCheckDto) {
         log.info("findBookedRoom : {}", reserveCheckDto);
         return ResponseEntity.ok(reservationService.findBookedReservation(reserveCheckDto));
     }
