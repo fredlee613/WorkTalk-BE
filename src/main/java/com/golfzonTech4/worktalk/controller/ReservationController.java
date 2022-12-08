@@ -89,7 +89,7 @@ public class ReservationController {
      * 해당 공간의 예약된 리스트 조회 요청(선택된 기간/시간 기준)
      */
     @GetMapping("/reservations/isBooked")
-    public ResponseEntity<List<ReserveCheckDto>> findBookedRoom(@RequestParam ReserveCheckDto reserveCheckDto) {
+    public ResponseEntity<List<ReserveCheckDto>> findBookedRoom(@ModelAttribute ReserveCheckDto reserveCheckDto) {
         log.info("findBookedRoom : {}", reserveCheckDto);
         return ResponseEntity.ok(reservationService.findBookedReservation(reserveCheckDto));
     }
