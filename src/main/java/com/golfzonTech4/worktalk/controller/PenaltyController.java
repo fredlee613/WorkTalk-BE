@@ -8,10 +8,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.*;
 
 @Slf4j
 @Controller
@@ -43,7 +40,7 @@ public class PenaltyController {
      * 페널티 리스트 요청
      */
     @GetMapping("/penalty")
-    public ResponseEntity<ListResult> findPenalties(@RequestBody MemberSerachDto dto) {
+    public ResponseEntity<ListResult> findPenalties(@RequestParam MemberSerachDto dto) {
         log.info("findPenalties");
         return ResponseEntity.ok(penaltyService.findPenalties(dto));
     }

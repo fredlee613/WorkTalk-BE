@@ -12,6 +12,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class PayOrderSearch {
 
+    private int pageNum; // 페이지 번호
     private PaymentStatus payStatus; // 결제 유형
     private LocalDateTime reserveDate; // 예약 날짜
 

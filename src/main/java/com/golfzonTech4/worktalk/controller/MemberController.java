@@ -67,7 +67,7 @@ public class MemberController {
     }
 
     @GetMapping("/member/deactivated")
-    public ResponseEntity<ListResult> findDeactMemeber(@RequestBody MemberSerachDto dto) {
+    public ResponseEntity<ListResult> findDeactMemeber(@RequestParam MemberSerachDto dto) {
         log.info("findDeactMemeber");
         return ResponseEntity.ok(memberService.findDeactMemeber(dto));
     }
