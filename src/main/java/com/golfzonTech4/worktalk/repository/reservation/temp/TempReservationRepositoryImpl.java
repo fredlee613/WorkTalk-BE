@@ -37,8 +37,8 @@ public class TempReservationRepositoryImpl implements TempReservationRepositoryC
     }
 
     @Override
-    public List<ReserveCheckDto> findBookedRoom(Long roomId, LocalDate initDate, int initTime, int endTime) {
-        log.info("findBookedOffice : {}, {}, {}, {}", roomId, initDate, initTime, endTime);
+    public List<ReserveCheckDto> findBookedRoom(Long roomId, LocalDate initDate) {
+        log.info("findBookedOffice : {}, {}", roomId, initDate);
         return queryFactory.select(new QReserveCheckDto(
                         tempReservation.roomId,
                         tempReservation.bookDate.checkInDate,

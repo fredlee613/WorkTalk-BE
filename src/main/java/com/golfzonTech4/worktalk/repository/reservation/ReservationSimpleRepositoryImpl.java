@@ -144,8 +144,8 @@ public class ReservationSimpleRepositoryImpl implements ReservationSimpleReposit
     }
 
     @Override
-    public List<ReserveCheckDto> findBookedRoom(Long roomId, LocalDate initDate, int initTime, int endTime) {
-        log.info("findBookedOffice : {}, {}, {}, {}", roomId, initDate, initTime, endTime);
+    public List<ReserveCheckDto> findBookedRoom(Long roomId, LocalDate initDate) {
+        log.info("findBookedOffice : {}, {}, {}, {}", roomId, initDate);
         return queryFactory.select(new QReserveCheckDto(
                         reservation.room.roomId,
                         reservation.bookDate.checkInDate,

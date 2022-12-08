@@ -10,5 +10,5 @@ import java.util.List;
 public interface TempReservationRepositoryCustom{
     List<ReserveCheckDto> findBookedOffice(Long roomId, LocalDate initDate, LocalDate endDate);
 
-    List<ReserveCheckDto> findBookedRoom(Long roomId, LocalDate initDate, int initTime, int endTime);
+    List<ReserveCheckDto> findBookedRoom(Long roomId, LocalDate initDate);
 }
