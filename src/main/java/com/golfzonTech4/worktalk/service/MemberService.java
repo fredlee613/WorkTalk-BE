@@ -5,6 +5,7 @@ import com.golfzonTech4.worktalk.domain.MemberType;
 import com.golfzonTech4.worktalk.domain.ReserveStatus;
 import com.golfzonTech4.worktalk.dto.member.MemberDetailDto;
 import com.golfzonTech4.worktalk.dto.member.MemberDto;
+import com.golfzonTech4.worktalk.dto.member.MemberSerachDto;
 import com.golfzonTech4.worktalk.dto.member.MemberUpdateDto;
 import com.golfzonTech4.worktalk.dto.reservation.ReserveSimpleDto;
 import com.golfzonTech4.worktalk.repository.ListResult;
@@ -139,9 +140,9 @@ public class MemberService {
     /**
      * 미승인 호스트 리스트 조회
      */
-    public ListResult findDeactMemeber() {
+    public ListResult findDeactMemeber(MemberSerachDto dto) {
         log.info("findDeactMemeber");
-        List<MemberDto> findMembers = memberRepository.findDeactMemeber();
+        List<MemberDto> findMembers = memberRepository.findDeactMemeber(dto);
         return new ListResult((long) findMembers.size(), findMembers);
     }
 

@@ -3,6 +3,7 @@ package com.golfzonTech4.worktalk.controller;
 import com.golfzonTech4.worktalk.domain.Member;
 import com.golfzonTech4.worktalk.domain.MemberType;
 import com.golfzonTech4.worktalk.dto.member.MemberDetailDto;
+import com.golfzonTech4.worktalk.dto.member.MemberSerachDto;
 import com.golfzonTech4.worktalk.dto.member.MemberUpdateDto;
 import com.golfzonTech4.worktalk.repository.ListResult;
 import com.golfzonTech4.worktalk.service.MemberService;
@@ -66,9 +67,9 @@ public class MemberController {
     }
 
     @GetMapping("/member/deactivated")
-    public ResponseEntity<ListResult> findDeactMemeber() {
+    public ResponseEntity<ListResult> findDeactMemeber(@RequestBody MemberSerachDto dto) {
         log.info("findDeactMemeber");
-        return ResponseEntity.ok(memberService.findDeactMemeber());
+        return ResponseEntity.ok(memberService.findDeactMemeber(dto));
     }
     @GetMapping("/member/approve/{memberId}")
     public ResponseEntity<Integer> approve(@PathVariable(value = "memberId") Long memberId) {

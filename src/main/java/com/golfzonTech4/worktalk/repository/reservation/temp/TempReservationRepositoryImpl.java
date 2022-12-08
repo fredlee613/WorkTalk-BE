@@ -48,9 +48,8 @@ public class TempReservationRepositoryImpl implements TempReservationRepositoryC
                 ))
                 .from(tempReservation)
                 .where(tempReservation.bookDate.checkInDate.eq(initDate)
-                        .and(tempReservation.roomId.eq(roomId))
-                        .and(tempReservation.bookDate.checkInTime.between(initTime, endTime)
-                                .or(tempReservation.bookDate.checkOutTime.between(initTime, endTime))))
+                        .and(tempReservation.roomId.eq(roomId)))
                 .fetch();
     }
+
 }
