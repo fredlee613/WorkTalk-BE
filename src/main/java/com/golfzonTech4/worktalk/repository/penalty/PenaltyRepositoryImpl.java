@@ -1,14 +1,11 @@
 package com.golfzonTech4.worktalk.repository.penalty;
 
-import com.golfzonTech4.worktalk.domain.PenaltyType;
-import com.golfzonTech4.worktalk.domain.QPenalty;
-import com.golfzonTech4.worktalk.dto.penalty.PenaltyDto;
-import com.golfzonTech4.worktalk.dto.penalty.QPenaltyDto;
+import com.golfzonTech4.worktalk.dto.penalty.PenaltySearchDto;
+import com.golfzonTech4.worktalk.dto.penalty.QPenaltySearchDto;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.persistence.EntityManager;
-import java.time.LocalDateTime;
 import java.util.List;
 
 import static com.golfzonTech4.worktalk.domain.QPenalty.penalty;
@@ -21,10 +18,13 @@ public class PenaltyRepositoryImpl implements PenaltyRepositoryCustom {
         this.queryFactory = new JPAQueryFactory(em);
     }
 
-    public List<PenaltyDto> findPenalties() {
+    public List<PenaltySearchDto> findPenalties() {
         log.info("findPenalties");
-        return queryFactory.select(new QPenaltyDto(penalty.penaltyId, penalty.member.id, penalty.member.name,
-                        penalty.penaltyReason, penalty.penaltyType, penalty.penaltyDate))
+        return queryFactory.select(new QPenaltySearchDto(
+                        penalty.penaltyId, penalty.penaltyReason, penalty.penaltyType, penalty.penaltyDate,
+                        penalty.member.id, penalty.member.email, penalty.member.name, penalty.member.tel, penalty.member.memberType,
+                        penalty.member.activated
+                ))
                 .from(penalty).fetch();
     }
 }

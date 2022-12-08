@@ -1,19 +1,29 @@
 package com.golfzonTech4.worktalk.dto.reservation;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.golfzonTech4.worktalk.domain.PaymentStatus;
+import com.golfzonTech4.worktalk.domain.BookDate;
+import com.golfzonTech4.worktalk.domain.RoomType;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Data
-public class ReserveDto {
-//    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Seoul")
-//    private LocalDateTime reserveDate; // 예약 일자
+@NoArgsConstructor
+@AllArgsConstructor
+@ToString
+public class ReserveTempDto {
 
-    private Long room_id;
+    private Long tempReserveId; // 예약 고유 번호
 
-    private Long reserveId;
+    private Long memberId; // 예약 회원
+
+    private Long roomId; // 예약 세부 공간
+
+    private LocalDateTime reserveDate; // 예약 시간
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd", timezone = "Asia/Seoul")
     private LocalDate CheckInDate; // 사용 시작 일자
@@ -24,12 +34,4 @@ public class ReserveDto {
     private Integer checkInTime; // 사용 시작 시간
 
     private Integer checkOutTime; // 사용 종료 시간
-    
-    private String cancelReason; // 취소 사유
-
-    private Integer amount; // 결제 가격
-
-    private PaymentStatus paymentStatus; // 결제 유형
-
-    private Long payId;
 }
