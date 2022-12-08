@@ -39,6 +39,18 @@ public class ReservationController {
     }
 
     /**
+     * 해당 임시 예약건 삭제 요청
+     */
+    @GetMapping("/reservation/delete/{tempReserveId}")
+    public ResponseEntity<Long> delete(@PathVariable Long tempReserveId)  {
+
+        log.info("delete: {}", tempReserveId);
+        tempReservationService.deleteTemp(tempReserveId);
+        return ResponseEntity.ok().build();
+    }
+
+
+    /**
      * 예약 및 결제 요청
      */
     @PostMapping("/reservation/reserve")

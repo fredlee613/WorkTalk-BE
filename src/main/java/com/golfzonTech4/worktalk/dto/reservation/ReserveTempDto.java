@@ -26,10 +26,10 @@ public class ReserveTempDto {
     private LocalDateTime reserveDate; // 예약 시간
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd", timezone = "Asia/Seoul")
-    private LocalDate CheckInDate; // 사용 시작 일자
+    private LocalDate checkInDate; // 사용 시작 일자
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd", timezone = "Asia/Seoul")
-    private LocalDate CheckOutDate; // 사용 종료 일자
+    private LocalDate checkOutDate; // 사용 종료 일자
 
     private Integer checkInTime; // 사용 시작 시간
 
