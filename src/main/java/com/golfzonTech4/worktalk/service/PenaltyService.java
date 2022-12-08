@@ -3,6 +3,7 @@ package com.golfzonTech4.worktalk.service;
 import com.golfzonTech4.worktalk.domain.Member;
 import com.golfzonTech4.worktalk.domain.Penalty;
 import com.golfzonTech4.worktalk.dto.member.MemberPenaltyDto;
+import com.golfzonTech4.worktalk.dto.member.MemberSerachDto;
 import com.golfzonTech4.worktalk.dto.penalty.PenaltyDto;
 import com.golfzonTech4.worktalk.dto.penalty.PenaltySearchDto;
 import com.golfzonTech4.worktalk.repository.ListResult;
@@ -13,6 +14,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.RequestBody;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -66,8 +68,8 @@ public class PenaltyService {
     /**
      * 페널티 리스트 조회
      */
-    public ListResult findPenalties() {
-        List<MemberPenaltyDto> findPenalties = memberRepository.findNoshowMember();
+    public ListResult findPenalties(MemberSerachDto dto) {
+        List<MemberPenaltyDto> findPenalties = memberRepository.findNoshowMember(dto);
         return new ListResult((long) findPenalties.size(), findPenalties);
     }
 

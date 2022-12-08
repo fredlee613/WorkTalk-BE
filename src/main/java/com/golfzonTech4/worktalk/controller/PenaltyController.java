@@ -1,5 +1,6 @@
 package com.golfzonTech4.worktalk.controller;
 
+import com.golfzonTech4.worktalk.dto.member.MemberSerachDto;
 import com.golfzonTech4.worktalk.repository.ListResult;
 import com.golfzonTech4.worktalk.dto.penalty.PenaltyDto;
 import com.golfzonTech4.worktalk.service.PenaltyService;
@@ -42,8 +43,8 @@ public class PenaltyController {
      * 페널티 리스트 요청
      */
     @GetMapping("/penalty")
-    public ResponseEntity<ListResult> findPenalties() {
+    public ResponseEntity<ListResult> findPenalties(@RequestBody MemberSerachDto dto) {
         log.info("findPenalties");
-        return ResponseEntity.ok(penaltyService.findPenalties());
+        return ResponseEntity.ok(penaltyService.findPenalties(dto));
     }
 }

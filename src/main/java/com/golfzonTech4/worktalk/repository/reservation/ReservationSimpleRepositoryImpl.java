@@ -156,9 +156,7 @@ public class ReservationSimpleRepositoryImpl implements ReservationSimpleReposit
                 .from(reservation)
                 .where(reservation.bookDate.checkInDate.eq(initDate)
                         .and(reservation.room.roomId.eq(roomId))
-                        .and(reservation.room.roomType.ne(RoomType.OFFICE))
-                        .and(reservation.bookDate.checkInTime.between(initTime, endTime)
-                                .or(reservation.bookDate.checkOutTime.between(initTime, endTime))))
+                        .and(reservation.room.roomType.ne(RoomType.OFFICE)))
                 .fetch();
     }
 
