@@ -90,6 +90,7 @@ public class ReservationController {
      */
     @GetMapping("/reservations/isBooked")
     public ResponseEntity<List<ReserveCheckDto>> findBookedRoom(@ModelAttribute ReserveCheckDto reserveCheckDto) {
+
         log.info("findBookedRoom : {}", reserveCheckDto);
         return ResponseEntity.ok(reservationService.findBookedReservation(reserveCheckDto));
     }
