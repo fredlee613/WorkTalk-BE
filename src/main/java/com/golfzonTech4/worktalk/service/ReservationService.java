@@ -65,7 +65,7 @@ public class ReservationService {
         // 로그인 값이 없을 경우 예외처리
         if (currentUsername.isEmpty()) throw new NotFoundMemberException("Member not found");
 
-        Member findMember = memberRepository.findById(temp.getMemberId()).get();
+        Member findMember = memberRepository.findByName(currentUsername.get()).get();
         // 노쇼로 이용이 제한된 사용자일 경우 예외 처리
         if (findMember.getActivated() == 0) {
             throw new IllegalAccessException("이용이 제한된 계정입니다.");
