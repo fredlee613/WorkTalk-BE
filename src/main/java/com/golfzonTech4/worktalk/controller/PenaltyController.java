@@ -40,8 +40,9 @@ public class PenaltyController {
      * 페널티 리스트 요청
      */
     @GetMapping("/penalty")
-    public ResponseEntity<ListResult> findPenalties(@RequestParam Integer activated) {
-        log.info("findPenalties");
-        return ResponseEntity.ok(penaltyService.findPenalties(activated));
+    public ResponseEntity<ListResult> findPenalties(@RequestParam(required = false) Integer activated) {
+        log.info("findPenalties : {}", activated);
+        ListResult result = penaltyService.findPenalties(activated);
+        return ResponseEntity.ok(result);
     }
 }

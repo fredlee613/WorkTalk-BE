@@ -82,7 +82,9 @@ public class ReservationService {
         PaymentStatus paymentStatus;
         if (payDto.getPayStatus() == PaymentStatus.DEPOSIT || payDto.getPayStatus() == PaymentStatus.PREPAID) {
             paymentStatus = PaymentStatus.PREPAID;
-        } else { paymentStatus = PaymentStatus.POSTPAID; }
+        } else {
+            paymentStatus = PaymentStatus.POSTPAID;
+        }
         Reservation reservation = Reservation.makeReservation(
                 findMember, findRoom, temp.getBookDate(), payDto.getReserveAmount(), paymentStatus);
         Reservation result = reservationRepository.save(reservation);
@@ -147,7 +149,7 @@ public class ReservationService {
         int reservePeriod = BookDate.getPeriodSeconds(LocalDateTime.now(), reserveDate);
 
         log.info("reservePeriod : {}", reservePeriod);
-        
+
         // 결제 취소 로직
         int flag = reservePeriod <= 3600 ? 0 : 1; // 1시간 이하일 경우 0, 초과 시 1
         int count = 0;
@@ -270,26 +272,33 @@ public class ReservationService {
      */
     public List<ReserveCheckDto> findBookedReservation(ReserveCheckDto dto) {
         log.info("findBookedReservation : {}", dto);
+        List<ReserveCheckDto> result = null;
         if (dto.getRoomType().equals(RoomType.OFFICE)) {
             List<ReserveCheckDto> tempBookedOffice = tempReservationRepository.findBookedOffice(dto.getRoomId(), dto.getInitDate(), dto.getEndDate());
             List<ReserveCheckDto> bookedOffice = reservationSimpleRepository.findBookedOffice(dto.getRoomId(), dto.getInitDate(), dto.getEndDate());
-            List<ReserveCheckDto> result = Stream.of(tempBookedOffice, bookedOffice)
-                    .flatMap(Collection::stream)
-                    .collect(Collectors.toList());
-            for (ReserveCheckDto dto1 : result) {
-                log.info("dto1 : {}", dto1);
+            if (!tempBookedOffice.isEmpty()) {
+                if (!bookedOffice.isEmpty()) {
+                    return Stream.of(tempBookedOffice, bookedOffice)
+                            .flatMap(Collection::stream)
+                            .collect(Collectors.toList());
+                } else return tempBookedOffice;
+            } else {
+                if (!bookedOffice.isEmpty())  return bookedOffice;
+                else return null;
             }
-            return result;
         } else {
-            List<ReserveCheckDto> tempBookedRoom = tempReservationRepository.findBookedRoom(dto.getRoomId(), dto.getInitDate(), dto.getInitTime(), dto.getEndTime());
-            List<ReserveCheckDto> bookedRoom = reservationSimpleRepository.findBookedRoom(dto.getRoomId(), dto.getInitDate(), dto.getInitTime(), dto.getEndTime());
-            List<ReserveCheckDto> result = Stream.of(tempBookedRoom, bookedRoom)
-                    .flatMap(Collection::stream)
-                    .collect(Collectors.toList());
-            for (ReserveCheckDto dto1 : result) {
-                log.info("dto1 : {}", dto1);
+            List<ReserveCheckDto> tempBookedRoom = tempReservationRepository.findBookedRoom(dto.getRoomId(), dto.getInitDate());
+            List<ReserveCheckDto> bookedRoom = reservationSimpleRepository.findBookedRoom(dto.getRoomId(), dto.getInitDate());
+            if (!tempBookedRoom.isEmpty()) {
+                if (!bookedRoom.isEmpty()) {
+                    return Stream.of(tempBookedRoom, bookedRoom)
+                            .flatMap(Collection::stream)
+                            .collect(Collectors.toList());
+                } else return tempBookedRoom;
+            } else {
+                if (!bookedRoom.isEmpty())  return bookedRoom;
+                else return null;
             }
-            return result;
         }
     }
 
