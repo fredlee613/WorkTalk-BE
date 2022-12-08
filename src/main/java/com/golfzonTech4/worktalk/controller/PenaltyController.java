@@ -41,7 +41,7 @@ public class PenaltyController {
     /**
      * 페널티 리스트 요청
      */
-    @GetMapping("/penalty/")
+    @GetMapping("/penalty")
     public ResponseEntity<ListResult> findPenalties() {
         log.info("findPenalties");
         return ResponseEntity.ok(penaltyService.findPenalties());

@@ -1,5 +1,6 @@
 package com.golfzonTech4.worktalk.dto.mileage;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.golfzonTech4.worktalk.domain.Mileage_status;
 import com.querydsl.core.annotations.QueryProjection;
 import lombok.AllArgsConstructor;
@@ -17,6 +18,7 @@ public class MileageFindDto {
     private Long payId;
     private Mileage_status status;
     private int mileageAmount;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd", timezone = "Asia/Seoul")
     private LocalDate mileageDate;
 
     @QueryProjection
