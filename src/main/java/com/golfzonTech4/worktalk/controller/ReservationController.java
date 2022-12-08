@@ -79,7 +79,7 @@ public class ReservationController {
     /**
      * 예약 리스트 조회
      */
-    @GetMapping("/reservation/{pageNum}")
+    @GetMapping("/reservation/find/{pageNum}")
     public ResponseEntity<ListResult> findByName(
             @PathVariable(value = "pageNum") int pageNum,
             @RequestBody ReserveOrderSearch dto) {
