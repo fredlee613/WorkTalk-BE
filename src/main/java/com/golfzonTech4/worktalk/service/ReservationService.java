@@ -77,6 +77,7 @@ public class ReservationService {
 
         // 오피스의 경우 체크인 일자가 체크아웃 일자보다 늦을 경우 예외처리
         // 그 외의 경우 체크인 시간이 체크아웃 시간보다 늦을 경우 예외처리
+        log.info("validating time....");
         validateDateTime(findRoom.getRoomType(), temp.getBookDate());
 
         PaymentStatus paymentStatus;
@@ -91,11 +92,15 @@ public class ReservationService {
         payDto.setReserveId(result.getReserveId());
 
         if (payDto.getPayStatus() == PaymentStatus.DEPOSIT) {  // 결제 유형에 따른 분기: 1. 선결제 중 보증금만 결제
+            log.info("prepaid....");
             payService.prepaid(payDto);
         } else if (payDto.getPayStatus() == PaymentStatus.PREPAID) { // 결제 유형에 따른 분기: 2. 선결제 중 전액 결제
+            log.info("prepaid....");
             payService.prepaid(payDto);
+            log.info("setPaid to 1....");
             result.setPaid(1);
         } else { // 결제 유형에 따른 분기: 3. 후결제 (보증금 결제 후 예약)
+            log.info("schedule....");
             payService.schedule(payDto);
         }
         return result.getReserveId();
@@ -105,9 +110,11 @@ public class ReservationService {
      * 예약 시간 관련 시간 검증
      */
     private static void validateDateTime(RoomType roomType, BookDate bookDate) {
+        log.info("validateDateTime.... {}, {}",roomType, bookDate);
         if (roomType.equals(RoomType.OFFICE)) {
             // 오피스의 경우 날짜 비교
             if (!BookDate.validDate(bookDate.getCheckInDate(), bookDate.getCheckOutDate())) {
+                log.info("result : {}, {} .... failed!!", bookDate.getCheckInDate(), bookDate.getCheckOutDate());
                 throw new IllegalArgumentException("잘못된 날짜값 입력입니다.");
             }
         } else {
