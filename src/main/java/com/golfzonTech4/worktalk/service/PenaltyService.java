@@ -3,16 +3,21 @@ package com.golfzonTech4.worktalk.service;
 import com.golfzonTech4.worktalk.domain.Member;
 import com.golfzonTech4.worktalk.domain.Penalty;
 import com.golfzonTech4.worktalk.dto.penalty.PenaltyDto;
+import com.golfzonTech4.worktalk.dto.penalty.PenaltySearchDto;
 import com.golfzonTech4.worktalk.repository.ListResult;
 import com.golfzonTech4.worktalk.repository.member.MemberRepository;
 import com.golfzonTech4.worktalk.repository.penalty.PenaltyRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.List;
+import java.util.Optional;
 
 @Slf4j
 @Service
@@ -61,8 +66,22 @@ public class PenaltyService {
      * 페널티 리스트 조회
      */
     public ListResult findPenalties() {
-        List<PenaltyDto> findPenalties = penaltyRepository.findPenalties();
+        List<PenaltySearchDto> findPenalties = penaltyRepository.findPenalties();
         return new ListResult((long) findPenalties.size(), findPenalties);
+    }
+
+    @Scheduled(cron = "0 0 * * * *")
+    @Transactional
+    public void updatePenalties() {
+        List<Penalty> penalties = penaltyRepository.findAll();
+        for (Penalty penalty : penalties) {
+            if (penalty.getPenaltyDate().plusDays(7).isBefore(LocalDateTime.of(LocalDate.now(), LocalTime.MIDNIGHT))) {
+                Optional<Member> member = memberRepository.findById(penalty.getMember().getId());
+                if (member.isPresent()){ member.get().setActivated(1);}
+
+                penaltyRepository.delete(penalty);
+            }
+        }
     }
 
 }
