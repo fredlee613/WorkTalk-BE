@@ -43,7 +43,7 @@ public class PayController {
     /**
      * 결제 이력 조회 요청
      */
-    @GetMapping("/payments/{pageNum}")
+    @GetMapping("/payments/history/{pageNum}")
     public ResponseEntity<ListResult> findByName(@PathVariable("pageNum") int pageNum, @RequestBody PayOrderSearch orderSearch) {
         log.info("findByUserPage : {} , {}", pageNum, orderSearch);
         PageRequest pageRequest = PageRequest.of(pageNum, 10);

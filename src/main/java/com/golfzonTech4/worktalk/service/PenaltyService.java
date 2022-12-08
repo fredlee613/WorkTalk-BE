@@ -2,6 +2,7 @@ package com.golfzonTech4.worktalk.service;
 
 import com.golfzonTech4.worktalk.domain.Member;
 import com.golfzonTech4.worktalk.domain.Penalty;
+import com.golfzonTech4.worktalk.dto.member.MemberPenaltyDto;
 import com.golfzonTech4.worktalk.dto.penalty.PenaltyDto;
 import com.golfzonTech4.worktalk.dto.penalty.PenaltySearchDto;
 import com.golfzonTech4.worktalk.repository.ListResult;
@@ -66,7 +67,7 @@ public class PenaltyService {
      * 페널티 리스트 조회
      */
     public ListResult findPenalties() {
-        List<PenaltySearchDto> findPenalties = penaltyRepository.findPenalties();
+        List<MemberPenaltyDto> findPenalties = memberRepository.findNoshowMember();
         return new ListResult((long) findPenalties.size(), findPenalties);
     }
 
