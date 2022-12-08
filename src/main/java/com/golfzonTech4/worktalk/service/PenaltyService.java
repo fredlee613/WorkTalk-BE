@@ -68,8 +68,8 @@ public class PenaltyService {
     /**
      * 페널티 리스트 조회
      */
-    public ListResult findPenalties(MemberSerachDto dto) {
-        List<MemberPenaltyDto> findPenalties = memberRepository.findNoshowMember(dto);
+    public ListResult findPenalties(Integer activated) {
+        List<MemberPenaltyDto> findPenalties = memberRepository.findNoshowMember(activated);
         return new ListResult((long) findPenalties.size(), findPenalties);
     }
 

@@ -10,5 +10,5 @@ import java.util.List;
 public interface MemberRepositoryCustom {
     public List<MemberDto> findDeactMemeber(MemberSerachDto dto);
 
-    public List<MemberPenaltyDto> findNoshowMember(MemberSerachDto dto);
+    public List<MemberPenaltyDto> findNoshowMember(Integer activated);
 }

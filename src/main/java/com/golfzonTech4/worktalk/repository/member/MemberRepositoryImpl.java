@@ -29,7 +29,7 @@ public class MemberRepositoryImpl implements MemberRepositoryCustom{
                 .fetch();
     }
 
-    public List<MemberPenaltyDto> findNoshowMember(MemberSerachDto dto) {
+    public List<MemberPenaltyDto> findNoshowMember(Integer activated) {
         return queryFactory
                 .select(new QMemberPenaltyDto(member.id, member.email, member.name, member.tel, member.memberType, member.activated,
                         penalty.penaltyId, penalty.penaltyReason, penalty.penaltyType, penalty.penaltyDate
@@ -37,7 +37,7 @@ public class MemberRepositoryImpl implements MemberRepositoryCustom{
                 .from(member)
                 .leftJoin(penalty)
                 .on(member.id.eq(penalty.member.id))
-                .where(eqActivated(dto.getActivated()), member.memberType.eq(MemberType.ROLE_USER))
+                .where(eqActivated(activated), member.memberType.eq(MemberType.ROLE_USER))
                 .fetch();
     }
 

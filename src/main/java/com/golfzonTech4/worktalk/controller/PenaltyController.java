@@ -40,8 +40,8 @@ public class PenaltyController {
      * 페널티 리스트 요청
      */
     @GetMapping("/penalty")
-    public ResponseEntity<ListResult> findPenalties(@ModelAttribute MemberSerachDto dto) {
+    public ResponseEntity<ListResult> findPenalties(@RequestParam Integer activated) {
         log.info("findPenalties");
-        return ResponseEntity.ok(penaltyService.findPenalties(dto));
+        return ResponseEntity.ok(penaltyService.findPenalties(activated));
     }
 }
