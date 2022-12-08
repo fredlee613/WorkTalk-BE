@@ -116,7 +116,7 @@ public class PayService {
                 findReservation.getBookDate().getCheckOutTime()).plusHours(1);
         log.info("endDate : {}", endDate);
 
-        String merchant_uid = dto.getMerchant_uid() + "예약결제";
+        String merchant_uid = dto.getMerchant_uid() + " 예약결제";
         int balance = (int) (findReservation.getReserveAmount() * 0.8);
 
         log.info("merchant_uid : {}, balance : {}", merchant_uid, balance);
