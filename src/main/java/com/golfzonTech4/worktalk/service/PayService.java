@@ -98,7 +98,7 @@ public class PayService {
      */
     @Transactional
     public IamportResponse<List<Schedule>> schedule(PayInsertDto dto) throws IamportResponseException, IOException {
-
+        log.info("schedule : {}", dto);
         Reservation findReservation = reservationRepository.findById(dto.getReserveId()).get();
 
         log.info("findReservation : {}", findReservation);
@@ -108,7 +108,7 @@ public class PayService {
         Pay deposit = Pay.builder().reservation(findReservation).impUid(dto.getImp_uid())
                 .merchantUid(dto.getMerchant_uid()).payStatus(PaymentStatus.DEPOSIT)
                 .payAmount(dto.getPayAmount()).build();
-
+        log.info("save : {}", deposit);
         payRepository.save(deposit); // 보증금 결제 데이터 DB 등록
 
         LocalDateTime endDate = BookDate.getEndTime(
