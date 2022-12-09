@@ -3,7 +3,7 @@ package com.golfzonTech4.worktalk.service;
 import com.golfzonTech4.worktalk.domain.Room;
 import com.golfzonTech4.worktalk.domain.Space;
 import com.golfzonTech4.worktalk.repository.RoomRepository;
-import com.golfzonTech4.worktalk.repository.SpaceRepository;
+import com.golfzonTech4.worktalk.repository.space.SpaceRepository;
 import com.golfzonTech4.worktalk.dto.room.RoomInsertDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

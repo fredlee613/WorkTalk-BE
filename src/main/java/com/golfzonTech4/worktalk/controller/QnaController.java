@@ -24,14 +24,14 @@ public class QnaController {
 
     //사무공간상세페이지에서 QnA 리스트 출력
     @GetMapping("/spaceOne/{spaceId}/qnas")
-    public ResponseEntity findByQnas(@PathVariable("spaceId") Long spaceId){
-        return ResponseEntity.ok(qnaService.getQnas(spaceId));
+    public ResponseEntity qnaListBySpace(@PathVariable("spaceId") Long spaceId){
+        return ResponseEntity.ok(qnaService.getQnasBySpace(spaceId));
     }
 
     //마이페이지에서 QnA 리스트 출력
     @GetMapping("/myqnas")
-    public ResponseEntity MypageQnas(){
-        return ResponseEntity.ok(qnaService.QnaListPage());
+    public ResponseEntity myQnaListPage(){
+        return ResponseEntity.ok(qnaService.getMyQnas());
     }
 
     @PostMapping("/qnaCreate")

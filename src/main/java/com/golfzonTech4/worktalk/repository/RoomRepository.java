@@ -1,6 +1,5 @@
 package com.golfzonTech4.worktalk.repository;
 
-import com.golfzonTech4.worktalk.domain.Member;
 import com.golfzonTech4.worktalk.domain.Room;
 import com.golfzonTech4.worktalk.domain.Space;
 import org.springframework.data.jpa.repository.JpaRepository;

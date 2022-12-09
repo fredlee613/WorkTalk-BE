@@ -80,13 +80,13 @@ public class ReviewService {
             throw new EntityNotFoundException("삭제 권한이 없습니다.");
     }
 
-    public List<ReviewDetailDto> getReviews(Long spaceId) {
-        log.info("getReviews()....");
+    public List<ReviewDetailDto> getReviewsBySpace(Long spaceId) {
+        log.info("getReviewsBySpace()....");
         return reviewRepository.findReviewsDtoListBySpaceId(spaceId);
     }
 
-    public List<ReviewDetailDto> ReviewListPage() {
-        log.info("ReviewListPage()....");
+    public List<ReviewDetailDto> getMyReviews() {
+        log.info("getMyReviews()....");
 
         Optional<String> currentUsername = SecurityUtil.getCurrentUsername();
         if (currentUsername.isEmpty()) throw new EntityNotFoundException("Member not found");

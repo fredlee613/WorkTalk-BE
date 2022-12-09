@@ -1,7 +1,6 @@
-package com.golfzonTech4.worktalk.repository;
+package com.golfzonTech4.worktalk.repository.customercenter;
 
 import com.golfzonTech4.worktalk.domain.CustomerComment;
-import com.golfzonTech4.worktalk.domain.QnaComment;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

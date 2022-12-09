@@ -3,10 +3,8 @@ package com.golfzonTech4.worktalk.controller;
 import com.golfzonTech4.worktalk.domain.Qna;
 import com.golfzonTech4.worktalk.dto.customercenter.CustomerCenterInsertDto;
 import com.golfzonTech4.worktalk.dto.customercenter.CustomerCenterUpdateDto;
-import com.golfzonTech4.worktalk.dto.qna.QnaInsertDto;
-import com.golfzonTech4.worktalk.dto.qna.QnaUpdateDto;
+import com.golfzonTech4.worktalk.dto.customercenter.CustomerCenterSearchDto;
 import com.golfzonTech4.worktalk.service.CustomerCenterService;
-import com.golfzonTech4.worktalk.service.QnaService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -22,16 +20,22 @@ public class CustomerCenterController {
 
     private final CustomerCenterService customerCenterService;
 
-    //마스터페이지에서 1대1문의 리스트 출력
+    //마스터페이지에서 1대1문의 리스트 출력 - 유저 / 호스트 sorting
     @GetMapping("/customerCenter")
-    public ResponseEntity CustomerCenterMasterPage(){
-        return ResponseEntity.ok(customerCenterService.CustomerCenterMasterPage());
+    public ResponseEntity customerCenterMasterPage(@ModelAttribute CustomerCenterSearchDto dto){
+        return ResponseEntity.ok(customerCenterService.getccMasterManage(dto));
+    }
+
+    //마스터페이지에서 1대1문의 문의타입 sorting
+    @GetMapping("/customerCenter/type")
+    public ResponseEntity customerCenterMasterccType(@ModelAttribute CustomerCenterSearchDto dto){
+        return ResponseEntity.ok(customerCenterService.getccMasterManage(dto));
     }
 
     //마이페이지에서 1대1문의 리스트 출력
     @GetMapping("/myCustomerCenter")
-    public ResponseEntity MypageQnas(){
-        return ResponseEntity.ok(customerCenterService.CustomerCenterListPage());
+    public ResponseEntity myPageQnas(){
+        return ResponseEntity.ok(customerCenterService.getMyCustomerCenterList());
     }
 
     //1대1문의 작성

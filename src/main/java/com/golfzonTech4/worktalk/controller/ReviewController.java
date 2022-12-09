@@ -48,13 +48,13 @@ public class ReviewController {
 
     //사무공간상세페이지에서 후기 리스트 출력
     @GetMapping("/spaceOne/{spaceId}/reviews")
-    public ResponseEntity findByReviews(@PathVariable("spaceId") Long spaceId){
-        return ResponseEntity.ok(reviewService.getReviews(spaceId));
+    public ResponseEntity reviewListBySpace(@PathVariable("spaceId") Long spaceId){
+        return ResponseEntity.ok(reviewService.getReviewsBySpace(spaceId));
     }
 
     //마이페이지에서 후기 리스트 출력
     @GetMapping("/myreviews")
-    public ResponseEntity MypageReviews(){
-        return ResponseEntity.ok(reviewService.ReviewListPage());
+    public ResponseEntity myReviewPage(){
+        return ResponseEntity.ok(reviewService.getMyReviews());
     }
 }

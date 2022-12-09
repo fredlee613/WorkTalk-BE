@@ -6,11 +6,10 @@ import lombok.Setter;
 @Getter @Setter
 public class SpaceSearchDto {
 
-    private String searchDateType;
-
     private int searchSpaceType;
 
-    private String searchBy;
+    private String searchSpaceName;
 
-    private String searchQuery = "";
+    private String searchAddress;
+
 }
