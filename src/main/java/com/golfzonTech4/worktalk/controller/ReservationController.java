@@ -92,7 +92,7 @@ public class ReservationController {
      * 예약 리스트 조회
      */
     @GetMapping("/reservation/find/{pageNum}")
-    public ResponseEntity<ListResult> findByName(@RequestBody ReserveOrderSearch dto) {
+    public ResponseEntity<ListResult> findByName(@ModelAttribute ReserveOrderSearch dto) {
         PageRequest pageRequest = PageRequest.of(dto.getPageNum(), 10);
         return ResponseEntity.ok(reservationService.findAllByName(dto, pageRequest));
     }
