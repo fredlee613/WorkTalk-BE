@@ -20,18 +20,18 @@ public class RoomController {
     private final RoomService roomService;
 
     //사무공간상세페이지에서 세부공간 리스트 출력
-    @GetMapping("/spaceOne/{space}/rooms")
-    public ResponseEntity findByRooms(@PathVariable("space") Space space){
-        return ResponseEntity.ok(roomService.getRooms(space));
+    @GetMapping("/spaceOne/{spaceId}/rooms")
+    public ResponseEntity findByRooms(@PathVariable("spaceId") Long spaceId){
+        log.info("spaceId : {}", spaceId);
+        return ResponseEntity.ok(roomService.getRooms(spaceId));
     }
 
     //호스트의 세부사무공간 등록
-    @PostMapping("/host/{space}/roomCreate")
-    public ResponseEntity<Room> createRoom(@Valid @RequestBody RoomInsertDto dto, Space space){
-
+    @PostMapping("/host/roomCreate")
+    public ResponseEntity<Room> createRoom(@Valid RoomInsertDto dto, Space space){
+        log.info("createRoom : {}", dto);
         roomService.createRoom(dto);
 
-//        return new ResponseEntity.ok(roomService.createRoom(form));
         return new ResponseEntity("입력완료", HttpStatus.OK);
     }
 

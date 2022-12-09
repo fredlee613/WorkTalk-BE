@@ -1,7 +1,9 @@
 package com.golfzonTech4.worktalk.repository.space;
 
 import com.golfzonTech4.worktalk.domain.QSpace;
+import com.golfzonTech4.worktalk.dto.space.QSpaceImgDto;
 import com.golfzonTech4.worktalk.dto.space.QSpaceMainDto;
+import com.golfzonTech4.worktalk.dto.space.SpaceImgDto;
 import com.golfzonTech4.worktalk.dto.space.SpaceMainDto;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
@@ -11,8 +13,11 @@ import org.springframework.data.domain.PageRequest;
 
 import javax.persistence.EntityManager;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import static com.golfzonTech4.worktalk.domain.QSpace.space;
+import static com.golfzonTech4.worktalk.domain.QSpaceImg.spaceImg;
 
 @Slf4j
 public class SpaceRepositoryCustomImpl implements SpaceRepositoryCustom{
@@ -36,8 +41,7 @@ public class SpaceRepositoryCustomImpl implements SpaceRepositoryCustom{
                                 space.spaceId,
                                 space.spaceName,
                                 space.address,
-                                space.spaceType
-                                /*space.spaceImg*/)
+                                space.spaceType)
                 )
                 .from(space)
                 .where(eqSpaceType(spaceType), containName(spaceName), containAddress(address), space.spaceStatus.eq("approved"))
@@ -45,6 +49,17 @@ public class SpaceRepositoryCustomImpl implements SpaceRepositoryCustom{
                 .offset(pageRequest.getOffset())
                 .limit(pageRequest.getPageSize())
                 .fetch();
+
+        List<Long> spaceIds = content.stream().map(SpaceMainDto::getSpaceId).collect(Collectors.toList());
+
+        List<SpaceImgDto> images = queryFactory.select(new QSpaceImgDto(spaceImg.spaceImgId, spaceImg.spaceImgUrl, spaceImg.space.spaceId))
+                .from(spaceImg)
+                .where(spaceImg.space.spaceId.in(spaceIds))
+                .fetch();
+
+        Map<Long, List<SpaceImgDto>> imgIdsMap = images.stream().collect(Collectors.groupingBy(SpaceImgDto::getSpaceId));
+
+        content.forEach(s -> s.setSpaceImgList(imgIdsMap.get(s.getSpaceId())));
 
         long total = queryFactory
                 .select(space.count())
@@ -56,7 +71,7 @@ public class SpaceRepositoryCustomImpl implements SpaceRepositoryCustom{
     }
 
     private BooleanExpression eqSpaceType(Integer spaceType) {
-        if(spaceType == null || spaceType == 0) {
+        if(spaceType == null) {
             return null;
         }
         return space.spaceType.eq(spaceType);
