@@ -31,7 +31,7 @@ public class Review extends BaseTimeEntity implements Serializable {
     @Column(name = "GRADE", nullable = false)
     private Double grade;
 
-    @Column(name = "REVIEW_IMG", nullable = true, length = 100)
-    private String review_img;
+    @Column(name = "REVIEW_IMG_URL", nullable = true, length = 200)
+    private String reviewImgUrl;
 
 }

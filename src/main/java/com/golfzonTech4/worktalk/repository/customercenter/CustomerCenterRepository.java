@@ -1,18 +1,18 @@
-package com.golfzonTech4.worktalk.repository;
+package com.golfzonTech4.worktalk.repository.customercenter;
 
 import com.golfzonTech4.worktalk.domain.CustomerCenter;
-import com.golfzonTech4.worktalk.domain.Qna;
 import com.golfzonTech4.worktalk.dto.customercenter.CustomerCenterDetailDto;
-import com.golfzonTech4.worktalk.dto.qna.QnaDetailDto;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.querydsl.QuerydslPredicateExecutor;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
 @Repository
-public interface CustomerCenterRepository extends JpaRepository<CustomerCenter, Long> {
+public interface CustomerCenterRepository extends JpaRepository<CustomerCenter, Long>,
+        QuerydslPredicateExecutor<CustomerCenter>, CustomerCenterRepositoryCustom {
 
     CustomerCenter findByCcId(Long ccId); //문의 선택
 

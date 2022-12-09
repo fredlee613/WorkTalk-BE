@@ -1,8 +1,6 @@
 package com.golfzonTech4.worktalk.repository;
 
 import com.golfzonTech4.worktalk.domain.Qna;
-import com.golfzonTech4.worktalk.domain.Room;
-import com.golfzonTech4.worktalk.domain.Space;
 import com.golfzonTech4.worktalk.dto.qna.QnaDetailDto;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;

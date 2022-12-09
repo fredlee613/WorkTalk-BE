@@ -18,20 +18,23 @@ public class SpaceImg {
     @Column(name = "SPACE_IMG_ID")
     private Long spaceImgId;
 
-    @Column(name = "IMG_NAME")
-    private String imgName;
+    @Column(name = "SPACE_IMG_URL", length = 200)
+    private String spaceImgUrl;
+
+    @Column(name = "REP_IMG_YN", length = 20)
+    private String repImgYn; //대표 이미지 여부
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "SPACE_ID")
+    @JoinColumn(name = "SPACE_ID", nullable = false)
     private Space space;
 
-    public SpaceImg(String imgName, Space space) {
-        this.imgName = imgName;
+    public SpaceImg(String spaceImgUrl, Space space) {
+        this.spaceImgUrl = spaceImgUrl;
         this.space = space;
     }
 
-    public void updateSpaceImg(String imgName){
-        this.imgName = imgName;
+    public void updateSpaceImg(String spaceImgUrl){
+        this.spaceImgUrl = spaceImgUrl;
     }
 
 }

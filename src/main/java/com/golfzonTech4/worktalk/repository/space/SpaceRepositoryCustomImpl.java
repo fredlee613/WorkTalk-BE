@@ -49,14 +49,14 @@ public class SpaceRepositoryCustomImpl implements SpaceRepositoryCustom{
         long total = queryFactory
                 .select(space.count())
                 .from(space)
-                .where(eqSpaceType(spaceType), containName(spaceName), containAddress(address))
+                .where(eqSpaceType(spaceType), containName(spaceName), containAddress(address), space.spaceStatus.eq("approved"))
                 .fetchOne();
 
         return new PageImpl<>(content, pageRequest, total);
     }
 
     private BooleanExpression eqSpaceType(Integer spaceType) {
-        if(spaceType == null) {
+        if(spaceType == null || spaceType == 0) {
             return null;
         }
         return space.spaceType.eq(spaceType);

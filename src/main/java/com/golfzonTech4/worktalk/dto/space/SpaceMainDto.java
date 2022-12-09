@@ -4,8 +4,6 @@ import com.querydsl.core.annotations.QueryProjection;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.List;
-
 @Data
 @NoArgsConstructor
 public class SpaceMainDto {
@@ -19,7 +17,9 @@ public class SpaceMainDto {
     private int spaceType;
 
 //    private String spaceImg;
-    private Double gradeSum;
+//    private List<Review> reviewList;
+
+    private Double gradeAvg;
 
     private int count;
 
@@ -31,13 +31,15 @@ public class SpaceMainDto {
         this.spaceType = spaceType;
     }
 
+
+
     @QueryProjection
-    public SpaceMainDto(Long spaceId, String spaceName, String address, int spaceType, Double gradeSum, int count) {
+    public SpaceMainDto(Long spaceId, String spaceName, String address, int spaceType, Double gradeAvg, int count) {
         this.spaceId = spaceId;
         this.spaceName = spaceName;
         this.address = address;
         this.spaceType = spaceType;
-        this.gradeSum = gradeSum;
+        this.gradeAvg = gradeAvg;
         this.count = count;
     }
 }

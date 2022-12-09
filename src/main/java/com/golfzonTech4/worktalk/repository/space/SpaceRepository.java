@@ -1,7 +1,6 @@
 package com.golfzonTech4.worktalk.repository.space;
 
 import com.golfzonTech4.worktalk.domain.Space;
-import com.golfzonTech4.worktalk.repository.space.SpaceRepositoryCustom;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.querydsl.QuerydslPredicateExecutor;
 import org.springframework.stereotype.Repository;
@@ -19,6 +18,9 @@ public interface SpaceRepository extends JpaRepository<Space, Long>,
 //    List<Space> findAllBySpaceStatus(); //메인페이지 사무공간리스트
 
     List<Space> findAllByMemberId(Long memberId); // 호스트가 등록한 사무공간리스트
+//    @Query("select new com.golfzonTech4.worktalk.dto.space.SpaceMainDto (s.spaceId, s.spaceName, s.address, s.spaceType) from Space s " +
+//            "where s.member.id = :memberId")
+//    List<SpaceMainDto> findAllByMemberId(Long memberId); // 호스트가 등록한 사무공간리스트
 
 //    save(): 레코드 저장
 //    findOne(): PK로 레코드 한 건 찾기

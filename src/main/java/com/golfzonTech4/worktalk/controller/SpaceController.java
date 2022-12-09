@@ -63,11 +63,10 @@ public class SpaceController {
 
     //호스트의 사무공간 등록-다중이미지
     @PostMapping("/host/spaceImg")
-    public ResponseEntity<Space> createiSpace(
-            @PathVariable SpaceImgDto dto, @RequestParam("multipartFileList") List<MultipartFile> multipartFileList) {
+    public ResponseEntity<Space> createiSpace(SpaceImgDto dto, List<MultipartFile> multipartFileList) {
 
         try {
-            spaceService.uploadImage(dto,multipartFileList);
+            spaceService.uploadSpaceImage(dto,multipartFileList);
         } catch (Exception e){
             log.info("등록 중 에러 발생");
         }
@@ -104,10 +103,10 @@ public class SpaceController {
         return new ResponseEntity("승인거절하였습니다",HttpStatus.OK);
     }
 
-    //이미지 업로드
+    //이미지 업로드 테스트
     @PostMapping("/upload")
     public ResponseEntity<Object> upload(
-            @Valid @RequestParam("SpaceImg") List<MultipartFile> multipartFileList, MultipartHttpServletRequest req) throws Exception {
+            List<MultipartFile> multipartFileList) throws Exception {
         List<String> imagePathList = new ArrayList<>();
         if(multipartFileList.size()>0) {
             for (MultipartFile multipartFile : multipartFileList) {

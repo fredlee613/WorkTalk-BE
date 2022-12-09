@@ -5,7 +5,8 @@ import com.golfzonTech4.worktalk.domain.Member;
 import com.golfzonTech4.worktalk.dto.customercenter.CustomerCenterDetailDto;
 import com.golfzonTech4.worktalk.dto.customercenter.CustomerCenterInsertDto;
 import com.golfzonTech4.worktalk.dto.customercenter.CustomerCenterUpdateDto;
-import com.golfzonTech4.worktalk.repository.CustomerCenterRepository;
+import com.golfzonTech4.worktalk.dto.customercenter.CustomerCenterSearchDto;
+import com.golfzonTech4.worktalk.repository.customercenter.CustomerCenterRepository;
 import com.golfzonTech4.worktalk.util.SecurityUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -24,7 +25,6 @@ import java.util.Optional;
 public class CustomerCenterService {
     private final CustomerCenterRepository customerCenterRepository;
     private final MemberService memberService;
-
     @Transactional
     public CustomerCenter createCustmerCenter(CustomerCenterInsertDto dto){
         log.info("createCustmerCenter()....");
@@ -93,6 +93,15 @@ public class CustomerCenterService {
         if (currentUsername.isEmpty()) throw new EntityNotFoundException("Member not found");
 
         return customerCenterRepository.findAllcc();
+    }
+
+    public List<CustomerCenterDetailDto> getccMasterManage(CustomerCenterSearchDto dto) {
+        log.info("getccMasterManage()....");
+
+        Optional<String> currentUsername = SecurityUtil.getCurrentUsername();
+        if (currentUsername.isEmpty()) throw new EntityNotFoundException("Member not found");
+
+        return customerCenterRepository.customerManagePage(dto.getSearchMemberType(), dto.getSearchccType());
     }
 
 }
