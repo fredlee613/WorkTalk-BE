@@ -30,4 +30,6 @@ public class ReserveDto {
     private Integer amount; // 결제 가격
 
     private PaymentStatus paymentStatus; // 결제 유형
+
+    private Long payId;
 }

@@ -1,6 +1,7 @@
 package com.golfzonTech4.worktalk.service;
 
 import com.golfzonTech4.worktalk.domain.*;
+import com.golfzonTech4.worktalk.dto.pay.PayInsertDto;
 import com.golfzonTech4.worktalk.dto.penalty.PenaltyDto;
 import com.golfzonTech4.worktalk.dto.reservation.ReserveOrderSearch;
 import com.golfzonTech4.worktalk.dto.reservation.ReserveCheckDto;
@@ -9,8 +10,11 @@ import com.golfzonTech4.worktalk.dto.reservation.ReserveSimpleDto;
 import com.golfzonTech4.worktalk.exception.NotFoundMemberException;
 import com.golfzonTech4.worktalk.repository.ListResult;
 import com.golfzonTech4.worktalk.repository.RoomRepository;
+import com.golfzonTech4.worktalk.repository.member.MemberRepository;
 import com.golfzonTech4.worktalk.repository.reservation.ReservationRepository;
 import com.golfzonTech4.worktalk.repository.reservation.ReservationSimpleRepository;
+import com.golfzonTech4.worktalk.repository.reservation.query.ReservationRepositoryQuery;
+import com.golfzonTech4.worktalk.repository.reservation.temp.TempReservationRepository;
 import com.golfzonTech4.worktalk.util.SecurityUtil;
 import com.siot.IamportRestClient.exception.IamportResponseException;
 import lombok.RequiredArgsConstructor;
@@ -18,13 +22,17 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.awt.print.Book;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Service
 @Transactional(readOnly = true)
@@ -32,59 +40,86 @@ import java.util.*;
 @Slf4j
 public class ReservationService {
 
-    private final MemberService memberService;
+    private final MemberRepository memberRepository;
     private final RoomRepository roomRepository;
     private final ReservationRepository reservationRepository;
     private final ReservationSimpleRepository reservationSimpleRepository;
     private final PenaltyService penaltyService;
+    private final ReservationRepositoryQuery reservationRepositoryQuery;
+
+    private final TempReservationRepository tempReservationRepository;
+
+    private final PayService payService;
 
     /**
      * 예약 기능
      */
-    @Transactional
-    public Long reserve(ReserveDto dto) {
-        log.info("reserve : {}", dto);
+    @Transactional(rollbackFor = {Exception.class})
+    public Long reserve(PayInsertDto payDto) throws IamportResponseException, IOException, IllegalAccessException {
+        log.info("reserve : {}", payDto);
+
+        TempReservation temp = tempReservationRepository.findById(payDto.getReserveId()).get();
+        log.info("tempReservation : {}", temp);
 
         Optional<String> currentUsername = SecurityUtil.getCurrentUsername();
         // 로그인 값이 없을 경우 예외처리
         if (currentUsername.isEmpty()) throw new NotFoundMemberException("Member not found");
 
-        Member findMember = memberService.findByName(currentUsername.get());
+        Member findMember = memberRepository.findByName(currentUsername.get()).get();
+        // 노쇼로 이용이 제한된 사용자일 경우 예외 처리
+        if (findMember.getActivated() == 0) {
+            throw new IllegalAccessException("이용이 제한된 계정입니다.");
+        }
         log.info("findMember : {}", findMember.toString());
 
-        Room findRoom = roomRepository.findByRoomId(dto.getRoom_id());
+        Room findRoom = roomRepository.findByRoomId(temp.getRoomId());
         log.info("findRoom : {}", findRoom.toString());
 
         // 오피스의 경우 체크인 일자가 체크아웃 일자보다 늦을 경우 예외처리
         // 그 외의 경우 체크인 시간이 체크아웃 시간보다 늦을 경우 예외처리
-        validateDateTime(dto, findRoom);
+        log.info("validating time....");
+        validateDateTime(findRoom.getRoomType(), temp.getBookDate());
 
-        BookDate bookDate = new BookDate(
-                LocalDateTime.now(),
-                dto.getCheckInDate(),
-                dto.getCheckOutDate(),
-                dto.getCheckInTime(),
-                dto.getCheckOutTime());
+        PaymentStatus paymentStatus;
+        if (payDto.getPayStatus() == PaymentStatus.DEPOSIT || payDto.getPayStatus() == PaymentStatus.PREPAID) {
+            paymentStatus = PaymentStatus.PREPAID;
+        } else {
+            paymentStatus = PaymentStatus.POSTPAID;
+        }
+        Reservation reservation = Reservation.makeReservation(
+                findMember, findRoom, temp.getBookDate(), payDto.getReserveAmount(), paymentStatus);
+        Reservation result = reservationRepository.save(reservation);
+        payDto.setReserveId(result.getReserveId());
 
-        log.info("bookDate: {}", bookDate);
-
-        Reservation reservation = Reservation.makeReservation(findMember, findRoom, bookDate, dto.getAmount(), dto.getPaymentStatus());
-
-        return reservationRepository.save(reservation).getReserveId();
+        if (payDto.getPayStatus() == PaymentStatus.DEPOSIT) {  // 결제 유형에 따른 분기: 1. 선결제 중 보증금만 결제
+            log.info("prepaid....");
+            payService.prepaid(payDto);
+        } else if (payDto.getPayStatus() == PaymentStatus.PREPAID) { // 결제 유형에 따른 분기: 2. 선결제 중 전액 결제
+            log.info("prepaid....");
+            payService.prepaid(payDto);
+            log.info("setPaid to 1....");
+            result.setPaid(1);
+        } else { // 결제 유형에 따른 분기: 3. 후결제 (보증금 결제 후 예약)
+            log.info("schedule....");
+            payService.schedule(payDto);
+        }
+        return result.getReserveId();
     }
 
     /**
      * 예약 시간 관련 시간 검증
      */
-    private static void validateDateTime(ReserveDto reserveDto, Room room) {
-        if (room.getRoomType().equals(RoomType.OFFICE)) {
+    private static void validateDateTime(RoomType roomType, BookDate bookDate) {
+        log.info("validateDateTime.... {}, {}",roomType, bookDate);
+        if (roomType.equals(RoomType.OFFICE)) {
             // 오피스의 경우 날짜 비교
-            if (!BookDate.validDate(reserveDto.getCheckInDate(), reserveDto.getCheckOutDate())) {
+            if (!BookDate.validDate(bookDate.getCheckInDate(), bookDate.getCheckOutDate())) {
+                log.info("result : {}, {} .... failed!!", bookDate.getCheckInDate(), bookDate.getCheckOutDate());
                 throw new IllegalArgumentException("잘못된 날짜값 입력입니다.");
             }
         } else {
             // 그 외의 경우 시간 비교
-            if (!BookDate.validTime(reserveDto.getCheckInTime(), reserveDto.getCheckOutTime())) {
+            if (!BookDate.validTime(bookDate.getCheckInTime(), bookDate.getCheckOutTime())) {
                 throw new IllegalArgumentException("잘못된 시간값 입력입니다.");
             }
         }
@@ -93,8 +128,8 @@ public class ReservationService {
     /**
      * 사용자 예약 취소 기능
      */
-    @Transactional
-    public Map<String, Object> cancelByUser(Long reserveId, String cancelReason) throws IamportResponseException, IOException {
+    @Transactional(rollbackFor = {Exception.class})
+    public int cancelByUser(Long reserveId, String cancelReason) throws IamportResponseException, IOException {
         log.info("cancelByUser : {}, {}", reserveId, cancelReason);
 
         // 해당 값이 Null일 경우 NoSuchElementException 발생
@@ -122,22 +157,22 @@ public class ReservationService {
 
         log.info("reservePeriod : {}", reservePeriod);
 
+        // 결제 취소 로직
         int flag = reservePeriod <= 3600 ? 0 : 1; // 1시간 이하일 경우 0, 초과 시 1
-
-        log.info("before map put >> {} : {} : {}", reserveId, flag, findReservation.getPaymentStatus());
-
-        Map result = new HashMap<>();
-        result.put("reserveId", reserveId);
-        result.put("flag", flag);
-        result.put("status", findReservation.getPaymentStatus().toString());
-        return result;
+        int count = 0;
+        if (findReservation.getPaymentStatus().equals(PaymentStatus.PREPAID)) {
+            count = payService.cancelPrepaid(findReservation.getReserveId(), flag);
+        } else {
+            count = payService.cancelPostPaid(findReservation.getReserveId(), flag);
+        }
+        return count;
     }
 
     /**
      * 호스트는 예약 취소 기능
      */
-    @Transactional
-    public Map<String, Object> cancelByHost(Long reserveId, String cancelReason) throws IamportResponseException, IOException {
+    @Transactional(rollbackFor = {Exception.class})
+    public int cancelByHost(Long reserveId, String cancelReason) throws IamportResponseException, IOException {
         log.info("cancelByHost : {}, {}", reserveId, cancelReason);
         // 해당 값이 Null일 경우 NoSuchElementException 발생
         Reservation findReservation = reservationRepository.findById(reserveId).get();
@@ -146,12 +181,13 @@ public class ReservationService {
         findReservation.setReserveStatus(ReserveStatus.CANCELED_BY_HOST);
         findReservation.setCancelReason(cancelReason);
 
-        Map result = new HashMap<>();
-        result.put("reserveId", reserveId);
-        String status = findReservation.getPaymentStatus().toString();
-        log.info("status : {}", status);
-        result.put("status", status);
-        return result;
+        int count = 0;
+        // 결제 취소 로직
+        if (findReservation.equals(PaymentStatus.PREPAID))
+            count = payService.cancelPrepaid(findReservation.getReserveId(), 0);
+        else count = payService.cancelPostPaid(findReservation.getReserveId(), 0);
+
+        return count;
     }
 
     /**
@@ -159,8 +195,8 @@ public class ReservationService {
      * NOSHOW처리된 예약자의 NOSHOW 이력 조회
      * 해당 이력건이 3회 이상일 경우 페널티 부여
      */
-//    @Scheduled(cron = "0/15 * * * * *")
-    @Transactional
+    @Scheduled(cron = "0 30 * * * *")
+    @Transactional(rollbackFor = {Exception.class})
     public int updateNoShow() {
         log.info("updateNoShow");
         log.info("current time : {}", LocalDateTime.now());
@@ -201,7 +237,6 @@ public class ReservationService {
         return result;
     }
 
-
     /**
      * 결제 생태가 미결제인 예약 건에 대하여 예약 상태를 NOSHOW로 변경
      */
@@ -222,39 +257,20 @@ public class ReservationService {
         return reservationSimpleRepository.countNoShow(memberId, ReserveStatus.NOSHOW);
     }
 
-    public List<Reservation> findAllByName() {
+    public ListResult findAllByName(ReserveOrderSearch dto, PageRequest pageRequest) {
+        log.info("findAllByName : {}, {}", dto, pageRequest);
         String name = SecurityUtil.getCurrentUsername().get();
-        log.info("findByName : {}", name);
-        return reservationRepository.findAllByName(name);
+        String role = SecurityUtil.getCurrentUserRole().get();
+        log.info("name: {}, role : {}", name, role);
+        if (role.equals(MemberType.ROLE_USER.toString())) {
+            PageImpl<ReserveSimpleDto> result = reservationSimpleRepository.findAllByUserPage(name, pageRequest, dto.getPaid(), dto.getPaymentStatus());
+            return new ListResult(result.getTotalElements(), result.getContent());
+        } else {
+            PageImpl<ReserveSimpleDto> result = reservationRepositoryQuery.findAllByHost(name, dto.getPaid(), dto.getRoomType(), dto.getPaymentStatus(), pageRequest);
+            return new ListResult(result.getTotalElements(), result.getContent());
+        }
     }
 
-//    /**
-//     * 접속자(USER)명을 기준으로 예약 리스트 조회(Spring Data Jpa + JPQL)
-//     */
-//    public List<ReserveSimpleDto> findAllByUser() {
-//        String name = SecurityUtil.getCurrentUsername().get();
-//        log.info("findAllByUser : {}", name);
-//        return reservationSimpleRepository.findAllByUser(name);
-//    }
-
-    /**
-     * 접속자(USER)명을 기준으로 예약 리스트 조회(QueryDsl)
-     */
-    public ListResult findAllByUser(ReserveOrderSearch reserveOrderSearch) {
-        String name = SecurityUtil.getCurrentUsername().get();
-        log.info("findAllByUser : {}", name);
-        return reservationSimpleRepository.findAllByUser(name, reserveOrderSearch.getPaid(), reserveOrderSearch.getPaymentStatus(), null);
-    }
-
-    /**
-     * 접속자(USER)명을 기준으로 예약 리스트 페이징 조회(QueryDsl)
-     */
-    public ListResult findAllByUserPage(PageRequest pageRequest, ReserveOrderSearch reserveOrderSearch) {
-        String name = SecurityUtil.getCurrentUsername().get();
-        log.info("findAllByUser : {}", name);
-        PageImpl<ReserveSimpleDto> result = reservationSimpleRepository.findAllByUserPage(name, pageRequest, reserveOrderSearch.getPaid(), reserveOrderSearch.getPaymentStatus());
-        return new ListResult(result.getTotalElements(), result.getContent());
-    }
 
     /**
      * 선택 일자를 기준으로 예약 리스트 조회
@@ -263,51 +279,36 @@ public class ReservationService {
      */
     public List<ReserveCheckDto> findBookedReservation(ReserveCheckDto dto) {
         log.info("findBookedReservation : {}", dto);
+        List<ReserveCheckDto> result = null;
         if (dto.getRoomType().equals(RoomType.OFFICE)) {
-            return reservationSimpleRepository.findBookedOffice(dto.getRoomId(), dto.getInitDate(), dto.getEndDate());
-        } else {
-            return reservationSimpleRepository.findBookedRoom(dto.getRoomId(), dto.getInitDate(), dto.getInitTime(), dto.getEndTime());
-        }
-    }
-
-    /**
-     * 호스트가 관리하는 공간 들에 대한 예약 리스트 조회
-     */
-    public ListResult findAllByHost() {
-        String currentUsername = SecurityUtil.getCurrentUsername().get();
-        log.info("findAllByHost : {}", currentUsername);
-        List<ReserveSimpleDto> result = reservationSimpleRepository.findAllByHost(currentUsername);
-        return new ListResult((long) result.size(), result);
-    }
-
-    /**
-     * 호스트가 관리하는 공간 들에 대한 예약 리스트 페이지 조회
-     */
-    public ListResult findAllByHostPage(ReserveOrderSearch reserveOrderSearch, PageRequest pageRequest) {
-        String currentUsername = SecurityUtil.getCurrentUsername().get();
-        log.info("findAllByHost : {}, {}, {}", currentUsername, reserveOrderSearch, pageRequest);
-        if (reserveOrderSearch.getRoomType() != null) {
-            if (reserveOrderSearch.getPaymentStatus() != null && reserveOrderSearch.getPaid() != null) {
-                log.info("findAllByHostPageBoth");
-                Page<ReserveSimpleDto> result = reservationSimpleRepository.findAllByHostPageBoth(currentUsername, reserveOrderSearch.getPaid(), reserveOrderSearch.getRoomType(), reserveOrderSearch.getPaymentStatus(), pageRequest);
-                return new ListResult(result.getTotalElements(), result.getContent());
-
+            List<ReserveCheckDto> tempBookedOffice = tempReservationRepository.findBookedOffice(dto.getRoomId(), dto.getInitDate(), dto.getEndDate());
+            List<ReserveCheckDto> bookedOffice = reservationSimpleRepository.findBookedOffice(dto.getRoomId(), dto.getInitDate(), dto.getEndDate());
+            if (!tempBookedOffice.isEmpty()) {
+                if (!bookedOffice.isEmpty()) {
+                    return Stream.of(tempBookedOffice, bookedOffice)
+                            .flatMap(Collection::stream)
+                            .collect(Collectors.toList());
+                } else return tempBookedOffice;
             } else {
-                log.info("findAllByHostPageRoom");
-                Page<ReserveSimpleDto> result = reservationSimpleRepository.findAllByHostPageRoom(currentUsername, reserveOrderSearch.getRoomType(), pageRequest);
-                return new ListResult(result.getTotalElements(), result.getContent());
+                if (!bookedOffice.isEmpty())  return bookedOffice;
+                else return null;
             }
         } else {
-            if (reserveOrderSearch.getPaymentStatus() != null && reserveOrderSearch.getPaid() != null) {
-                log.info("findAllByHostPagePaid");
-                Page<ReserveSimpleDto> result = reservationSimpleRepository.findAllByHostPagePaid(currentUsername, reserveOrderSearch.getPaid(), reserveOrderSearch.getPaymentStatus(), pageRequest);
-                return new ListResult(result.getTotalElements(), result.getContent());
+            List<ReserveCheckDto> tempBookedRoom = tempReservationRepository.findBookedRoom(dto.getRoomId(), dto.getInitDate());
+            List<ReserveCheckDto> bookedRoom = reservationSimpleRepository.findBookedRoom(dto.getRoomId(), dto.getInitDate());
+            if (!tempBookedRoom.isEmpty()) {
+                if (!bookedRoom.isEmpty()) {
+                    return Stream.of(tempBookedRoom, bookedRoom)
+                            .flatMap(Collection::stream)
+                            .collect(Collectors.toList());
+                } else return tempBookedRoom;
+            } else {
+                if (!bookedRoom.isEmpty())  return bookedRoom;
+                else return null;
             }
         }
-        log.info("findAllByHostPage");
-        Page<ReserveSimpleDto> result = reservationSimpleRepository.findAllByHostPage(currentUsername, pageRequest);
-        return new ListResult(result.getTotalElements(), result.getContent());
     }
+
 
     public Optional<Reservation> findById(Long reserveId) {
         return reservationRepository.findById(reserveId);

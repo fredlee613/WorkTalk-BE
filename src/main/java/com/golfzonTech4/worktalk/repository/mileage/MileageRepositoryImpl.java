@@ -21,7 +21,7 @@ public class MileageRepositoryImpl implements MileageRepositoryCustom{
      * 적립된 마일리지의 총 합
      */
     @Override
-    public int getTotalSave(Long memberId) {
+    public Integer getTotalSave(Long memberId) {
         return queryFactory.select(mileage.mileageAmount.sum())
                 .from(mileage)
                 .where(mileage.member.id.eq(memberId)
@@ -33,7 +33,7 @@ public class MileageRepositoryImpl implements MileageRepositoryCustom{
      * 사용된 마일리지의 총 합
      */
     @Override
-    public int getTotalUse(Long memberId) {
+    public Integer getTotalUse(Long memberId) {
         return queryFactory.select(mileage.mileageAmount.sum())
                 .from(mileage)
                 .where(mileage.member.id.eq(memberId)

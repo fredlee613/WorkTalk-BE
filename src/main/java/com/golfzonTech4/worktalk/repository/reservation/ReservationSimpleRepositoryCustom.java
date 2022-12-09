@@ -22,7 +22,7 @@ public interface ReservationSimpleRepositoryCustom {
     Long countNoShow(Long memberId, ReserveStatus reserveStatus);
 
     List<ReserveCheckDto> findBookedOffice(Long roomId, LocalDate initDate, LocalDate endDate);
-    List<ReserveCheckDto> findBookedRoom(Long roomId, LocalDate initDate, int initTime, int endTime);
+    List<ReserveCheckDto> findBookedRoom(Long roomId, LocalDate initDate);
 
 
     Optional<ReserveSimpleDto> findRoomName(Long reserveId);

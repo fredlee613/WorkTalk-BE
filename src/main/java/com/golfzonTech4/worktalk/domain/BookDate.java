@@ -87,7 +87,7 @@ public class BookDate {
 
     public static boolean validDate(LocalDate checkInDate, LocalDate checkOutDate) {
         if (checkInDate.isAfter(checkOutDate) || // 입실 날짜가 퇴실 날짜보다 늦은 경우
-                checkInDate.isAfter(LocalDate.now()) // 입실 날짜가 예약일을 이미 지난 경우
+                checkInDate.isBefore(LocalDate.now()) // 입실 날짜가 예약일을 이미 지난 경우
         ) return false;
         else return true;
     }
