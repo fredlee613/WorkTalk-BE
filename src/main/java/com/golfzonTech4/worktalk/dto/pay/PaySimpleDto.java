@@ -12,7 +12,6 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 public class PaySimpleDto {
     private LocalDateTime reserveDate; // 예약 날짜
-
     private String name; // 예약자명
     private String spaceName; // 공간명
     private String roomName; // 세부 공간명

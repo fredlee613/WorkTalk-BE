@@ -263,7 +263,7 @@ public class ReservationService {
         String role = SecurityUtil.getCurrentUserRole().get();
         log.info("name: {}, role : {}", name, role);
         if (role.equals(MemberType.ROLE_USER.toString())) {
-            PageImpl<ReserveSimpleDto> result = reservationSimpleRepository.findAllByUserPage(name, pageRequest, dto.getPaid(), dto.getPaymentStatus());
+            PageImpl<ReserveSimpleDto> result = reservationSimpleRepository.findAllByUserPage(name, pageRequest, dto.getReserveStatus(), dto.getSpaceType());
             return new ListResult(result.getTotalElements(), result.getContent());
         } else {
             PageImpl<ReserveSimpleDto> result = reservationRepositoryQuery.findAllByHost(name, dto.getPaid(), dto.getRoomType(), dto.getPaymentStatus(), pageRequest);

@@ -33,6 +33,7 @@ import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -60,6 +61,7 @@ public class PayService {
                 .payAmount(dto.getPayAmount()).build();
 
         Pay savedPay = payRepository.save(pay);
+
         return savedPay;
     }
 
@@ -85,6 +87,14 @@ public class PayService {
         verify(dto.getImp_uid(), dto.getPayAmount());
 
         Pay savedPay = save(dto);
+
+        // 선결제 중 잔금 납부일 경우 결제 상태
+        if (dto.getMerchant_uid().contains("잔금")) {
+            Optional<Reservation> result = reservationRepository.findById(dto.getReserveId());
+            if (result.isPresent()) {
+                result.get().setPaid(1);
+            }
+        }
 
         //마일리지 처리 로직
         useMileage(dto, savedPay);
@@ -225,16 +235,16 @@ public class PayService {
                 count++;
             }
         } else { // 예약 1시간 초과일 경우
+            double rate = findPays.size() == 1 ? 1.0 : 0.8;
+            // 일괄 계산 시 총액의 0.8만 취소, 보증금의 경우 취소 안됨
             for (PayInsertDto findPay : findPays) { // 선결제(일괄결제)만 취소, 보증금 제외
-
                 // 해당 결제 건의 마일리지 내역 삭제
                 mileageService.cancelUsage(findPay.getPayId());
                 mileageService.cancelSave(findPay.getPayId());
 
                 if (findPay.getPayStatus() == PaymentStatus.PREPAID) {
-                    double rate = findPays.size() == 1 ? 1.0 : 0.8; // 일괄 계산 시 총액의 0.8만 취소, 보증금의 경우 취소 안됨
                     IamportResponse<Payment> response = client.cancelPaymentByImpUid(
-                            new CancelData(findPay.getImp_uid(), true,// imp_uid 값으로 전액 취소
+                            new CancelData(findPay.getImp_uid(), true,// imp_uid 값으로 취소 진행
                                     BigDecimal.valueOf(findPay.getPayAmount() * rate)));
                     log.info("response : {}", response);
                     findPay.setPayStatus(PaymentStatus.REFUND); // 결제 데이터 상태를 환불로 변경

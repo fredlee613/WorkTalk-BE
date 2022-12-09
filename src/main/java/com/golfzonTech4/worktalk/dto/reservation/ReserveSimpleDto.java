@@ -1,13 +1,14 @@
 package com.golfzonTech4.worktalk.dto.reservation;
 
-import com.golfzonTech4.worktalk.domain.BookDate;
-import com.golfzonTech4.worktalk.domain.PaymentStatus;
-import com.golfzonTech4.worktalk.domain.ReserveStatus;
-import com.golfzonTech4.worktalk.domain.RoomType;
+import com.golfzonTech4.worktalk.domain.*;
+import com.golfzonTech4.worktalk.dto.pay.PayDto;
+import com.golfzonTech4.worktalk.dto.pay.PaySimpleDto;
 import com.querydsl.core.annotations.QueryProjection;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.data.jpa.repository.Query;
+
+import java.util.List;
 
 @Data
 @NoArgsConstructor
@@ -26,6 +27,7 @@ public class ReserveSimpleDto {
     private PaymentStatus paymentStatus;
     private RoomType roomType;
     private int reserveAmount;
+    private List<PayDto> pays;
 
     @QueryProjection
     public ReserveSimpleDto(String roomName, int paid, Long reserveId, Long memberId, Long rooomId, BookDate bookDate, String name, ReserveStatus reserveStatus, PaymentStatus paymentStatus, RoomType roomType, int reserveAmount) {
@@ -40,6 +42,22 @@ public class ReserveSimpleDto {
         this.paymentStatus = paymentStatus;
         this.roomType = roomType;
         this.reserveAmount = reserveAmount;
+    }
+
+    @QueryProjection
+    public ReserveSimpleDto(String roomName, int paid, Long reserveId, Long memberId, Long rooomId, BookDate bookDate, String name, ReserveStatus reserveStatus, PaymentStatus paymentStatus, RoomType roomType, int reserveAmount, List<PayDto> pays) {
+        this.roomName = roomName;
+        this.paid = paid;
+        this.reserveId = reserveId;
+        this.memberId = memberId;
+        this.rooomId = rooomId;
+        this.bookDate = bookDate;
+        this.name = name;
+        this.reserveStatus = reserveStatus;
+        this.paymentStatus = paymentStatus;
+        this.roomType = roomType;
+        this.reserveAmount = reserveAmount;
+        this.pays = pays;
     }
 
     @QueryProjection

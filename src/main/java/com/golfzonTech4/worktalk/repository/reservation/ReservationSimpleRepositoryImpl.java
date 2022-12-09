@@ -1,8 +1,8 @@
 package com.golfzonTech4.worktalk.repository.reservation;
 
-import com.golfzonTech4.worktalk.domain.PaymentStatus;
-import com.golfzonTech4.worktalk.domain.ReserveStatus;
-import com.golfzonTech4.worktalk.domain.RoomType;
+import com.golfzonTech4.worktalk.domain.*;
+import com.golfzonTech4.worktalk.dto.pay.PayDto;
+import com.golfzonTech4.worktalk.dto.pay.QPayDto;
 import com.golfzonTech4.worktalk.dto.reservation.QReserveCheckDto;
 import com.golfzonTech4.worktalk.dto.reservation.QReserveSimpleDto;
 import com.golfzonTech4.worktalk.dto.reservation.ReserveCheckDto;
@@ -18,10 +18,16 @@ import org.springframework.data.domain.PageRequest;
 import javax.persistence.EntityManager;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
+import static com.golfzonTech4.worktalk.domain.QPay.pay;
 import static com.golfzonTech4.worktalk.domain.QReservation.reservation;
+import static com.golfzonTech4.worktalk.domain.QRoom.room;
+import static com.golfzonTech4.worktalk.domain.QSpace.space;
 
 @Slf4j
 public class ReservationSimpleRepositoryImpl implements ReservationSimpleRepositoryCustom {
@@ -57,8 +63,9 @@ public class ReservationSimpleRepositoryImpl implements ReservationSimpleReposit
     }
 
     @Override
-    public PageImpl<ReserveSimpleDto> findAllByUserPage(String name, PageRequest pageRequest, Integer paid, PaymentStatus paymentStatus) {
-        log.info("findAllByUser : {}, {}, {}, {}", name, pageRequest, paid, paymentStatus);
+    public PageImpl<ReserveSimpleDto> findAllByUserPage(String name, PageRequest pageRequest,
+                                                        ReserveStatus reserveStatus, Integer spaceType) {
+        log.info("findAllByUser : {}, {}, {}, {}", name, pageRequest, reserveStatus, spaceType);
 
         List<ReserveSimpleDto> content = queryFactory.select(new QReserveSimpleDto(
                         reservation.room.roomName,
@@ -74,19 +81,29 @@ public class ReservationSimpleRepositoryImpl implements ReservationSimpleReposit
                         reservation.reserveAmount)
                 )
                 .from(reservation)
-                .where(reservation.member.name.eq(name), eqPaid(paid), eqPayStatus(paymentStatus))
+                .where(reservation.member.name.eq(name), eqReserveStatus(reserveStatus), eqSpaceType(spaceType))
                 .orderBy(reservation.reserveId.desc())
                 .offset(pageRequest.getOffset())
                 .limit(pageRequest.getPageSize())
                 .fetch();
 
+        List<Long> reserveIds = content.stream().map(ReserveSimpleDto::getReserveId).collect(Collectors.toList());
+
+        List<PayDto> pays = queryFactory.select(new QPayDto(pay.payId, pay.reservation.reserveId, pay.impUid, pay.merchantUid, pay.customerUid, pay.payStatus, pay.payAmount))
+                .from(pay)
+                .where(pay.reservation.reserveId.in(reserveIds))
+                .orderBy(pay.payId.desc())
+                .fetch();
+
+        Map<Long, List<PayDto>> paysMap = pays.stream().collect(Collectors.groupingBy(PayDto::getReserveId));
+
+        content.forEach(p -> p.setPays(paysMap.get(p.getReserveId())));
+
         Long count = queryFactory
                 .select(reservation.count())
                 .from(reservation)
-                .where(reservation.member.name.eq(name), eqPaid(paid), eqPayStatus(paymentStatus))
+                .where(reservation.member.name.eq(name), eqReserveStatus(reserveStatus), eqSpaceType(spaceType))
                 .fetchOne();
-
-
         return new PageImpl<>(content, pageRequest, count);
     }
 
@@ -190,6 +207,13 @@ public class ReservationSimpleRepositoryImpl implements ReservationSimpleReposit
             return null;
         }
         return reservation.reserveStatus.eq(status);
+    }
+
+    private BooleanExpression eqSpaceType(Integer spaceType) {
+        if (spaceType == null) {
+            return null;
+        }
+        return reservation.room.space.spaceType.eq(spaceType);
     }
 
 }
