@@ -17,7 +17,8 @@ import java.util.Optional;
 public interface ReservationSimpleRepositoryCustom {
 
     public ListResult findAllByUser(String name, Integer paid, PaymentStatus paymentStatus, ReserveStatus reserveStatus);
-    PageImpl<ReserveSimpleDto> findAllByUserPage(String name, PageRequest pageRequest, Integer paid, PaymentStatus paymentStatus);
+    PageImpl<ReserveSimpleDto> findAllByUserPage(String name, PageRequest pageRequest,
+                                                 ReserveStatus reserveStatus, Integer spaceType);
     List<ReserveSimpleDto> findAllByTime();
     Long countNoShow(Long memberId, ReserveStatus reserveStatus);
 

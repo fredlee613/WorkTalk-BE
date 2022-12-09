@@ -29,7 +29,7 @@ public class PayController {
     @PostMapping("/payments/prepaid")
     public ResponseEntity<Long> prepaid( @RequestBody PayInsertDto dto) throws IamportResponseException, IOException {
         log.info("getResult : {}", dto);
-        Long result = payService.save(dto).getPayId();
+        Long result = payService.prepaid(dto);
         return ResponseEntity.ok(result);
     }
 

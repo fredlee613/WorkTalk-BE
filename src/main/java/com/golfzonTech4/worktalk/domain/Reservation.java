@@ -6,6 +6,8 @@ import lombok.Setter;
 import org.hibernate.annotations.ColumnDefault;
 
 import javax.persistence.*;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @SequenceGenerator(name = "SEQ_RESERVATION_GENERATOR", sequenceName = "SEQ_RESERVATION", initialValue = 1, allocationSize = 50)
@@ -44,6 +46,10 @@ public class Reservation {
     @Enumerated(EnumType.STRING)
     @Column(name = "PAYMENT_STATUS", length = 20, nullable = false)
     private PaymentStatus paymentStatus; // 결제 방법 (PREPAID, POSTPAID)
+
+    @OneToMany(mappedBy = "reservation")
+    private List<Pay> pays = new ArrayList<>();
+
     @Override
     public String toString() {
         return "Reservation{" +
