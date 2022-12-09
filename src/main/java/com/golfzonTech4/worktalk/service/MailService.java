@@ -3,7 +3,7 @@ package com.golfzonTech4.worktalk.service;
 import com.golfzonTech4.worktalk.config.EmailConfig;
 import com.golfzonTech4.worktalk.domain.Member;
 import com.golfzonTech4.worktalk.dto.reservation.ReserveSimpleDto;
-import com.golfzonTech4.worktalk.repository.MemberRepository;
+import com.golfzonTech4.worktalk.repository.member.MemberRepository;
 import com.golfzonTech4.worktalk.repository.reservation.ReservationSimpleRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

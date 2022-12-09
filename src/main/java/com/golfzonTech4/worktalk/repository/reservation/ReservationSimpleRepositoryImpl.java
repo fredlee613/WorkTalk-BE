@@ -126,8 +126,8 @@ public class ReservationSimpleRepositoryImpl implements ReservationSimpleReposit
     }
 
     @Override
-    public List<ReserveCheckDto> findBookedOffice(Long reserveId, LocalDate initDate, LocalDate endDate) {
-        log.info("findBookedOffice : {}, {}, {}, {}", reserveId, initDate, endDate);
+    public List<ReserveCheckDto> findBookedOffice(Long roomId, LocalDate initDate, LocalDate endDate) {
+        log.info("findBookedOffice : {}, {}, {}, {}", roomId, initDate, endDate);
         return queryFactory.select(new QReserveCheckDto(
                         reservation.room.roomId,
                         reservation.bookDate.checkInDate,
@@ -137,14 +137,15 @@ public class ReservationSimpleRepositoryImpl implements ReservationSimpleReposit
                 ))
                 .from(reservation)
                 .where(reservation.room.roomType.eq(RoomType.OFFICE)
+                        .and(reservation.room.roomId.eq(roomId))
                         .and(reservation.bookDate.checkInDate.between(initDate, endDate)
                                 .or(reservation.bookDate.checkOutDate.between(initDate, endDate))))
                 .fetch();
     }
 
     @Override
-    public List<ReserveCheckDto> findBookedRoom(Long roomId, LocalDate initDate, int initTime, int endTime) {
-        log.info("findBookedOffice : {}, {}, {}, {}", roomId, initDate, initTime, endTime);
+    public List<ReserveCheckDto> findBookedRoom(Long roomId, LocalDate initDate) {
+        log.info("findBookedOffice : {}, {}, {}, {}", roomId, initDate);
         return queryFactory.select(new QReserveCheckDto(
                         reservation.room.roomId,
                         reservation.bookDate.checkInDate,
@@ -154,9 +155,8 @@ public class ReservationSimpleRepositoryImpl implements ReservationSimpleReposit
                 ))
                 .from(reservation)
                 .where(reservation.bookDate.checkInDate.eq(initDate)
-                        .and(reservation.room.roomType.ne(RoomType.OFFICE))
-                        .and(reservation.bookDate.checkInTime.between(initTime, endTime)
-                                .or(reservation.bookDate.checkOutTime.between(initTime, endTime))))
+                        .and(reservation.room.roomId.eq(roomId))
+                        .and(reservation.room.roomType.ne(RoomType.OFFICE)))
                 .fetch();
     }
 

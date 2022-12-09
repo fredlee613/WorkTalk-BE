@@ -11,6 +11,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class ReserveOrderSearch {
 
+    private int pageNum;
     private Integer paid;
     private PaymentStatus paymentStatus;
     private RoomType roomType;

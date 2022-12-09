@@ -8,6 +8,8 @@ import com.golfzonTech4.worktalk.dto.pay.PaySimpleDto;
 import com.golfzonTech4.worktalk.dto.pay.PayWebhookDto;
 import com.golfzonTech4.worktalk.repository.ListResult;
 import com.golfzonTech4.worktalk.repository.pay.PayRepository;
+import com.golfzonTech4.worktalk.repository.pay.query.PayRepositoryQuery;
+import com.golfzonTech4.worktalk.repository.reservation.ReservationRepository;
 import com.golfzonTech4.worktalk.util.SecurityUtil;
 import com.siot.IamportRestClient.IamportClient;
 import com.siot.IamportRestClient.exception.IamportResponseException;
@@ -20,7 +22,7 @@ import com.siot.IamportRestClient.response.Payment;
 import com.siot.IamportRestClient.response.Schedule;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -38,36 +40,50 @@ import java.util.List;
 @Slf4j
 public class PayService {
     private final PayRepository payRepository;
-    private final ReservationService reservationService;
+    private final ReservationRepository reservationRepository;
     private final MileageService mileageService;
     private final MyIamport myIamport;
-
     private final MailService mailService;
+    private final PayRepositoryQuery payRepositoryQuery;
 
     /**
      * 결제 데이터 검증 및 저장 로직
      * 마일리지 사용 및 적립 로직
      */
-    @Transactional(rollbackFor = Exception.class)
+    @Transactional
     public Pay save(PayInsertDto dto) {
         log.info("save : {}", dto);
-        Reservation findReservation = reservationService.findById(dto.getReserveId()).get();
+        Reservation findReservation = reservationRepository.findById(dto.getReserveId()).get();
 
         Pay pay = Pay.builder().reservation(findReservation).impUid(dto.getImp_uid())
                 .merchantUid(dto.getMerchant_uid()).payStatus(dto.getPayStatus())
                 .payAmount(dto.getPayAmount()).build();
-        
+
         Pay savedPay = payRepository.save(pay);
         return savedPay;
+    }
+
+    public void verify(String imp_uid, int payAmount) throws IamportResponseException, IOException {
+        log.info("");
+        IamportResponse<Payment> response = myIamport.getClient().paymentByImpUid(imp_uid);
+        BigDecimal serverAmount = response.getResponse().getAmount();
+        BigDecimal clientAmount = BigDecimal.valueOf(payAmount);
+        log.info("clientAmount : {}, serverAmount : {}", clientAmount, serverAmount);
+        if (!clientAmount.equals(serverAmount)) {
+            new IllegalStateException("잘못된 가격값입니다.");
+        }
     }
 
     /**
      * 선결제 데이터 DB 등록 로직
      * 선결제 관련 마일리지 등록 및 사용 로직
      */
-    @Transactional(rollbackFor = Exception.class)
-    public Long prepaid(PayInsertDto dto) {
+    @Transactional
+    public Long prepaid(PayInsertDto dto) throws IamportResponseException, IOException {
         log.info("prepaid: {}", dto);
+        // 가격 검증
+        verify(dto.getImp_uid(), dto.getPayAmount());
+
         Pay savedPay = save(dto);
 
         //마일리지 처리 로직
@@ -80,17 +96,19 @@ public class PayService {
      * 보증금 결제 데이터 DB 등록 로직
      * 예약 결제 및 예약 결제 데이터 DB 등록 로직(추후 결제 시 수정)
      */
-    @Transactional(rollbackFor = Exception.class)
+    @Transactional
     public IamportResponse<List<Schedule>> schedule(PayInsertDto dto) throws IamportResponseException, IOException {
-
-        Reservation findReservation = reservationService.findById(dto.getReserveId()).get();
+        log.info("schedule : {}", dto);
+        Reservation findReservation = reservationRepository.findById(dto.getReserveId()).get();
 
         log.info("findReservation : {}", findReservation);
 
-        Pay deposit = Pay.builder().reservation(findReservation).impUid(dto.getImp_uid())
-                .merchantUid(dto.getMerchant_uid()).payStatus(dto.getPayStatus())
-                .payAmount(dto.getPayAmount()).build();
+        verify(dto.getImp_uid(), dto.getPayAmount());
 
+        Pay deposit = Pay.builder().reservation(findReservation).impUid(dto.getImp_uid())
+                .merchantUid(dto.getMerchant_uid()).payStatus(PaymentStatus.DEPOSIT)
+                .payAmount(dto.getPayAmount()).build();
+        log.info("save : {}", deposit);
         payRepository.save(deposit); // 보증금 결제 데이터 DB 등록
 
         LocalDateTime endDate = BookDate.getEndTime(
@@ -98,7 +116,7 @@ public class PayService {
                 findReservation.getBookDate().getCheckOutTime()).plusHours(1);
         log.info("endDate : {}", endDate);
 
-        String merchant_uid = dto.getMerchant_uid() + "예약결제";
+        String merchant_uid = dto.getMerchant_uid() + " 예약결제";
         int balance = (int) (findReservation.getReserveAmount() * 0.8);
 
         log.info("merchant_uid : {}, balance : {}", merchant_uid, balance);
@@ -135,7 +153,7 @@ public class PayService {
      * 예약 1시간 초과 선결제금액만 환불 (보증금 X)
      * 예약 결제 취소
      */
-    @Transactional(rollbackFor = Exception.class)
+    @Transactional
     public int cancelPay(Long reserveId, Integer flag) throws IamportResponseException, IOException {
         log.info("cancelByHost");
         IamportClient client = myIamport.getClient();
@@ -174,7 +192,7 @@ public class PayService {
                 count++;
             }
             // 해당 예약 건의 결제 상태를 미결제로 수정(paid = 0)
-            Reservation findReservation = reservationService.findById(reserveId).get();
+            Reservation findReservation = reservationRepository.findById(reserveId).get();
             findReservation.setPaid(0);
         }
         return count;
@@ -183,7 +201,7 @@ public class PayService {
     /**
      * 선 결제 취소
      */
-    @Transactional(rollbackFor = Exception.class)
+    @Transactional
     public int cancelPrepaid(Long reserveId, Integer flag) throws IamportResponseException, IOException {
         log.info("cancelPrepaid");
         IamportClient client = myIamport.getClient();
@@ -203,7 +221,7 @@ public class PayService {
                 findPay.setPayStatus(PaymentStatus.REFUND); // 결제 데이터 상태를 환불로 변경
                 Long canceledPay = save(findPay).getPayId(); // 취소 결제 데이터 추가
                 log.info("canceledPay : {}", canceledPay);
-               
+
                 count++;
             }
         } else { // 예약 1시간 초과일 경우
@@ -227,7 +245,7 @@ public class PayService {
             }
         }
         // 해당 예약 건의 결제 상태를 미결제로 수정(paid = 0)
-        Reservation findReservation = reservationService.findById(reserveId).get();
+        Reservation findReservation = reservationRepository.findById(reserveId).get();
         findReservation.setPaid(0);
 
         return count;
@@ -236,7 +254,7 @@ public class PayService {
     /**
      * 후결제 취소 및 마일리지 적립 내역 취소 로직
      */
-    @Transactional(rollbackFor = Exception.class)
+    @Transactional
     public int cancelPostPaid(Long reserveId, Integer flag) throws IamportResponseException, IOException {
         log.info("cancelPostPaid");
         IamportClient client = myIamport.getClient();
@@ -260,7 +278,7 @@ public class PayService {
             if (findPay.getPayStatus() == PaymentStatus.POSTPAID_BOOKED) {
                 // 해당 결제 건에 해당하는 마일리지 사용 내역 삭제 (후결제이기에 적립 내역 X => 적립 취소 로직 추가 X)
                 mileageService.cancelUsage(findPay.getPayId());
-                
+
                 IamportResponse<List<Schedule>> response =
                         client.unsubscribeSchedule(new UnscheduleData(findPay.getCustomer_uid()));// customer_uid 값으로 예약 결제 취소
                 log.info("response : {}", response);
@@ -295,7 +313,7 @@ public class PayService {
             // 결제 성공 후 결제 상태를 결제 완료(1)로 변경
             Long reserveId = findPay.getReservation().getReserveId();
             log.info("reserveId : {}", reserveId);
-            Reservation findReservation = reservationService.findById(reserveId).get();
+            Reservation findReservation = reservationRepository.findById(reserveId).get();
             log.info("findReservation : {}", findReservation);
             findReservation.setPaid(1);
         } else { // 결제 실패 시 3일 후 예약 결제 진행
@@ -312,7 +330,7 @@ public class PayService {
 
             IamportResponse<List<Schedule>> response = myIamport.getClient().subscribeSchedule(scheduleData); // 예약 결제
             log.info("IamportResponse<List<Schedule>> : {}", response.toString());
-            Reservation findReservation = reservationService.findById(findPay.getReservation().getReserveId()).get();
+            Reservation findReservation = reservationRepository.findById(findPay.getReservation().getReserveId()).get();
             // 예약 결제 알림 메일 발송
             mailService.payMail(findReservation.getMember().getId(), findReservation.getReserveId(), findPay.getPayAmount(), payDate);
         }
@@ -321,66 +339,17 @@ public class PayService {
     /**
      * 사용자 결제 내역 전체 조회
      */
-    public ListResult findAllByUser() {
-        log.info("findAllByUser");
+    public ListResult findByName(PayOrderSearch dto, PageRequest pageRequest) {
+        log.info("findByName: {}, {}");
         String name = SecurityUtil.getCurrentUsername().get();
-        List<PaySimpleDto> result = payRepository.findAllByUser(name);
-        return new ListResult((long) result.size(), result);
-    }
-
-    /**
-     * 사용자 결제 내역 페이징 조회 및 조건 검색
-     */
-    public ListResult findAllByUserPage(int pageNum, PayOrderSearch orderSearch) {
-        log.info("findAllByUserPage");
-        String name = SecurityUtil.getCurrentUsername().get();
-        PageRequest pageRequest = PageRequest.of(pageNum, 10);
-        if (orderSearch.getPayStatus() != null) {
-            if (orderSearch.getReserveDate() != null) {
-                log.info("Both");
-                Page<PaySimpleDto> result = payRepository.findAllByUser(name, orderSearch.getReserveDate(), orderSearch.getPayStatus(), pageRequest);
-                return new ListResult(result.getTotalElements(), result.getContent());
-            } else {
-                log.info("Status");
-                Page<PaySimpleDto> result = payRepository.findAllByUser(name, orderSearch.getPayStatus(), pageRequest);
-                return new ListResult(result.getTotalElements(), result.getContent());
-            }
+        String role = SecurityUtil.getCurrentUserRole().get();
+        if (role.equals(MemberType.ROLE_USER.toString())) {
+            PageImpl<PaySimpleDto> result = payRepositoryQuery.findAllByUser(name, dto.getReserveDate(), dto.getPayStatus(), pageRequest);
+            return new ListResult<>(result.getTotalElements(), result.getContent());
         } else {
-            if (orderSearch.getReserveDate() != null) {
-                log.info("Time");
-                Page<PaySimpleDto> result = payRepository.findAllByUser(name, orderSearch.getReserveDate(), pageRequest);
-                return new ListResult(result.getTotalElements(), result.getContent());
-            }
+            PageImpl<PaySimpleDto> result = payRepositoryQuery.findAllByHost(name, dto.getReserveDate(), pageRequest);
+            return new ListResult<>(result.getTotalElements(), result.getContent());
         }
-        log.info("Default");
-        Page<PaySimpleDto> result = payRepository.findAllByUser(name, pageRequest);
-        return new ListResult(result.getTotalElements(), result.getContent());
-    }
-
-    /**
-     * 호스트 결제 내역 전체 조회
-     */
-    public ListResult findAllByHost() {
-        log.info("findAllByUser");
-        String name = SecurityUtil.getCurrentUsername().get();
-        List<PaySimpleDto> result = payRepository.findAllByHost(name);
-        return new ListResult((long) result.size(), result);
-    }
-
-    /**
-     * 호스트 결제 내역 페이징 조회 및 조건 검색
-     */
-    public ListResult findAllByHostPage(int pageNum, PayOrderSearch orderSearch) {
-        log.info("findAllByUserPage");
-        String name = SecurityUtil.getCurrentUsername().get();
-        PageRequest pageRequest = PageRequest.of(pageNum, 10);
-        if (orderSearch.getReserveDate() != null) {
-            Page<PaySimpleDto> result = payRepository.findAllByHost(name, orderSearch.getReserveDate(), pageRequest);
-            return new ListResult(result.getTotalElements(), result.getContent());
-        }
-        log.info("Default");
-        Page<PaySimpleDto> result = payRepository.findAllByHost(name, pageRequest);
-        return new ListResult(result.getTotalElements(), result.getContent());
     }
 
     /**

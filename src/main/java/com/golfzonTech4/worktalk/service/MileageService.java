@@ -7,13 +7,14 @@ import com.golfzonTech4.worktalk.domain.Pay;
 import com.golfzonTech4.worktalk.dto.mileage.MileageDto;
 import com.golfzonTech4.worktalk.dto.mileage.MileageFindDto;
 import com.golfzonTech4.worktalk.repository.ListResult;
-import com.golfzonTech4.worktalk.repository.MemberRepository;
+import com.golfzonTech4.worktalk.repository.member.MemberRepository;
 import com.golfzonTech4.worktalk.repository.mileage.MileageRepository;
 import com.golfzonTech4.worktalk.repository.pay.PayRepository;
 import com.golfzonTech4.worktalk.util.SecurityUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -31,6 +32,7 @@ public class MileageService {
     /**
      * 마일리지 적립 로직
      */
+    @Transactional
     public Long save(MileageDto dto) {
         log.info("save : {}", dto);
 
@@ -53,6 +55,7 @@ public class MileageService {
     /**
      * 마일리지 사용 로직
      */
+    @Transactional
     public Long use(MileageDto dto) {
         log.info("use : {}", dto);
 
@@ -80,6 +83,7 @@ public class MileageService {
     /**
      * 마일리지 적립 취소 (삭제) 로직
      */
+    @Transactional
     public void cancelSave(Long payId) {
         log.info("cancelSave : {}", payId);
         Optional<Mileage> deleteMileage = mileageRepository.findByPay(payId, Mileage_status.SAVED);
@@ -89,6 +93,7 @@ public class MileageService {
     /**
      * 마일리지 사용 취소 (삭제) 로직
      */
+    @Transactional
     public void cancelUsage(Long payId) {
         log.info("cancelUsage : {}", payId);
         Optional<Mileage> deleteMileage = mileageRepository.findByPay(payId, Mileage_status.USED);
@@ -111,9 +116,10 @@ public class MileageService {
         log.info("getTotal : {}");
         String currentUser = SecurityUtil.getCurrentUsername().get();
         Member findMember = memberRepository.findByName(currentUser).get();
-        int totalSave = mileageRepository.getTotalSave(findMember.getId());
-        int totalUse = mileageRepository.getTotalUse(findMember.getId());
-        int total = totalSave - totalUse;
+        Integer totalSave = mileageRepository.getTotalSave(findMember.getId());
+        Integer totalUse = mileageRepository.getTotalUse(findMember.getId());
+        int total = 0;
+        if (totalSave != null && totalUse != null) total = totalSave - totalUse;
         return total;
     }
 
