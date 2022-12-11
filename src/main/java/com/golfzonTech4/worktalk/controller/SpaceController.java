@@ -22,12 +22,6 @@ public class SpaceController {
     private final AmazonS3 amazonS3;
 //    private String S3Bucket = "worktalk-img";
 
-    //유저-사무공간 전체리스트 조회->Main컨트롤러로 분리
-//    @GetMapping("/user/spaceAll")
-//    public ResponseEntity findSpaces(){
-//        log.info("findSpaces()");
-//        return ResponseEntity.ok(spaceService.findAllBySpaceStatus());
-//    }
 
     //호스트가 등록한 사무공간리스트 조회
     @GetMapping("/host/spaceAll/{name}")
@@ -49,20 +43,6 @@ public class SpaceController {
 
         return new ResponseEntity("입력완료",HttpStatus.OK);
     }
-
-    //호스트의 사무공간 등록-다중이미지
-//    @PostMapping("/host/spaceImg")
-//    public ResponseEntity<Space> createiSpace(SpaceImgDto dto, List<MultipartFile> multipartFileList) {
-//
-//        try {
-//            spaceService.uploadSpaceImage(dto,multipartFileList);
-//        } catch (Exception e){
-//            log.info("등록 중 에러 발생");
-//        }
-//
-////        return new ResponseEntity.ok(spaceService.createSpace(form));
-//        return new ResponseEntity("입력완료",HttpStatus.OK);
-//    }
 
     //호스트 사무공간 수정(사무공간 설명, 이미지)
 //    @PostMapping("/host/space_update/{spaceId}")
