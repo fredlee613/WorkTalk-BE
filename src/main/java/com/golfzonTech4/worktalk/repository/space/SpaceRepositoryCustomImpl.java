@@ -41,6 +41,7 @@ public class SpaceRepositoryCustomImpl implements SpaceRepositoryCustom{
                                 space.spaceId,
                                 space.spaceName,
                                 space.address,
+                                space.detailAddress,
                                 space.spaceType)
                 )
                 .from(space)
