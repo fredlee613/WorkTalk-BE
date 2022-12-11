@@ -1,16 +1,26 @@
 package com.golfzonTech4.worktalk.repository.pay;
 
-import com.golfzonTech4.worktalk.domain.PaymentStatus;
+import com.golfzonTech4.worktalk.domain.*;
 import com.golfzonTech4.worktalk.dto.pay.PayInsertDto;
+import com.golfzonTech4.worktalk.dto.pay.PaySimpleDto;
 import com.golfzonTech4.worktalk.dto.pay.QPayInsertDto;
+import com.golfzonTech4.worktalk.dto.pay.QPaySimpleDto;
+import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
+import com.siot.IamportRestClient.response.Payment;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 
 import javax.persistence.EntityManager;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
 import static com.golfzonTech4.worktalk.domain.QPay.pay;
+import static com.golfzonTech4.worktalk.domain.QReservation.reservation;
+import static com.golfzonTech4.worktalk.domain.QRoom.room;
+import static com.golfzonTech4.worktalk.domain.QSpace.space;
 
 @Slf4j
 public class PayRepositoryImpl implements PayRepositoryCustom {
@@ -44,5 +54,109 @@ public class PayRepositoryImpl implements PayRepositoryCustom {
                         .and(pay.payStatus.eq(PaymentStatus.POSTPAID_BOOKED))) // 보증금 내역을 호출
                 .fetchOne();
         return Optional.ofNullable(result);
+    }
+
+    @Override
+    public PageImpl<PaySimpleDto> findByUser(String name, LocalDateTime reserveDate, PaymentStatus paymentStatus,
+                                             PageRequest pageRequest) {
+
+        List<PaySimpleDto> content = queryFactory.select(new QPaySimpleDto(
+                        reservation.reserveId, reservation.bookDate.reserveDate, space.spaceName, room.roomName,
+                        pay.payAmount, pay.payStatus, reservation.reserveStatus, reservation.member.name,
+                        reservation.member.tel, reservation.reserveAmount))
+                .from(pay)
+                .join(reservation).on(pay.reservation.reserveId.eq(reservation.reserveId))
+                .join(room).on(reservation.room.roomId.eq(room.roomId))
+                .join(space).on(room.space.spaceId.eq(space.spaceId))
+                .where(reservation.member.name.eq(name), eqReserveDate(reserveDate), eqPaymentStatus(paymentStatus))
+                .orderBy(reservation.reserveId.desc())
+                .orderBy(pay.payId.desc())
+                .offset(pageRequest.getOffset())
+                .limit(pageRequest.getPageSize())
+                .fetch();
+
+        Long count = queryFactory.select(pay.count())
+                .from(pay)
+                .join(reservation).on(pay.reservation.reserveId.eq(reservation.reserveId))
+                .join(room).on(reservation.room.roomId.eq(room.roomId))
+                .join(space).on(room.space.spaceId.eq(space.spaceId))
+                .where(reservation.member.name.eq(name), eqReserveDate(reserveDate), eqPaymentStatus(paymentStatus))
+                .fetchOne();
+
+        return new PageImpl<>(content, pageRequest, count);
+    }
+
+    @Override
+    public PageImpl<PaySimpleDto> findByHost(String name, LocalDateTime reserveDate, PaymentStatus paymentStatus,
+                                             Integer spaceType, String roomName, PageRequest pageRequest) {
+
+        List<PaySimpleDto> content = queryFactory.select(new QPaySimpleDto(
+                        reservation.reserveId, reservation.bookDate.reserveDate, space.spaceName, room.roomName,
+                        pay.payAmount, pay.payStatus, reservation.reserveStatus, reservation.member.name, reservation.member.tel, reservation.reserveAmount))
+                .from(pay)
+                .join(reservation).on(pay.reservation.reserveId.eq(reservation.reserveId))
+                .join(room).on(reservation.room.roomId.eq(room.roomId))
+                .join(space).on(room.space.spaceId.eq(space.spaceId))
+                .where(space.member.name.eq(name), eqReserveDate(reserveDate), eqPaymentStatus(paymentStatus),
+                        eqRoom(roomName), eqSpaceType(spaceType))
+                .orderBy(reservation.reserveId.desc())
+                .orderBy(pay.payId.desc())
+                .offset(pageRequest.getOffset())
+                .limit(pageRequest.getPageSize())
+                .fetch();
+
+        Long count = queryFactory.select(pay.count())
+                .from(pay)
+                .join(reservation).on(pay.reservation.reserveId.eq(reservation.reserveId))
+                .join(room).on(reservation.room.roomId.eq(room.roomId))
+                .join(space).on(room.space.spaceId.eq(space.spaceId))
+                .where(space.member.name.eq(name), eqReserveDate(reserveDate), eqPaymentStatus(paymentStatus),
+                        eqRoom(roomName), eqSpaceType(spaceType))
+                .fetchOne();
+
+        return new PageImpl<>(content, pageRequest, count);
+    }
+
+    @Override
+    public List<PaySimpleDto> findRooms(String name) {
+
+        List<PaySimpleDto> content = queryFactory.select(new QPaySimpleDto(room.roomName))
+                .from(pay)
+                .join(reservation).on(pay.reservation.reserveId.eq(reservation.reserveId))
+                .join(room).on(reservation.room.roomId.eq(room.roomId))
+                .join(space).on(room.space.spaceId.eq(space.spaceId))
+                .where(space.member.name.eq(name))
+                .fetch();
+
+        return content;
+    }
+
+    static BooleanExpression eqReserveDate(LocalDateTime reserveDate) {
+        if (reserveDate == null) {
+            return null;
+        }
+        return reservation.bookDate.reserveDate.after(reserveDate)
+                .or(reservation.bookDate.reserveDate.eq(reserveDate));
+    }
+
+    static BooleanExpression eqPaymentStatus(PaymentStatus paymentStatus) {
+        if (paymentStatus == null) {
+            return null;
+        }
+        return pay.payStatus.eq(paymentStatus);
+    }
+
+    static BooleanExpression eqRoom(String roomName) {
+        if (roomName == null || roomName.isEmpty()) {
+            return null;
+        }
+        return room.roomName.eq(roomName);
+    }
+
+    static BooleanExpression eqSpaceType(Integer spaceType) {
+        if (spaceType == null ) {
+            return null;
+        }
+        return space.spaceType.eq(spaceType);
     }
 }

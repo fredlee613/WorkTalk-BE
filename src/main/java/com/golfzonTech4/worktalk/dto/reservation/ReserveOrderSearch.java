@@ -12,11 +12,11 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class ReserveOrderSearch {
 
-    private int pageNum;
-    private Integer paid;
-    private Integer spaceType;
-    private ReserveStatus reserveStatus;
-    private PaymentStatus paymentStatus;
-    private RoomType roomType;
+    private int pageNum; // 페이지 번호
+    private Integer paid; // 결제 여부
+    private Integer spaceType; // 공간 타입
+    private ReserveStatus reserveStatus; // 예약 상태
+    private PaymentStatus paymentStatus; // 결제 종류
+    private RoomType roomType; // 세부 공간 타입
 
 }

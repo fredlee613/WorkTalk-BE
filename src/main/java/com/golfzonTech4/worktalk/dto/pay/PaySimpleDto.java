@@ -2,6 +2,7 @@ package com.golfzonTech4.worktalk.dto.pay;
 
 import com.golfzonTech4.worktalk.domain.PaymentStatus;
 import com.golfzonTech4.worktalk.domain.ReserveStatus;
+import com.querydsl.core.annotations.QueryProjection;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -11,6 +12,7 @@ import java.time.LocalDateTime;
 @Data
 @NoArgsConstructor
 public class PaySimpleDto {
+    private Long reserveId; // 예약 번호
     private LocalDateTime reserveDate; // 예약 날짜
     private String name; // 예약자명
     private String spaceName; // 공간명
@@ -41,7 +43,9 @@ public class PaySimpleDto {
         this.reserveAmount = reserveAmount;
     }
 
-    public PaySimpleDto(LocalDateTime reserveDate, String spaceName, String roomName, int payAmount, PaymentStatus payStatus, ReserveStatus reserveStatus, String name, String tel, int reserveAmount) {
+    @QueryProjection
+    public PaySimpleDto(Long reserveId, LocalDateTime reserveDate, String spaceName, String roomName, int payAmount, PaymentStatus payStatus, ReserveStatus reserveStatus, String name, String tel, int reserveAmount) {
+        this.reserveId = reserveId;
         this.reserveDate = reserveDate;
         this.spaceName = spaceName;
         this.roomName = roomName;
@@ -53,6 +57,10 @@ public class PaySimpleDto {
         this.reserveAmount = reserveAmount;
     }
 
+    @QueryProjection
+    public PaySimpleDto(String roomName) {
+        this.roomName = roomName;
+    }
 }
 
 
