@@ -189,7 +189,7 @@ public class ReservationService {
 
         int count = 0;
         // 결제 취소 로직
-        if (findReservation.equals(PaymentStatus.PREPAID))
+        if (findReservation.getPaymentStatus().equals(PaymentStatus.PREPAID))
             count = payService.cancelPrepaid(findReservation.getReserveId(), 0);
         else count = payService.cancelPostPaid(findReservation.getReserveId(), 0);
 
