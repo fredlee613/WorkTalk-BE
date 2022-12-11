@@ -39,6 +39,9 @@ dependencies {
 	implementation 'com.github.iamport:iamport-rest-client-java:0.2.22'
 	implementation 'org.postgresql:postgresql:42.5.1'
 	implementation 'io.awspring.cloud:spring-cloud-starter-aws:2.3.1'
+	implementation group: 'io.springfox', name: 'springfox-swagger-ui', version: '2.9.2'
+	implementation group: 'io.springfox', name: 'springfox-swagger2', version: '2.9.2'
+
 
 	compileOnly 'org.projectlombok:lombok'
 	developmentOnly 'org.springframework.boot:spring-boot-devtools'

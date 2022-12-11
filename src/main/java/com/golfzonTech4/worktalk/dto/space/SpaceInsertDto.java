@@ -3,11 +3,13 @@ package com.golfzonTech4.worktalk.dto.space;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.ToString;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.constraints.NotEmpty;
+import java.util.List;
 
-@Getter @Setter @NoArgsConstructor
+@Getter @Setter @NoArgsConstructor @ToString
 public class SpaceInsertDto {
 
     private Long memberId;
@@ -35,6 +37,6 @@ public class SpaceInsertDto {
 
     private int spaceType;
 
-    MultipartFile multipartFile;
+    List<MultipartFile> multipartFileList;
 
 }

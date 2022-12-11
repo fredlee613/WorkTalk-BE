@@ -4,9 +4,11 @@ import com.golfzonTech4.worktalk.domain.RoomType;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
+import java.util.List;
 
 @Getter @Setter @NoArgsConstructor
 public class RoomInsertDto {
@@ -32,5 +34,7 @@ public class RoomInsertDto {
 
     @NotNull(message = "종료시간을 입력해주세요")
     private int workEnd;
+
+    List<MultipartFile> multipartFileList;
 
 }

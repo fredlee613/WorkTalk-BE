@@ -1,25 +1,24 @@
 package com.golfzonTech4.worktalk.dto.space;
 
-import lombok.Getter;
+import com.querydsl.core.annotations.QueryProjection;
+import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 import org.springframework.web.multipart.MultipartFile;
 
-@Getter @Setter @NoArgsConstructor
+@Data
+@NoArgsConstructor
 public class SpaceImgDto {
 
     private Long spaceImgId;
 
-    private String imgUrl;
-
-    private MultipartFile multipartFile;
+    private String spaceImgUrl;
 
     private Long spaceId;
 
-    public SpaceImgDto(Long spaceImgId, String imgUrl, MultipartFile multipartFile, Long spaceId) {
+    @QueryProjection
+    public SpaceImgDto(Long spaceImgId, String spaceImgUrl, Long spaceId) {
         this.spaceImgId = spaceImgId;
-        this.imgUrl = imgUrl;
-        this.multipartFile = multipartFile;
+        this.spaceImgUrl = spaceImgUrl;
         this.spaceId = spaceId;
     }
 }

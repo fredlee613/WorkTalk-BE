@@ -7,10 +7,10 @@ import com.golfzonTech4.worktalk.domain.SpaceImg;
 import com.golfzonTech4.worktalk.dto.space.*;
 import com.golfzonTech4.worktalk.repository.ListResult;
 import com.golfzonTech4.worktalk.repository.ReviewRepository;
-import com.golfzonTech4.worktalk.repository.RoomRepository;
 import com.golfzonTech4.worktalk.repository.member.MemberRepository;
 import com.golfzonTech4.worktalk.repository.space.SpaceImgRepository;
 import com.golfzonTech4.worktalk.repository.space.SpaceRepository;
+import com.golfzonTech4.worktalk.util.SecurityUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
@@ -32,59 +32,68 @@ import java.util.Optional;
 public class SpaceService {
 
     private final MemberRepository memberRepository;
-
-    private final MemberService memberService;
-
     private final SpaceRepository spaceRepository;
     private final SpaceImgRepository spaceImgRepository;
     private final ReviewRepository reviewRepository;
-
-    private final RoomRepository roomRepository;
     private final AwsS3Service awsS3Service;
 
     //사무공간 등록
     @Transactional
-    public Space createSpace(SpaceInsertDto dto) {
+    public Long createSpace(SpaceInsertDto dto) {
+        log.info("createSpace : {}", dto);
+        Optional<String> currentUsername = SecurityUtil.getCurrentUsername();
 
-        Optional<Member> member = memberRepository.findByName(dto.getName());
+        Optional<Member> member = memberRepository.findByName(currentUsername.get());
 
-        if (!member.isPresent()) {
-            throw new EntityNotFoundException("Member Not Found");
-        }
         if (member.get().getActivated() == 0) {
             throw new EntityNotFoundException("계정 승인이 완료되면 이용할 수 있어요");
+        }
+
+        List<String> imageurlList = new ArrayList<>();
+        if (!dto.getMultipartFileList().isEmpty()) {
+            imageurlList.addAll(awsS3Service.upload(dto.getMultipartFileList()));
+        } else {
+            imageurlList.add(null);
         }
 
         Space spaceToCreate = new Space();
         BeanUtils.copyProperties(dto, spaceToCreate);
         spaceToCreate.setMember(member.get());
-        return spaceRepository.save(spaceToCreate);
-
-    }
-
-    //사무공간 다중이미지 등록
-    @Transactional
-    public Long uploadSpaceImage(SpaceImgDto dto, List<MultipartFile> multipartFileList) {
-
-        Space findSpace = spaceRepository.findBySpaceId(dto.getSpaceId());
-        List<String> imageurlList = new ArrayList<>();
-        if (multipartFileList.size() > 0) {
-            imageurlList.addAll(awsS3Service.upload(multipartFileList));
-        } else {
-            imageurlList.add(null);
-        }
+        spaceRepository.save(spaceToCreate);
 
         for (String imageurl : imageurlList) {
             SpaceImg spaceImgToCreate = new SpaceImg();
             BeanUtils.copyProperties(dto, spaceImgToCreate);
-            spaceImgToCreate.setSpace(findSpace);
+            spaceImgToCreate.setSpace(spaceToCreate);
             spaceImgToCreate.setSpaceImgUrl(imageurl);
             spaceImgRepository.save(spaceImgToCreate);
         }
-
-        return findSpace.getSpaceId();
-
+        return spaceToCreate.getSpaceId();
     }
+
+    //사무공간 다중이미지 등록
+//    @Transactional
+//    public Long uploadSpaceImage(SpaceImgDto dto, List<MultipartFile> multipartFileList) {
+//
+//        Space findSpace = spaceRepository.findBySpaceId(dto.getSpaceId());
+//        List<String> imageurlList = new ArrayList<>();
+//        if (multipartFileList.size() > 0) {
+//            imageurlList.addAll(awsS3Service.upload(multipartFileList));
+//        } else {
+//            imageurlList.add(null);
+//        }
+//
+//        for (String imageurl : imageurlList) {
+//            SpaceImg spaceImgToCreate = new SpaceImg();
+//            BeanUtils.copyProperties(dto, spaceImgToCreate);
+//            spaceImgToCreate.setSpace(findSpace);
+//            spaceImgToCreate.setSpaceImgUrl(imageurl);
+//            spaceImgRepository.save(spaceImgToCreate);
+//        }
+//
+//        return findSpace.getSpaceId();
+//
+//    }
 
     //사무공간 수정
     @Transactional

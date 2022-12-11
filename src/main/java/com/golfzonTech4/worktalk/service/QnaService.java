@@ -6,7 +6,7 @@ import com.golfzonTech4.worktalk.domain.Space;
 import com.golfzonTech4.worktalk.dto.qna.QnaDetailDto;
 import com.golfzonTech4.worktalk.dto.qna.QnaInsertDto;
 import com.golfzonTech4.worktalk.dto.qna.QnaUpdateDto;
-import com.golfzonTech4.worktalk.repository.QnaRepository;
+import com.golfzonTech4.worktalk.repository.qna.QnaRepository;
 import com.golfzonTech4.worktalk.repository.space.SpaceRepository;
 import com.golfzonTech4.worktalk.util.SecurityUtil;
 import lombok.RequiredArgsConstructor;
