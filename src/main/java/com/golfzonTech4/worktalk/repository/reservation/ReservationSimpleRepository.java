@@ -19,7 +19,7 @@ public interface ReservationSimpleRepository extends JpaRepository<Reservation, 
 
     @Query("select " +
             "new com.golfzonTech4.worktalk.dto.reservation.ReserveSimpleDto" +
-            "(ro.roomName, r.paid, r.reserveId,m.id, ro.roomId, b, m.name, r.reserveStatus, r.paymentStatus, ro.roomType, r.reserveAmount)" +
+            "(ro.roomName, r.paid, r.reserveId,m.id, ro.roomId, b, m.name, r.reserveStatus, r.paymentStatus, ro.roomType, r.reserveAmount, r.cancelReason)" +
             "from Reservation r " +
             "join r.member m " +
             "join r.bookDate b " +

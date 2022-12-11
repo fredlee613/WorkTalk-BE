@@ -1,26 +1,32 @@
 package com.golfzonTech4.worktalk.controller;
 
+import com.golfzonTech4.worktalk.domain.MemberType;
 import com.golfzonTech4.worktalk.domain.MyIamport;
 import com.golfzonTech4.worktalk.dto.pay.PayInsertDto;
 import com.golfzonTech4.worktalk.dto.pay.PayOrderSearch;
+import com.golfzonTech4.worktalk.dto.pay.PaySimpleDto;
 import com.golfzonTech4.worktalk.dto.pay.PayWebhookDto;
 import com.golfzonTech4.worktalk.repository.ListResult;
+import com.golfzonTech4.worktalk.repository.pay.PayRepository;
 import com.golfzonTech4.worktalk.service.PayService;
+import com.golfzonTech4.worktalk.util.SecurityUtil;
 import com.siot.IamportRestClient.exception.IamportResponseException;
-import com.siot.IamportRestClient.response.Payment;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
+import java.util.Set;
 
 @RestController
 @Slf4j
 @RequiredArgsConstructor
 public class PayController {
     private final PayService payService;
+    private final PayRepository payRepository;
     private final MyIamport myIamport;
 
     /**
@@ -44,6 +50,15 @@ public class PayController {
             log.info("heading to postpaid....");
             payService.postpaid(dto);}
 
+    }
+
+    /**
+     * 결제건이 있는 방들의 이름 조회 요청
+     */
+    @GetMapping("/payments/rooms")
+    public ResponseEntity<Set<String>> findRooms() {
+        log.info("findRooms");
+        return ResponseEntity.ok(payService.findRooms());
     }
 
     /**

@@ -80,6 +80,11 @@ public class ReservationService {
         log.info("validating time....");
         validateDateTime(findRoom.getRoomType(), temp.getBookDate());
 
+        // 가격 검증
+        if (!validAmount(payDto.getReserveAmount(), findRoom, temp.getBookDate(), payDto.getMileageUsage())) {
+            throw new IllegalArgumentException("잘못된 가격값입니다.");
+        }
+
         PaymentStatus paymentStatus;
         if (payDto.getPayStatus() == PaymentStatus.DEPOSIT || payDto.getPayStatus() == PaymentStatus.PREPAID) {
             paymentStatus = PaymentStatus.PREPAID;
@@ -88,6 +93,7 @@ public class ReservationService {
         }
         Reservation reservation = Reservation.makeReservation(
                 findMember, findRoom, temp.getBookDate(), payDto.getReserveAmount(), paymentStatus);
+
         Reservation result = reservationRepository.save(reservation);
         payDto.setReserveId(result.getReserveId());
 
@@ -266,7 +272,7 @@ public class ReservationService {
             PageImpl<ReserveSimpleDto> result = reservationSimpleRepository.findAllByUserPage(name, pageRequest, dto.getReserveStatus(), dto.getSpaceType());
             return new ListResult(result.getTotalElements(), result.getContent());
         } else {
-            PageImpl<ReserveSimpleDto> result = reservationRepositoryQuery.findAllByHost(name, dto.getPaid(), dto.getRoomType(), dto.getPaymentStatus(), pageRequest);
+            PageImpl<ReserveSimpleDto> result = reservationSimpleRepository.findAllByHostPage(name, pageRequest, dto.getReserveStatus(), dto.getSpaceType());
             return new ListResult(result.getTotalElements(), result.getContent());
         }
     }
@@ -321,5 +327,17 @@ public class ReservationService {
     public void end(Long reserveId) {
         Reservation findReservation = reservationRepository.findById(reserveId).get();
         findReservation.setReserveStatus(ReserveStatus.USED);
+    }
+
+    static boolean validAmount(int actualAmount, Room room, BookDate bookDate, int mileageUsage) {
+        log.info("validAmount : {}, {}, {}, {}", actualAmount, room, bookDate, mileageUsage);
+        int period;
+        if (room.getRoomType() == RoomType.OFFICE)  period = BookDate.getPeriodDate(bookDate.getCheckOutDate(), bookDate.getCheckInDate());
+        else  period = BookDate.getPeriodHours(bookDate.getCheckInTime(), bookDate.getCheckOutTime());
+        int expectedAmount = room.getRoomPrice() * period - mileageUsage;
+        log.info("expectedAmount : {}", expectedAmount);
+        if (actualAmount == expectedAmount) {
+            return true;
+        } else return false;
     }
 }

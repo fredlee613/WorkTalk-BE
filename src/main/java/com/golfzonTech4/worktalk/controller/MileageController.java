@@ -15,14 +15,14 @@ public class MileageController {
 
     public final MileageService mileageService;
 
-    @GetMapping("mileage/")
+    @GetMapping("/mileage")
     public ResponseEntity<ListResult> findAll() {
         log.info("findAll");
         ListResult result = mileageService.findAllByName();
         return ResponseEntity.ok(result);
     }
 
-    @GetMapping("mileage/total")
+    @GetMapping("/mileage/total")
     public ResponseEntity<Integer> getTotal() {
         log.info("getTotal");
         int total = mileageService.getTotal();

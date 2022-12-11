@@ -53,7 +53,8 @@ public class ReservationSimpleRepositoryImpl implements ReservationSimpleReposit
                         reservation.reserveStatus,
                         reservation.paymentStatus,
                         reservation.room.roomType,
-                        reservation.reserveAmount)
+                        reservation.reserveAmount,
+                        reservation.cancelReason)
                 )
                 .from(reservation)
                 .where(reservation.member.name.eq(name), eqPaid(paid), eqPayStatus(paymentStatus), eqReserveStatus(reserveStatus))
@@ -78,7 +79,8 @@ public class ReservationSimpleRepositoryImpl implements ReservationSimpleReposit
                         reservation.reserveStatus,
                         reservation.paymentStatus,
                         reservation.room.roomType,
-                        reservation.reserveAmount)
+                        reservation.reserveAmount,
+                        reservation.cancelReason)
                 )
                 .from(reservation)
                 .where(reservation.member.name.eq(name), eqReserveStatus(reserveStatus), eqSpaceType(spaceType))
@@ -104,6 +106,32 @@ public class ReservationSimpleRepositoryImpl implements ReservationSimpleReposit
                 .from(reservation)
                 .where(reservation.member.name.eq(name), eqReserveStatus(reserveStatus), eqSpaceType(spaceType))
                 .fetchOne();
+        return new PageImpl<>(content, pageRequest, count);
+    }
+
+    @Override
+    public PageImpl<ReserveSimpleDto> findAllByHostPage(String name, PageRequest pageRequest, ReserveStatus reserveStatus, Integer spaceType) {
+        log.info("findAllByHostPage : {}, {}, {}, {}", name, pageRequest, reserveStatus, spaceType);
+
+        List<ReserveSimpleDto> content = queryFactory.select(new QReserveSimpleDto(room.roomName, reservation.paid, reservation.reserveId,
+                        reservation.member.id, room.roomId, reservation.bookDate, reservation.member.name, reservation.reserveStatus,
+                        reservation.paymentStatus, room.roomType, reservation.reserveAmount, reservation.cancelReason))
+                .from(reservation)
+                .innerJoin(room).on(reservation.room.roomId.eq(room.roomId))
+                .innerJoin(space).on(room.space.spaceId.eq(space.spaceId))
+                .where(space.member.name.eq(name), eqReserveStatus(reserveStatus), eqSpaceType(spaceType))
+                .orderBy(reservation.reserveId.desc())
+                .offset(pageRequest.getOffset())
+                .limit(pageRequest.getPageSize())
+                .fetch();
+
+        Long count = queryFactory.select(reservation.count())
+                .from(reservation)
+                .innerJoin(room).on(reservation.room.roomId.eq(room.roomId))
+                .innerJoin(space).on(room.space.spaceId.eq(space.spaceId))
+                .where(space.member.name.eq(name), eqReserveStatus(reserveStatus), eqSpaceType(spaceType))
+                .fetchOne();
+
         return new PageImpl<>(content, pageRequest, count);
     }
 

@@ -74,13 +74,4 @@ public class Reservation {
         reservation.setReserveAmount(amount);
         return reservation;
     }
-
-    private static int calAmount(Room room, BookDate bookDate) {
-        int period;
-        if (room.getRoomType() == RoomType.OFFICE)  period = BookDate.getPeriodDate(bookDate.getCheckOutDate(), bookDate.getCheckInDate());
-        else  period = BookDate.getPeriodHours(bookDate.getCheckInTime(), bookDate.getCheckOutTime());
-
-        return room.getRoomPrice() * period;
-    }
-
 }

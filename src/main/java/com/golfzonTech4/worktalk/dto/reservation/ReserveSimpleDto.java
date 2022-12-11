@@ -20,7 +20,7 @@ public class ReserveSimpleDto {
     private int paid;
     private Long reserveId;
     private Long memberId;
-    private Long rooomId;
+    private Long roomId;
     private BookDate bookDate;
     private String name;
     private ReserveStatus reserveStatus;
@@ -29,28 +29,32 @@ public class ReserveSimpleDto {
     private int reserveAmount;
     private List<PayDto> pays;
 
+    private String cancelReason;
+
     @QueryProjection
-    public ReserveSimpleDto(String roomName, int paid, Long reserveId, Long memberId, Long rooomId, BookDate bookDate, String name, ReserveStatus reserveStatus, PaymentStatus paymentStatus, RoomType roomType, int reserveAmount) {
+    public ReserveSimpleDto(String roomName, int paid, Long reserveId, Long memberId, Long roomId, BookDate bookDate, String name,
+                            ReserveStatus reserveStatus, PaymentStatus paymentStatus, RoomType roomType, int reserveAmount, String cancelReason) {
         this.roomName = roomName;
         this.paid = paid;
         this.reserveId = reserveId;
         this.memberId = memberId;
-        this.rooomId = rooomId;
+        this.roomId = roomId;
         this.bookDate = bookDate;
         this.name = name;
         this.reserveStatus = reserveStatus;
         this.paymentStatus = paymentStatus;
         this.roomType = roomType;
         this.reserveAmount = reserveAmount;
+        this.cancelReason = cancelReason;
     }
 
     @QueryProjection
-    public ReserveSimpleDto(String roomName, int paid, Long reserveId, Long memberId, Long rooomId, BookDate bookDate, String name, ReserveStatus reserveStatus, PaymentStatus paymentStatus, RoomType roomType, int reserveAmount, List<PayDto> pays) {
+    public ReserveSimpleDto(String roomName, int paid, Long reserveId, Long memberId, Long roomId, BookDate bookDate, String name, ReserveStatus reserveStatus, PaymentStatus paymentStatus, RoomType roomType, int reserveAmount, List<PayDto> pays) {
         this.roomName = roomName;
         this.paid = paid;
         this.reserveId = reserveId;
         this.memberId = memberId;
-        this.rooomId = rooomId;
+        this.roomId = roomId;
         this.bookDate = bookDate;
         this.name = name;
         this.reserveStatus = reserveStatus;

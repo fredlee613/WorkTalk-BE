@@ -32,6 +32,7 @@ import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 
@@ -80,7 +81,7 @@ public class PayService {
      * 선결제 데이터 DB 등록 로직
      * 선결제 관련 마일리지 등록 및 사용 로직
      */
-    @Transactional
+    @Transactional(rollbackFor = {Exception.class})
     public Long prepaid(PayInsertDto dto) throws IamportResponseException, IOException {
         log.info("prepaid: {}", dto);
         // 가격 검증
@@ -141,7 +142,7 @@ public class PayService {
         scheduleData.addSchedule(scheduleEntry);
 
         IamportResponse<List<Schedule>> response = myIamport.getClient().subscribeSchedule(scheduleData); // 예약 결제
-
+        log.info("result >>> {}", response.getMessage());
 
         Pay bookedPay = Pay.builder().reservation(findReservation).merchantUid(merchant_uid)
                 .customerUid(dto.getCustomer_uid()).payStatus(PaymentStatus.POSTPAID_BOOKED).payAmount(balance).build();
@@ -308,7 +309,7 @@ public class PayService {
      * 웹훅을 수신한 예약 결제 데이터를 저장하는 로직
      * 기존에 예약 되어있던 결제 예약 데이터를 상태/고유 번호를 수정
      */
-    @Transactional
+    @Transactional(rollbackFor = {Exception.class})
     public void postpaid(PayWebhookDto dto) throws IamportResponseException, IOException {
         log.info("postpaid: {}}", dto);
         IamportClient client = myIamport.getClient();
@@ -330,7 +331,6 @@ public class PayService {
             log.info("status : {}", status);
             Pay findPay = payRepository.findByCustomerUid(paidPay.getCustomerUid()).get();
             LocalDateTime payDate = paidPay.getPaidAt().toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime().plusDays(3);
-
             ScheduleEntry scheduleEntry = new ScheduleEntry(paidPay.getMerchantUid(),
                     Timestamp.valueOf(payDate), // 지난 결제 시점에서 3일 후 결제 예약
                     paidPay.getAmount()); // 자동 결제 금액 설정 (총 금액의 80프로)
@@ -347,17 +347,31 @@ public class PayService {
     }
 
     /**
-     * 사용자 결제 내역 전체 조회
+     * 결제건이 있는 방들의 이름 조회
+     */
+    public HashSet<String> findRooms() {
+        log.info("findRooms: {}, {}");
+        String name = SecurityUtil.getCurrentUsername().get();
+        List<PaySimpleDto> rooms = payRepository.findRooms(name);
+        HashSet<String> result = new HashSet<>();
+        for (PaySimpleDto room : rooms) {
+            result.add(room.getRoomName());
+        }
+        return result;
+    }
+
+    /**
+     * 결제 내역 전체 조회 (사용자, 호스트)
      */
     public ListResult findByName(PayOrderSearch dto, PageRequest pageRequest) {
         log.info("findByName: {}, {}");
         String name = SecurityUtil.getCurrentUsername().get();
         String role = SecurityUtil.getCurrentUserRole().get();
         if (role.equals(MemberType.ROLE_USER.toString())) {
-            PageImpl<PaySimpleDto> result = payRepositoryQuery.findAllByUser(name, dto.getReserveDate(), dto.getPayStatus(), pageRequest);
+            PageImpl<PaySimpleDto> result = payRepository.findByUser(name,dto.getReserveDate(), dto.getPayStatus(), pageRequest);
             return new ListResult<>(result.getTotalElements(), result.getContent());
         } else {
-            PageImpl<PaySimpleDto> result = payRepositoryQuery.findAllByHost(name, dto.getReserveDate(), pageRequest);
+            PageImpl<PaySimpleDto> result = payRepository.findByHost(name, dto.getReserveDate(), dto.getPayStatus(), dto.getSpaceType(), dto.getRoomName() ,pageRequest);
             return new ListResult<>(result.getTotalElements(), result.getContent());
         }
     }

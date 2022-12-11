@@ -1,6 +1,7 @@
 package com.golfzonTech4.worktalk.repository.reservation;
 
 import com.golfzonTech4.worktalk.domain.PaymentStatus;
+import com.golfzonTech4.worktalk.domain.Reservation;
 import com.golfzonTech4.worktalk.domain.ReserveStatus;
 import com.golfzonTech4.worktalk.dto.reservation.ReserveCheckDto;
 import com.golfzonTech4.worktalk.dto.reservation.ReserveSimpleDto;
@@ -18,6 +19,9 @@ public interface ReservationSimpleRepositoryCustom {
 
     public ListResult findAllByUser(String name, Integer paid, PaymentStatus paymentStatus, ReserveStatus reserveStatus);
     PageImpl<ReserveSimpleDto> findAllByUserPage(String name, PageRequest pageRequest,
+                                                 ReserveStatus reserveStatus, Integer spaceType);
+
+    PageImpl<ReserveSimpleDto> findAllByHostPage(String name, PageRequest pageRequest,
                                                  ReserveStatus reserveStatus, Integer spaceType);
     List<ReserveSimpleDto> findAllByTime();
     Long countNoShow(Long memberId, ReserveStatus reserveStatus);
