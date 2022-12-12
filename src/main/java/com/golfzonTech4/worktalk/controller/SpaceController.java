@@ -7,6 +7,7 @@ import com.golfzonTech4.worktalk.service.SpaceService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -36,7 +37,7 @@ public class SpaceController {
     }
 
     //호스트의 사무공간 등록
-    @PostMapping("/host/spaceCreate")
+    @PostMapping(value = "/host/spaceCreate", consumes={MediaType.MULTIPART_FORM_DATA_VALUE} )
     public ResponseEntity<Space> createSpace(@Valid SpaceInsertDto dto){
         log.info("createSpace : {}", dto);
         spaceService.createSpace(dto);
