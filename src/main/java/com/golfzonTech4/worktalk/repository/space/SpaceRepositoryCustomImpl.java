@@ -1,10 +1,8 @@
 package com.golfzonTech4.worktalk.repository.space;
 
+import com.golfzonTech4.worktalk.domain.QReservation;
 import com.golfzonTech4.worktalk.domain.QSpace;
-import com.golfzonTech4.worktalk.dto.space.QSpaceImgDto;
-import com.golfzonTech4.worktalk.dto.space.QSpaceMainDto;
-import com.golfzonTech4.worktalk.dto.space.SpaceImgDto;
-import com.golfzonTech4.worktalk.dto.space.SpaceMainDto;
+import com.golfzonTech4.worktalk.dto.space.*;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.extern.slf4j.Slf4j;
@@ -12,10 +10,14 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 
 import javax.persistence.EntityManager;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import static com.golfzonTech4.worktalk.domain.QReservation.reservation;
+import static com.golfzonTech4.worktalk.domain.QRoom.room;
 import static com.golfzonTech4.worktalk.domain.QSpace.space;
 import static com.golfzonTech4.worktalk.domain.QSpaceImg.spaceImg;
 
@@ -30,7 +32,7 @@ public class SpaceRepositoryCustomImpl implements SpaceRepositoryCustom{
     }
 
     @Override
-    public PageImpl<SpaceMainDto> getMainSpacePage(PageRequest pageRequest, Integer spaceType, String spaceName, String address) {
+    public PageImpl<SpaceMainDto> getMainSpacePage(PageRequest pageRequest, SpaceSearchDto dto) {
 
         QSpace space = QSpace.space;
 //        QSpaceImg spaceImg = QSpaceImg.spaceImg;
@@ -42,10 +44,19 @@ public class SpaceRepositoryCustomImpl implements SpaceRepositoryCustom{
                                 space.spaceName,
                                 space.address,
                                 space.detailAddress,
-                                space.spaceType)
+                                space.spaceType,
+                                reservation.bookDate.checkInDate,
+                                reservation.bookDate.checkOutDate,
+                                reservation.bookDate.checkInTime,
+                                reservation.bookDate.checkOutTime)
                 )
                 .from(space)
-                .where(eqSpaceType(spaceType), containName(spaceName), containAddress(address), space.spaceStatus.eq("approved"))
+                .join(room).on(room.space.spaceId.eq(space.spaceId))
+                .join(reservation).on(reservation.room.roomId.eq(room.roomId))
+                .where(eqSpaceType(dto.getSearchSpaceType()), containName(dto.getSearchSpaceName()),
+                        containAddress(dto.getSearchAddress()), space.spaceStatus.eq("approved"),
+                        possibleDate(dto.getSearchSpaceType(), dto.getSearchStartDate(),
+                                dto.getSearchEndDate(), dto.getSearchStartTime(), dto.getSearchEndTime()))
                 .orderBy(space.spaceId.desc())
                 .offset(pageRequest.getOffset())
                 .limit(pageRequest.getPageSize())
@@ -65,31 +76,48 @@ public class SpaceRepositoryCustomImpl implements SpaceRepositoryCustom{
         long total = queryFactory
                 .select(space.count())
                 .from(space)
-                .where(eqSpaceType(spaceType), containName(spaceName), containAddress(address), space.spaceStatus.eq("approved"))
+                .join(room).on(room.space.spaceId.eq(space.spaceId))
+                .join(reservation).on(reservation.room.roomId.eq(room.roomId))
+                .where(eqSpaceType(dto.getSearchSpaceType()), containName(dto.getSearchSpaceName()),
+                        containAddress(dto.getSearchAddress()), space.spaceStatus.eq("approved"),
+                        possibleDate(dto.getSearchSpaceType(), dto.getSearchStartDate(),
+                                dto.getSearchEndDate(), dto.getSearchStartTime(), dto.getSearchEndTime()))
                 .fetchOne();
 
         return new PageImpl<>(content, pageRequest, total);
     }
 
-    private BooleanExpression eqSpaceType(Integer spaceType) {
-        if(spaceType == null) {
+    private BooleanExpression eqSpaceType(Integer searchSpaceType) {
+        if(searchSpaceType == null) {
             return null;
         }
-        return space.spaceType.eq(spaceType);
+        return space.spaceType.eq(searchSpaceType);
     }
 
-    private BooleanExpression containName(String spaceName) {
-        if(spaceName == null || spaceName.isEmpty()) {
+    private BooleanExpression containName(String searchSpaceName) {
+        if(searchSpaceName == null || searchSpaceName.isEmpty()) {
             return null;
         }
-        return space.spaceName.containsIgnoreCase(spaceName);
+        return space.spaceName.containsIgnoreCase(searchSpaceName);
     }
 
-    private BooleanExpression containAddress(String address) {
-        if(address == null || address.isEmpty()) {
+    private BooleanExpression containAddress(String searchAddress) {
+        if(searchAddress == null || searchAddress.isEmpty()) {
             return null;
         }
-        return space.address.containsIgnoreCase(address);
+        return space.address.containsIgnoreCase(searchAddress);
+    }
+
+    private BooleanExpression possibleDate(Integer spaceType, LocalDate searchStartDate, LocalDate searchEndDate,
+                                           Integer searchStartTime, Integer searchEndTime){
+        if(spaceType == 1){
+            return reservation.bookDate.checkInDate.notBetween(searchStartDate, searchEndDate)
+                    .or(reservation.bookDate.checkOutDate.notBetween(searchStartDate, searchEndDate));
+        } else{
+            return reservation.bookDate.checkInDate.eq(searchStartDate)
+                    .and(reservation.bookDate.checkInTime.notBetween(searchStartTime, searchEndTime))
+                    .or(reservation.bookDate.checkOutTime.notBetween(searchStartTime, searchEndTime));
+        }
     }
 
 

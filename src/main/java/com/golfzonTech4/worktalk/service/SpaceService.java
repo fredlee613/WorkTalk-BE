@@ -141,7 +141,7 @@ public class SpaceService {
 
     //유저-사무공간 리스트 조회
     public ListResult getMainSpacePage(PageRequest pageRequest, SpaceSearchDto dto) {
-        PageImpl<SpaceMainDto> result = spaceRepository.getMainSpacePage(pageRequest, dto.getSearchSpaceType(), dto.getSearchSpaceName(), dto.getSearchAddress());
+        PageImpl<SpaceMainDto> result = spaceRepository.getMainSpacePage(pageRequest, dto);
         return new ListResult(result.getTotalElements(), getSpaceList(result.getContent()));
 //        List<ListResult> spaceList = spaceRepository.findBySpaceId(spaceList.get());
     }

@@ -5,6 +5,7 @@ import com.querydsl.core.annotations.QueryProjection;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -28,13 +29,23 @@ public class SpaceMainDto {
 
     private int count;
 
+    private LocalDate checkInDate;
+    private LocalDate checkOutDate;
+    private int checkInTime;
+    private int checkOutTime;
+
     @QueryProjection
-    public SpaceMainDto(Long spaceId, String spaceName, String address, String detailAddress, int spaceType) {
+    public SpaceMainDto(Long spaceId, String spaceName, String address, String detailAddress, int spaceType,
+                        LocalDate checkInDate, LocalDate checkOutDate, int checkInTime, int checkOutTime) {
         this.spaceId = spaceId;
         this.spaceName = spaceName;
         this.address = address;
         this.detailAddress = detailAddress;
         this.spaceType = spaceType;
+        this.checkInDate = checkInDate;
+        this.checkOutDate = checkOutDate;
+        this.checkInTime = checkInTime;
+        this.checkOutTime = checkOutTime;
     }
 
     @QueryProjection
@@ -48,5 +59,14 @@ public class SpaceMainDto {
         this.spaceImgList = spaceImgList;
         this.gradeAvg = gradeAvg;
         this.count = count;
+    }
+
+    @QueryProjection
+    public SpaceMainDto(Long spaceId, String spaceName, String address, String detailAddress, int spaceType) {
+        this.spaceId = spaceId;
+        this.spaceName = spaceName;
+        this.address = address;
+        this.detailAddress = detailAddress;
+        this.spaceType = spaceType;
     }
 }
