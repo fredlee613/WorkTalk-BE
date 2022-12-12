@@ -20,21 +20,21 @@ public class CustomerCenterController {
 
     private final CustomerCenterService customerCenterService;
 
-    //마스터페이지에서 1대1문의 리스트 출력 - 유저 / 호스트 sorting
+    //마스터페이지에서 1대1문의 리스트 출력 - 유저 / 호스트 sorting, 문의타입 sorting
     @GetMapping("/customerCenter")
     public ResponseEntity customerCenterMasterPage(@ModelAttribute CustomerCenterSearchDto dto){
         return ResponseEntity.ok(customerCenterService.getccMasterManage(dto));
     }
 
     //마스터페이지에서 1대1문의 문의타입 sorting
-    @GetMapping("/customerCenter/type")
-    public ResponseEntity customerCenterMasterccType(@ModelAttribute CustomerCenterSearchDto dto){
-        return ResponseEntity.ok(customerCenterService.getccMasterManage(dto));
-    }
+//    @GetMapping("/customerCenter/type")
+//    public ResponseEntity customerCenterMasterccType(@ModelAttribute CustomerCenterSearchDto dto){
+//        return ResponseEntity.ok(customerCenterService.getccMasterManage(dto));
+//    }
 
     //마이페이지에서 1대1문의 리스트 출력
     @GetMapping("/myCustomerCenter")
-    public ResponseEntity myPageQnas(){
+    public ResponseEntity myPageccList(){
         return ResponseEntity.ok(customerCenterService.getMyCustomerCenterList());
     }
 
@@ -49,7 +49,7 @@ public class CustomerCenterController {
 
     //1대1문의 수정
     @PostMapping("/ccUpdate/{ccId}")
-    public ResponseEntity<Qna> updateQna(@Valid @RequestBody CustomerCenterUpdateDto dto, @PathVariable Long ccId){
+    public ResponseEntity<Qna> updateCc(@Valid @RequestBody CustomerCenterUpdateDto dto, @PathVariable Long ccId){
 
         customerCenterService.updateCustomerCenter(ccId, dto);
 
@@ -57,8 +57,8 @@ public class CustomerCenterController {
     }
 
     //1대1문의 삭제
-    @GetMapping("/ccDelete/{ccId}")
-    public ResponseEntity<Void> deleteQna(@PathVariable Long ccId){
+    @DeleteMapping("/ccDelete/{ccId}")
+    public ResponseEntity<Void> deleteCc(@PathVariable Long ccId){
         customerCenterService.deleteCustomerCenter(ccId);
         return ResponseEntity.ok().build();
     }
