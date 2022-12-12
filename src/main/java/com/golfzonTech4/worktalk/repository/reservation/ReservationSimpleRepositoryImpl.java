@@ -28,6 +28,7 @@ import static com.golfzonTech4.worktalk.domain.QPay.pay;
 import static com.golfzonTech4.worktalk.domain.QReservation.reservation;
 import static com.golfzonTech4.worktalk.domain.QRoom.room;
 import static com.golfzonTech4.worktalk.domain.QSpace.space;
+import static com.golfzonTech4.worktalk.domain.QTempReservation.tempReservation;
 
 @Slf4j
 public class ReservationSimpleRepositoryImpl implements ReservationSimpleRepositoryCustom {
@@ -190,7 +191,7 @@ public class ReservationSimpleRepositoryImpl implements ReservationSimpleReposit
 
     @Override
     public List<ReserveCheckDto> findBookedRoom(Long roomId, LocalDate initDate) {
-        log.info("findBookedOffice : {}, {}, {}, {}", roomId, initDate);
+        log.info("findBookedOffice : {}, {}", roomId, initDate);
         return queryFactory.select(new QReserveCheckDto(
                         reservation.room.roomId,
                         reservation.bookDate.checkInDate,
@@ -202,6 +203,31 @@ public class ReservationSimpleRepositoryImpl implements ReservationSimpleReposit
                 .where(reservation.bookDate.checkInDate.eq(initDate)
                         .and(reservation.room.roomId.eq(roomId))
                         .and(reservation.room.roomType.ne(RoomType.OFFICE)))
+                .fetch();
+    }
+
+    @Override
+    public List<ReserveCheckDto> checkBookedRoom(Long roomId, LocalDate initDate, Integer checkInTime, Integer checkOutTime) {
+        log.info("checkBookedRoom : {}, {}, {}, {}", roomId, initDate, checkInTime, checkOutTime);
+        return queryFactory.select(new QReserveCheckDto(
+                        reservation.room.roomId,
+                        reservation.bookDate.checkInDate,
+                        reservation.bookDate.checkOutDate,
+                        reservation.bookDate.checkInTime,
+                        reservation.bookDate.checkOutTime
+                ))
+                .from(reservation)
+                .where(reservation.bookDate.checkInDate.eq(initDate)
+                        .and(reservation.room.roomId.eq(roomId))
+                        .and(reservation.room.roomType.ne(RoomType.OFFICE))
+                        .and(reservation.bookDate.checkInTime.between(checkInTime, checkOutTime)
+                                .or(reservation.bookDate.checkInTime.loe(checkInTime)
+                                        .and(reservation.bookDate.checkOutTime.goe(checkOutTime)))
+                                .or(reservation.bookDate.checkInTime.loe(checkInTime)
+                                        .and(reservation.bookDate.checkOutTime.between(checkInTime, checkOutTime)))
+                                .or(reservation.bookDate.checkInTime.loe(checkInTime)
+                                        .and(reservation.bookDate.checkOutTime.goe(checkOutTime))))
+                )
                 .fetch();
     }
 

@@ -1,9 +1,11 @@
 package com.golfzonTech4.worktalk.controller;
 
 import com.golfzonTech4.worktalk.domain.MemberType;
-import com.golfzonTech4.worktalk.domain.Reservation;
 import com.golfzonTech4.worktalk.dto.pay.PayInsertDto;
-import com.golfzonTech4.worktalk.dto.reservation.*;
+import com.golfzonTech4.worktalk.dto.reservation.ReserveCheckDto;
+import com.golfzonTech4.worktalk.dto.reservation.ReserveDto;
+import com.golfzonTech4.worktalk.dto.reservation.ReserveOrderSearch;
+import com.golfzonTech4.worktalk.dto.reservation.ReserveTempDto;
 import com.golfzonTech4.worktalk.repository.ListResult;
 import com.golfzonTech4.worktalk.repository.member.MemberRepository;
 import com.golfzonTech4.worktalk.repository.reservation.ReservationSimpleRepository;

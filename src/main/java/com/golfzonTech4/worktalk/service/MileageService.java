@@ -116,10 +116,14 @@ public class MileageService {
         log.info("getTotal : {}");
         String currentUser = SecurityUtil.getCurrentUsername().get();
         Member findMember = memberRepository.findByName(currentUser).get();
+
         Integer totalSave = mileageRepository.getTotalSave(findMember.getId());
+        totalSave = totalSave == null ? 0 : totalSave;
+
         Integer totalUse = mileageRepository.getTotalUse(findMember.getId());
-        int total = 0;
-        if (totalSave != null && totalUse != null) total = totalSave - totalUse;
+        totalUse = totalUse == null ? 0 : totalUse;
+
+        int total = totalSave - totalUse;
         return total;
     }
 

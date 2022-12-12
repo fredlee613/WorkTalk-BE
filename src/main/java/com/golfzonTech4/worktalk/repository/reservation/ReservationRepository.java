@@ -2,9 +2,11 @@ package com.golfzonTech4.worktalk.repository.reservation;
 
 import com.golfzonTech4.worktalk.domain.Reservation;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import javax.persistence.LockModeType;
 import java.util.List;
 
 public interface ReservationRepository extends JpaRepository<Reservation, Long> {
@@ -16,4 +18,7 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
 
     Reservation findByReserveId(Long reserveId); //예약번호 조회
 
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Override
+    <S extends Reservation> S save(S entity);
 }
