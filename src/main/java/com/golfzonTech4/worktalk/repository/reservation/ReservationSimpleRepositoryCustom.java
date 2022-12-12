@@ -28,7 +28,7 @@ public interface ReservationSimpleRepositoryCustom {
 
     List<ReserveCheckDto> findBookedOffice(Long roomId, LocalDate initDate, LocalDate endDate);
     List<ReserveCheckDto> findBookedRoom(Long roomId, LocalDate initDate);
-
+    List<ReserveCheckDto> checkBookedRoom(Long roomId, LocalDate initDate, Integer checkInTime, Integer checkOutTime);
 
     Optional<ReserveSimpleDto> findRoomName(Long reserveId);
 }

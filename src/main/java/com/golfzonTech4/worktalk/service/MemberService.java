@@ -18,6 +18,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.security.Security;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
@@ -30,6 +31,7 @@ public class MemberService {
     private final MemberRepository memberRepository;
     private final PasswordEncoder passwordEncoder;
 
+    private final MailService mailService;
     private final ReservationSimpleRepository reservationSimpleRepository;
 
     @Transactional
@@ -130,6 +132,17 @@ public class MemberService {
     }
 
     /**
+     * 회원 이메일 찾기 서비스
+     */
+    public void findEmail(String email) {
+        log.info("findDuplicatesName : {}", email);
+        Optional<Member> result = memberRepository.findByEmail(email);
+        if (result.isEmpty()) {
+            throw new IllegalStateException("가입 정보가 없는 이메일입니다.");
+        }
+    }
+
+    /**
      * 전체 회원 리스트 조회
      */
     public List<Member> findAll() {
@@ -157,6 +170,17 @@ public class MemberService {
         return findMember.getActivated();
     }
 
+    @Transactional
+    public void changePw(String email) {
+        Optional<Member> result = memberRepository.findByEmail(email);
+        if (result.isPresent()) {
+            int changePw = mailService.pwMail(email);
+            String newPw = String.valueOf(changePw);
+            log.info("newPw : {}", newPw);
+            result.get().setPw(passwordEncoder.encode(newPw));
+        } else throw new IllegalStateException("가입 정보가 없는 이메일입니다.");
+    }
+
     // member -> memberDetailDto
     private static MemberDetailDto getMemberDetailDto(Member member) {
         MemberDetailDto memberDetailDto = new MemberDetailDto();
@@ -171,5 +195,20 @@ public class MemberService {
         memberDetailDto.setImgName(member.getImgName());
 
         return memberDetailDto;
+    }
+
+    public MemberDto findProfile() {
+        String name = SecurityUtil.getCurrentUsername().get();
+        log.info("findProfile: {}", name);
+        Member findMember = memberRepository.findByName(name).get();
+        MemberDto dto = MemberDto.builder()
+                .id(findMember.getId())
+                .name(findMember.getName())
+                .email(findMember.getEmail())
+                .memberType(findMember.getMemberType())
+                .tel(findMember.getTel())
+                .activated(findMember.getActivated())
+                .build();
+        return dto;
     }
 }

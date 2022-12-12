@@ -42,10 +42,7 @@ public class ReservationService {
     private final ReservationRepository reservationRepository;
     private final ReservationSimpleRepository reservationSimpleRepository;
     private final PenaltyService penaltyService;
-    private final ReservationRepositoryQuery reservationRepositoryQuery;
-
     private final TempReservationRepository tempReservationRepository;
-
     private final PayService payService;
 
     /**
@@ -58,6 +55,12 @@ public class ReservationService {
         TempReservation temp = tempReservationRepository.findById(payDto.getReserveId()).get();
         log.info("tempReservation : {}", temp);
 
+        Room findRoom = roomRepository.findByRoomId(temp.getRoomId());
+        log.info("findRoom : {}", findRoom.toString());
+
+        // 예약 중복 검증
+        checkReservations(findRoom, temp); // 이미 확정된 예약건이 있을 경우 예외 발생
+
         Optional<String> currentUsername = SecurityUtil.getCurrentUsername();
         // 로그인 값이 없을 경우 예외처리
         if (currentUsername.isEmpty()) throw new NotFoundMemberException("Member not found");
@@ -69,8 +72,7 @@ public class ReservationService {
         }
         log.info("findMember : {}", findMember.toString());
 
-        Room findRoom = roomRepository.findByRoomId(temp.getRoomId());
-        log.info("findRoom : {}", findRoom.toString());
+
 
         // 오피스의 경우 체크인 일자가 체크아웃 일자보다 늦을 경우 예외처리
         // 그 외의 경우 체크인 시간이 체크아웃 시간보다 늦을 경우 예외처리
@@ -282,32 +284,37 @@ public class ReservationService {
      */
     public List<ReserveCheckDto> findBookedReservation(ReserveCheckDto dto) {
         log.info("findBookedReservation : {}", dto);
-        List<ReserveCheckDto> result = null;
+        List<ReserveCheckDto> result = new ArrayList<>();
         if (dto.getRoomType().equals(RoomType.OFFICE)) {
-            List<ReserveCheckDto> tempBookedOffice = tempReservationRepository.findBookedOffice(dto.getRoomId(), dto.getInitDate(), dto.getEndDate());
-            List<ReserveCheckDto> bookedOffice = reservationSimpleRepository.findBookedOffice(dto.getRoomId(), dto.getInitDate(), dto.getEndDate());
-            if (!tempBookedOffice.isEmpty()) {
-                if (!bookedOffice.isEmpty()) {
-                    return Stream.of(tempBookedOffice, bookedOffice)
-                            .flatMap(Collection::stream)
-                            .collect(Collectors.toList());
-                } else return tempBookedOffice;
-            } else {
-                if (!bookedOffice.isEmpty())  return bookedOffice;
-                else return null;
+            List<ReserveCheckDto> tempBookedOffices = tempReservationRepository.findBookedOffice(dto.getRoomId(), dto.getInitDate(), dto.getEndDate());
+            List<ReserveCheckDto> reservedOffices = reservationSimpleRepository.findBookedOffice(dto.getRoomId(), dto.getInitDate(), dto.getEndDate());
+            result.addAll(tempBookedOffices);
+            result.addAll(reservedOffices);
+        } else {
+            List<ReserveCheckDto> tempBookedRooms = tempReservationRepository.findBookedRoom(dto.getRoomId(), dto.getInitDate());
+            List<ReserveCheckDto> reservedRooms = reservationSimpleRepository.findBookedRoom(dto.getRoomId(), dto.getInitDate());
+            result.addAll(tempBookedRooms);
+            result.addAll(reservedRooms);
+        }
+        return result;
+    }
+
+    /**
+     * 선택 일자를 기준으로 예약 리스트 조회
+     * 오피스의 경우 일별로 조회
+     * 그 외의 사무공간의 경우 시간별로 조회
+     * 임시 테이블 제외 => 결제 전 확인
+     */
+    public void checkReservations(Room room, TempReservation temp) {
+        log.info("checkReservations : {}", room, temp);
+        List<ReserveCheckDto> result = null;
+        if (room.getRoomType().equals(RoomType.OFFICE)) {
+            if (!reservationSimpleRepository.findBookedOffice(room.getRoomId(), temp.getBookDate().getCheckInDate(), temp.getBookDate().getCheckOutDate()).isEmpty()) {
+                throw new IllegalStateException("이미 예약건이 존재합니다");
             }
         } else {
-            List<ReserveCheckDto> tempBookedRoom = tempReservationRepository.findBookedRoom(dto.getRoomId(), dto.getInitDate());
-            List<ReserveCheckDto> bookedRoom = reservationSimpleRepository.findBookedRoom(dto.getRoomId(), dto.getInitDate());
-            if (!tempBookedRoom.isEmpty()) {
-                if (!bookedRoom.isEmpty()) {
-                    return Stream.of(tempBookedRoom, bookedRoom)
-                            .flatMap(Collection::stream)
-                            .collect(Collectors.toList());
-                } else return tempBookedRoom;
-            } else {
-                if (!bookedRoom.isEmpty())  return bookedRoom;
-                else return null;
+            if (reservationSimpleRepository.checkBookedRoom(room.getRoomId(), temp.getBookDate().getCheckInDate(), temp.getBookDate().getCheckInTime(), temp.getBookDate().getCheckOutTime()).isEmpty()) {
+                throw new IllegalStateException("이미 예약건이 존재합니다.");
             }
         }
     }
@@ -326,6 +333,11 @@ public class ReservationService {
         findReservation.setReserveStatus(ReserveStatus.USED);
     }
 
+    /**
+     * 가격 비교 로직
+     * JS 상에서 가격이 임의로 변경되어 넘어올 수 있기 때문에 DB상에서 가격 조회 후 비교
+     * 올바른 가격 값이 아닐 경우 예외 처리
+     */
     static boolean validAmount(int actualAmount, Room room, BookDate bookDate, int mileageUsage) {
         log.info("validAmount : {}, {}, {}, {}", actualAmount, room, bookDate, mileageUsage);
         int period;

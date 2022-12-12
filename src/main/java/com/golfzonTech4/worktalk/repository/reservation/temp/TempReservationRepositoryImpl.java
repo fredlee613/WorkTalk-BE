@@ -52,4 +52,28 @@ public class TempReservationRepositoryImpl implements TempReservationRepositoryC
                 .fetch();
     }
 
+    @Override
+    public List<ReserveCheckDto> checkBookedRoom(Long roomId, LocalDate initDate, Integer checkInTime, Integer checkOutTime) {
+        log.info("checkBookedRoom : {}, {}, {}, {}", roomId, initDate, checkInTime, checkOutTime);
+        return queryFactory.select(new QReserveCheckDto(
+                        tempReservation.roomId,
+                        tempReservation.bookDate.checkInDate,
+                        tempReservation.bookDate.checkOutDate,
+                        tempReservation.bookDate.checkInTime,
+                        tempReservation.bookDate.checkOutTime
+                ))
+                .from(tempReservation)
+                .where(tempReservation.bookDate.checkInDate.eq(initDate)
+                        .and(tempReservation.roomId.eq(roomId))
+                        .and(tempReservation.bookDate.checkInTime.between(checkInTime, checkOutTime)
+                                .or(tempReservation.bookDate.checkInTime.loe(checkInTime)
+                                        .and(tempReservation.bookDate.checkOutTime.goe(checkOutTime)))
+                                .or(tempReservation.bookDate.checkInTime.loe(checkInTime)
+                                        .and(tempReservation.bookDate.checkOutTime.between(checkInTime, checkOutTime)))
+                                .or(tempReservation.bookDate.checkInTime.loe(checkInTime)
+                                        .and(tempReservation.bookDate.checkOutTime.goe(checkOutTime))))
+                )
+                .fetch();
+    }
+
 }
