@@ -1,11 +1,11 @@
 package com.golfzonTech4.worktalk.dto.qna;
 
 import com.golfzonTech4.worktalk.domain.QnaType;
+import com.querydsl.core.annotations.QueryProjection;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import javax.validation.constraints.NotEmpty;
 import java.time.LocalDateTime;
 
 @Getter
@@ -30,6 +30,7 @@ public class QnaDetailDto {
 
     private String spaceName;
 
+    @QueryProjection
     public QnaDetailDto(Long qnaId, Long spaceId, Long memberId, QnaType type, String content, LocalDateTime lastModifiedDate,
                         String qnacomment, LocalDateTime qclastModifiedDate) {
         this.qnaId = qnaId;
@@ -54,4 +55,6 @@ public class QnaDetailDto {
         this.qclastModifiedDate = qclastModifiedDate;
         this.spaceName = spaceName;
     }
+
+
 }
