@@ -57,7 +57,7 @@ public class CustomerCenterController {
     }
 
     //1대1문의 삭제
-    @DeleteMapping("/ccDelete/{ccId}")
+    @GetMapping("/ccDelete/{ccId}")
     public ResponseEntity<Void> deleteQna(@PathVariable Long ccId){
         customerCenterService.deleteCustomerCenter(ccId);
         return ResponseEntity.ok().build();

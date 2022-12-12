@@ -110,10 +110,15 @@ public class SpaceRepositoryCustomImpl implements SpaceRepositoryCustom{
 
     private BooleanExpression possibleDate(Integer spaceType, LocalDate searchStartDate, LocalDate searchEndDate,
                                            Integer searchStartTime, Integer searchEndTime){
-        if(spaceType == 1){
+
+        if(searchStartDate == null || searchEndDate == null || searchStartTime == null || searchEndTime == null){
+            return null;
+        }
+        else if(spaceType == 1){
             return reservation.bookDate.checkInDate.notBetween(searchStartDate, searchEndDate)
                     .or(reservation.bookDate.checkOutDate.notBetween(searchStartDate, searchEndDate));
-        } else{
+        }
+        else{
             return reservation.bookDate.checkInDate.eq(searchStartDate)
                     .and(reservation.bookDate.checkInTime.notBetween(searchStartTime, searchEndTime))
                     .or(reservation.bookDate.checkOutTime.notBetween(searchStartTime, searchEndTime));
