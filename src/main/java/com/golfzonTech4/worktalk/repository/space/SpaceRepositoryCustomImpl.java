@@ -1,7 +1,8 @@
 package com.golfzonTech4.worktalk.repository.space;
 
-import com.golfzonTech4.worktalk.domain.QReservation;
 import com.golfzonTech4.worktalk.domain.QSpace;
+import com.golfzonTech4.worktalk.dto.qna.QQnaDetailDto;
+import com.golfzonTech4.worktalk.dto.qna.QnaDetailDto;
 import com.golfzonTech4.worktalk.dto.space.*;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
@@ -11,14 +12,14 @@ import org.springframework.data.domain.PageRequest;
 
 import javax.persistence.EntityManager;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import static com.golfzonTech4.worktalk.domain.QQna.qna;
+import static com.golfzonTech4.worktalk.domain.QQnaComment.qnaComment;
 import static com.golfzonTech4.worktalk.domain.QReservation.reservation;
 import static com.golfzonTech4.worktalk.domain.QRoom.room;
-import static com.golfzonTech4.worktalk.domain.QSpace.space;
 import static com.golfzonTech4.worktalk.domain.QSpaceImg.spaceImg;
 
 @Slf4j
@@ -30,12 +31,9 @@ public class SpaceRepositoryCustomImpl implements SpaceRepositoryCustom{
     public SpaceRepositoryCustomImpl(EntityManager em){
         this.queryFactory = new JPAQueryFactory(em);
     }
-
+    QSpace space = QSpace.space;
     @Override
     public PageImpl<SpaceMainDto> getMainSpacePage(PageRequest pageRequest, SpaceSearchDto dto) {
-
-        QSpace space = QSpace.space;
-//        QSpaceImg spaceImg = QSpaceImg.spaceImg;
 
         List<SpaceMainDto> content = queryFactory
                 .select(
@@ -44,15 +42,11 @@ public class SpaceRepositoryCustomImpl implements SpaceRepositoryCustom{
                                 space.spaceName,
                                 space.address,
                                 space.detailAddress,
-                                space.spaceType,
-                                reservation.bookDate.checkInDate,
-                                reservation.bookDate.checkOutDate,
-                                reservation.bookDate.checkInTime,
-                                reservation.bookDate.checkOutTime)
-                )
+                                space.spaceType)
+                ).distinct()
                 .from(space)
-                .join(room).on(room.space.spaceId.eq(space.spaceId))
-                .join(reservation).on(reservation.room.roomId.eq(room.roomId))
+                .leftJoin(room).on(room.space.spaceId.eq(space.spaceId))
+                .leftJoin(reservation).on(reservation.room.roomId.eq(room.roomId))
                 .where(eqSpaceType(dto.getSearchSpaceType()), containName(dto.getSearchSpaceName()),
                         containAddress(dto.getSearchAddress()), space.spaceStatus.eq("approved"),
                         possibleDate(dto.getSearchSpaceType(), dto.getSearchStartDate(),
@@ -74,10 +68,10 @@ public class SpaceRepositoryCustomImpl implements SpaceRepositoryCustom{
         content.forEach(s -> s.setSpaceImgList(imgIdsMap.get(s.getSpaceId())));
 
         long total = queryFactory
-                .select(space.count())
+                .select(space.countDistinct())
                 .from(space)
-                .join(room).on(room.space.spaceId.eq(space.spaceId))
-                .join(reservation).on(reservation.room.roomId.eq(room.roomId))
+                .leftJoin(room).on(room.space.spaceId.eq(space.spaceId))
+                .leftJoin(reservation).on(reservation.room.roomId.eq(room.roomId))
                 .where(eqSpaceType(dto.getSearchSpaceType()), containName(dto.getSearchSpaceName()),
                         containAddress(dto.getSearchAddress()), space.spaceStatus.eq("approved"),
                         possibleDate(dto.getSearchSpaceType(), dto.getSearchStartDate(),
@@ -85,6 +79,50 @@ public class SpaceRepositoryCustomImpl implements SpaceRepositoryCustom{
                 .fetchOne();
 
         return new PageImpl<>(content, pageRequest, total);
+    }
+
+    @Override
+    public List<SpaceDetailDto> getSpaceDetailPage(Long spaceId) {
+
+        List<SpaceDetailDto> content = queryFactory.select(
+                        new QSpaceDetailDto(
+                                space.member.id,
+                                space.spaceId,
+                                space.member.name,
+                                space.member.email,
+                                space.spaceName,
+                                space.spaceDetail,
+                                space.postcode,
+                                space.address,
+                                space.detailAddress,
+                                space.regCode,
+                                space.spaceType))
+                .from(space)
+                .where(space.spaceId.eq(spaceId))
+                .fetch();
+
+        List<Long> spaceIds = content.stream().map(SpaceDetailDto::getSpaceId).collect(Collectors.toList());
+
+        List<SpaceImgDto> images = queryFactory.select(new QSpaceImgDto(spaceImg.spaceImgId, spaceImg.spaceImgUrl, spaceImg.space.spaceId))
+                .from(spaceImg)
+                .where(spaceImg.space.spaceId.in(spaceIds))
+                .fetch();
+
+        Map<Long, List<SpaceImgDto>> imgIdsMap = images.stream().collect(Collectors.groupingBy(SpaceImgDto::getSpaceId));
+
+        content.forEach(s -> s.setSpaceImgList(imgIdsMap.get(s.getSpaceId())));
+
+        List<QnaDetailDto> qnas = queryFactory.select(new QQnaDetailDto(qna.qnaId, qna.space.spaceId, qna.member.id, qna.type, qna.content, qna.lastModifiedDate, qnaComment.qnacomment, qnaComment.lastModifiedDate))
+                .from(qna)
+                .join(qnaComment).on(qnaComment.qnaId.eq(qna.qnaId))
+                .where(qna.space.spaceId.in(spaceIds))
+                .fetch();
+
+        Map<Long, List<QnaDetailDto>> qnaIdsMap = qnas.stream().collect(Collectors.groupingBy(QnaDetailDto::getSpaceId));
+
+        content.forEach(s -> s.setQnaDetailDtoList(qnaIdsMap.get(s.getSpaceId())));
+
+        return content;
     }
 
     private BooleanExpression eqSpaceType(Integer searchSpaceType) {

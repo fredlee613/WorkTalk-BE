@@ -33,7 +33,7 @@ public class SpaceController {
     //사무공간 상세페이지
     @GetMapping("/spaceOne/{spaceId}")
     public ResponseEntity findOneSpace(@PathVariable("spaceId") final Long spaceId){
-        return ResponseEntity.ok(spaceService.selectSpace(spaceId));
+        return ResponseEntity.ok(spaceService.getSpaceDetailPage(spaceId));
     }
 
     //호스트의 사무공간 등록

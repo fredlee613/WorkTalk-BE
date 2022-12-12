@@ -18,7 +18,6 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.multipart.MultipartFile;
 
 import javax.persistence.EntityNotFoundException;
 import java.util.ArrayList;
@@ -118,6 +117,16 @@ public class SpaceService {
     public Space selectSpace(Long spaceId) {
         log.info("selectSpace()....");
         Space space = spaceRepository.findBySpaceId(spaceId);
+        if (space != null) {
+            return space;
+        }
+
+        throw new EntityNotFoundException("해당 사무공간을 찾지 못했습니다.");
+    }
+
+    public List<SpaceDetailDto> getSpaceDetailPage(Long spaceId) {
+        log.info("selectSpace()....");
+        List<SpaceDetailDto> space = spaceRepository.getSpaceDetailPage(spaceId);
         if (space != null) {
             return space;
         }
