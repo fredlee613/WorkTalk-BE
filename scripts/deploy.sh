@@ -7,7 +7,7 @@ cp $REPOSITORY/zip/*.jar $REPOSITORY/
 
 echo "> 현재 구동중인 애플리케이션 pid 확인"
 
-CURRENT_PID=$(pgrep -fl WorkTalk-BE | grep jar | awk '{print $1}')
+CURRENT_PID=$(pgrep -f worktalk-0.0.1.*.jar)
 
 echo "현재 구동중인 어플리케이션 pid: $CURRENT_PID"
 
