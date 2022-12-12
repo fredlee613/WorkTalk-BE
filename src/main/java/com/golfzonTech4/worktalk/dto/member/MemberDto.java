@@ -3,6 +3,7 @@ package com.golfzonTech4.worktalk.dto.member;
 import com.golfzonTech4.worktalk.domain.MemberType;
 import com.querydsl.core.annotations.QueryProjection;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.ColumnDefault;
@@ -11,6 +12,7 @@ import javax.persistence.*;
 
 @Data
 @NoArgsConstructor
+@Builder
 public class MemberDto {
 
     private Long id;

@@ -15,6 +15,7 @@ import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Optional;
 import java.util.Random;
 
 @Service
@@ -22,7 +23,6 @@ import java.util.Random;
 @Slf4j
 public class MailService {
 
-    private final MemberService memberService;
     private final MemberRepository memberRepository;
     private final JavaMailSender javaMailSender;
     private final ReservationSimpleRepository reservationSimpleRepository;
@@ -45,7 +45,8 @@ public class MailService {
 
         member.setEmail(email);
 
-        memberService.findDuplicatesEmail(member);
+        Optional<Member> result = memberRepository.findByEmail(email);
+        if (result.isPresent()) throw new IllegalArgumentException("이미 사용 중인 이메일입니다.");
 
         int validCode = creatingRandomCode();
 
@@ -92,6 +93,24 @@ public class MailService {
                         "<br>" +
                         "감사합니다."; //Email content
         sendMail(setFrom, toMail, title, content);
+    }
+
+    public int pwMail(String email) {
+        log.info("pwMail() : {}", email);
+
+        int validCode = creatingRandomCode();
+
+        String setFrom = emailConfig.getUserEmail(); // setting sender's own eamil that were registerd at email-config
+        String toMail = email;
+        String title = "WorkTalk 회원 임시비밀번호 메일입니다."; // Email Title
+        String content =
+                "임시 비밀번호를 전송하였습니다." +    //Should be written in html
+                        "<br><br>" +
+                        "임시 비밀번호는 " + String.valueOf(validCode) + "입니다." +
+                        "<br>" +
+                        "해당 임시 비밀번호는 보안에 취약하니 접속 후 빠른 시일 내에 비밀번호를 재설정해주시기 바랍니다."; //Email content
+        sendMail(setFrom, toMail, title, content);
+        return validCode;
     }
 
     public void sendMail(String setFrom, String toMail, String title, String content) {
