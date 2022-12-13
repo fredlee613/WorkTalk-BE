@@ -4,10 +4,6 @@ import com.querydsl.core.annotations.QueryProjection;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
-
 @Data
 @NoArgsConstructor
 public class SpaceMasterDto {
