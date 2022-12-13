@@ -48,31 +48,20 @@ public class SpaceRepositoryCustomImpl implements SpaceRepositoryCustom{
                 .leftJoin(room).on(room.space.spaceId.eq(space.spaceId))
                 .leftJoin(reservation).on(reservation.room.roomId.eq(room.roomId))
                 .where(eqSpaceType(dto.getSearchSpaceType()), containName(dto.getSearchSpaceName()),
-                        containAddress(dto.getSearchAddress()), space.spaceStatus.eq("approved"))
-                .where(reservation.room.roomId.notIn(
-                        JPAExpressions
-                                .select(subReservation.room.roomId)
-                                .from(subReservation)
-                                .where(possibleDate(dto.getSearchSpaceType(), dto.getSearchStartDate(),
-                                        dto.getSearchEndDate(), dto.getSearchStartTime(), dto.getSearchEndTime()))
-                )
-                        )
-
+                        containAddress(dto.getSearchAddress()), space.spaceStatus.eq("approved"),
+                        possibleDate(dto.getSearchSpaceType(), dto.getSearchStartDate(),
+                                dto.getSearchEndDate(), dto.getSearchStartTime(), dto.getSearchEndTime()))
                 .orderBy(space.spaceId.desc())
                 .offset(pageRequest.getOffset())
                 .limit(pageRequest.getPageSize())
                 .fetch();
 
         List<Long> spaceIds = content.stream().map(SpaceMainDto::getSpaceId).collect(Collectors.toList());
-
         List<SpaceImgDto> images = queryFactory.select(new QSpaceImgDto(spaceImg.spaceImgId, spaceImg.spaceImgUrl, spaceImg.space.spaceId))
-                .from(space)
-                .leftJoin(spaceImg).on(space.spaceId.eq(spaceImg.space.spaceId))
-                .where(space.spaceId.in(spaceIds))
+                .from(spaceImg)
+                .where(spaceImg.space.spaceId.in(spaceIds))
                 .fetch();
-
         Map<Long, List<SpaceImgDto>> imgIdsMap = images.stream().collect(Collectors.groupingBy(SpaceImgDto::getSpaceId));
-
         content.forEach(s -> s.setSpaceImgList(imgIdsMap.get(s.getSpaceId())));
 
         long total = queryFactory
@@ -81,16 +70,9 @@ public class SpaceRepositoryCustomImpl implements SpaceRepositoryCustom{
                 .leftJoin(room).on(room.space.spaceId.eq(space.spaceId))
                 .leftJoin(reservation).on(reservation.room.roomId.eq(room.roomId))
                 .where(eqSpaceType(dto.getSearchSpaceType()), containName(dto.getSearchSpaceName()),
-                        containAddress(dto.getSearchAddress()), space.spaceStatus.eq("approved")
-                )
-                .where(reservation.room.roomId.notIn(
-                                JPAExpressions
-                                        .select(subReservation.room.roomId)
-                                        .from(subReservation)
-                                        .where(possibleDate(dto.getSearchSpaceType(), dto.getSearchStartDate(),
-                                                dto.getSearchEndDate(), dto.getSearchStartTime(), dto.getSearchEndTime()))
-                        )
-                )
+                        containAddress(dto.getSearchAddress()), space.spaceStatus.eq("approved"),
+                        possibleDate(dto.getSearchSpaceType(), dto.getSearchStartDate(),
+                                dto.getSearchEndDate(), dto.getSearchStartTime(), dto.getSearchEndTime()))
                 .fetchOne();
 
         return new PageImpl<>(content, pageRequest, total);
