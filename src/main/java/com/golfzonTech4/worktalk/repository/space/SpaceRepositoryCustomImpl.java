@@ -79,6 +79,33 @@ public class SpaceRepositoryCustomImpl implements SpaceRepositoryCustom{
     }
 
     @Override
+    public List<SpaceMainDto> getHostSpacePage(String name) {
+        List<SpaceMainDto> content = queryFactory
+                .select(
+                        new QSpaceMainDto(
+                                space.spaceId,
+                                space.spaceName,
+                                space.address,
+                                space.detailAddress,
+                                space.spaceType)
+                ).distinct()
+                .from(space)
+                .where(space.member.name.eq(name))
+                .orderBy(space.spaceId.desc())
+                .fetch();
+
+        List<Long> spaceIds = content.stream().map(SpaceMainDto::getSpaceId).collect(Collectors.toList());
+        List<SpaceImgDto> images = queryFactory.select(new QSpaceImgDto(spaceImg.spaceImgId, spaceImg.spaceImgUrl, spaceImg.space.spaceId))
+                .from(spaceImg)
+                .where(spaceImg.space.spaceId.in(spaceIds))
+                .fetch();
+        Map<Long, List<SpaceImgDto>> imgIdsMap = images.stream().collect(Collectors.groupingBy(SpaceImgDto::getSpaceId));
+        content.forEach(s -> s.setSpaceImgList(imgIdsMap.get(s.getSpaceId())));
+
+        return content;
+    }
+
+    @Override
     public List<SpaceDetailDto> getSpaceDetailPage(Long spaceId) {
 
         List<SpaceDetailDto> content = queryFactory.select(
@@ -110,6 +137,29 @@ public class SpaceRepositoryCustomImpl implements SpaceRepositoryCustom{
         content.forEach(s -> s.setSpaceImgList(imgIdsMap.get(s.getSpaceId())));
 
         return content;
+    }
+
+    @Override
+    public List<SpaceMasterDto> getSpaceMasterPage(String spaceStatus) {
+        return queryFactory.select(
+                        new QSpaceMasterDto(
+                                space.spaceId,
+                                space.member.name,
+                                space.spaceName,
+                                space.spaceType,
+                                space.regCode,
+                                space.spaceStatus
+                                ))
+                .from(space)
+                .where(eqSpaceStatus(spaceStatus))
+                .fetch();
+    }
+
+    private BooleanExpression eqSpaceStatus(String spaceStatus) {
+        if(spaceStatus == null || spaceStatus.isEmpty()) {
+            return null;
+        }
+        return space.spaceStatus.eq(spaceStatus);
     }
 
     private BooleanExpression eqSpaceType(Integer searchSpaceType) {

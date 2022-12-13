@@ -135,24 +135,18 @@ public class SpaceService {
     }
 
     //호스트가 등록한 사무공간 리스트 조회
-    public List<Space> selectSpaceByHost(String name) {
+    public List<SpaceMainDto> selectSpaceByHost() {
         log.info("selectSpaceByHost()....");
-//        Optional<String> currentUsername = SecurityUtil.getCurrentUsername();
-//        if (currentUsername.isEmpty()) throw new NotFoundMemberException("Member not found");
-//        Member findMember = memberService.findByName(currentUsername.get());
-        Optional<Member> findMember = memberRepository.findByName(name);
+        Optional<String> currentUsername = SecurityUtil.getCurrentUsername();
 
-//        if(!optionalMember.isPresent()){
-//            throw new EntityNotFoundException("Member Not Found");
-//        }
-        return spaceRepository.findAllByMemberId(findMember.get().getId());
+        List<SpaceMainDto> result =  spaceRepository.getHostSpacePage(currentUsername.get());
+        return getSpaceList(result);
     }
 
     //유저-사무공간 리스트 조회
     public ListResult getMainSpacePage(PageRequest pageRequest, SpaceSearchDto dto) {
         PageImpl<SpaceMainDto> result = spaceRepository.getMainSpacePage(pageRequest, dto);
         return new ListResult(result.getTotalElements(), getSpaceList(result.getContent()));
-//        List<ListResult> spaceList = spaceRepository.findBySpaceId(spaceList.get());
     }
 
     public List<SpaceMainDto> getSpaceList(List<SpaceMainDto> spaceList) {
@@ -195,6 +189,16 @@ public class SpaceService {
     public void deleteSpace(Long spaceId) {
         log.info("deleteSpace()....");
         spaceRepository.deleteById(spaceId);
+    }
+
+    public List<SpaceMasterDto> getSpaceMasterPage(String spaceStatus) {
+        log.info("getSpaceMasterPage()....");
+        List<SpaceMasterDto> space = spaceRepository.getSpaceMasterPage(spaceStatus);
+        if (space != null) {
+            return space;
+        }
+
+        throw new EntityNotFoundException("해당 사무공간을 찾지 못했습니다.");
     }
 
     @Transactional
