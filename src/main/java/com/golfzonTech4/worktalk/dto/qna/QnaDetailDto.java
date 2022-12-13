@@ -30,7 +30,7 @@ public class QnaDetailDto {
 
     private String spaceName;
 
-    @QueryProjection
+
     public QnaDetailDto(Long qnaId, Long spaceId, Long memberId, QnaType type, String content, LocalDateTime lastModifiedDate,
                         String qnacomment, LocalDateTime qclastModifiedDate) {
         this.qnaId = qnaId;
@@ -55,6 +55,5 @@ public class QnaDetailDto {
         this.qclastModifiedDate = qclastModifiedDate;
         this.spaceName = spaceName;
     }
-
 
 }
