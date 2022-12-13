@@ -160,13 +160,12 @@ public class SpaceService {
         for (SpaceMainDto space : spaceList) {
             SpaceMainDto dto = space;
 
-//            List<Review> reviewList = dto.getReviewList();
                 List<Review> reviewList = reviewRepository.findAllBySpaceId(space.getSpaceId());
             double sum = 0;
             for (Review review : reviewList) {
                 sum += review.getGrade();
             }
-            double avg = (sum == 0) ? 0 : sum / reviewList.size();
+            double avg = (sum == 0) ? 0 : Math.floor((sum / reviewList.size()) * 10) / 10;
             log.info("avg= "+ avg);
             dto.setCount(reviewList.size());
             dto.setGradeAvg(avg);
