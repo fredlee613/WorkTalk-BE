@@ -25,9 +25,10 @@ public class SpaceController {
 
 
     //호스트가 등록한 사무공간리스트 조회
-    @GetMapping("/host/spaceAll/{name}")
-    public ResponseEntity findHostSpaces(@PathVariable("name") String name){
-        return ResponseEntity.ok(spaceService.selectSpaceByHost(name));
+    @GetMapping("/host/spaceAll")
+    public ResponseEntity findHostSpaces(){
+        log.info("findHostSpaces :{}");
+        return ResponseEntity.ok(spaceService.selectSpaceByHost());
     }
 
     //사무공간 상세페이지
@@ -57,6 +58,11 @@ public class SpaceController {
     public ResponseEntity<Void> deleteSpace(@PathVariable Long spaceId){
         spaceService.deleteSpace(spaceId);
         return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/master/spaceAll")
+    public ResponseEntity masterManageSpaces(@ModelAttribute String spaceStatus){
+        return ResponseEntity.ok(spaceService.getSpaceMasterPage(spaceStatus));
     }
 
     //마스터의 사무공간 승인
