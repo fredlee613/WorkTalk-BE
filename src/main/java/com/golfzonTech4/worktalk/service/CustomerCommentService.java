@@ -43,10 +43,10 @@ public class CustomerCommentService {
     }
 
     @Transactional
-    public void updateCustomerComment(Long ccId, CustomerCommentUpdateDto dto) {
+    public void updateCustomerComment(Long ccCommentId, CustomerCommentUpdateDto dto) {
         log.info("updateCustomerComment()....");
 
-        Optional<CustomerComment> optionalCustomerComment = Optional.ofNullable(customerCommentRepository.findByCcId(ccId));
+        Optional<CustomerComment> optionalCustomerComment = Optional.ofNullable(customerCommentRepository.findByCcCommentId(ccCommentId));
 
             CustomerComment customerComment = optionalCustomerComment.get();
             customerComment.setContent(dto.getContent());//dirty checking
@@ -54,8 +54,8 @@ public class CustomerCommentService {
     }
 
     @Transactional
-    public void deleteCustomerComment(Long ccId) {
+    public void deleteCustomerComment(Long ccCommentId) {
         log.info("deleteQnaComment()....");
-        customerCommentRepository.deleteById(ccId);
+        customerCommentRepository.deleteById(ccCommentId);
     }
 }

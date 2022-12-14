@@ -47,11 +47,11 @@ public class QnaCommentService {
     }
 
     @Transactional
-    public void updateQnaComment(Long qnaId, QnaCommentUpdateDto dto) {
+    public void updateQnaComment(Long qnaCommentId, QnaCommentUpdateDto dto) {
         log.info("updateQnaComment()....");
         Optional<String> currentUsername = SecurityUtil.getCurrentUsername();
 
-        Optional<QnaComment> optionalQnaComment = Optional.ofNullable(qnaCommentRepository.findByQnaId(qnaId));
+        Optional<QnaComment> optionalQnaComment = Optional.ofNullable(qnaCommentRepository.findByQnaCommentId(qnaCommentId));
 
         if (!currentUsername.isPresent()) throw new EntityNotFoundException("Member Not Found");
 
@@ -65,18 +65,18 @@ public class QnaCommentService {
     }
 
     @Transactional
-    public void deleteQnaComment(Long qnaId){
+    public void deleteQnaComment(Long qnaCommentId){
         log.info("deleteQnaComment()....");
 
         Optional<String> currentUsername = SecurityUtil.getCurrentUsername();
         if (!currentUsername.isPresent()) throw new EntityNotFoundException("Member Not Found");
 
-        Optional<QnaComment> optionalQnaComment = Optional.ofNullable(qnaCommentRepository.findByQnaId(qnaId));
+        Optional<QnaComment> optionalQnaComment = Optional.ofNullable(qnaCommentRepository.findByQnaCommentId(qnaCommentId));
 
         Member findMember = memberService.findByName(currentUsername.get());
         //qna작성자와 접속자가 같은지 확인
         if (findMember.getId() == optionalQnaComment.get().getMember().getId()) {
-            qnaCommentRepository.deleteById(qnaId);
+            qnaCommentRepository.deleteById(qnaCommentId);
         } else
             throw new EntityNotFoundException("삭제 권한이 없습니다.");
     }
