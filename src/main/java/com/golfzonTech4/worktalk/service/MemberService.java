@@ -72,7 +72,9 @@ public class MemberService {
         log.info("update : {}", dto);
         Member findMember = memberRepository.findById(dto.getId()).get();
         if (dto.getTel() != null || !dto.getTel().trim().isEmpty())  findMember.setTel(dto.getTel());
-        if (dto.getPw() != null || !dto.getPw().trim().isEmpty()) findMember.setPw(passwordEncoder.encode(dto.getPw()));
+        if (dto.getPw() != null) {
+            if (!dto.getPw().trim().isEmpty()) findMember.setPw(passwordEncoder.encode(dto.getPw()));
+        }
         return findMember.getId();
     }
 

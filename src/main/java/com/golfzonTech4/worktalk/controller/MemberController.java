@@ -38,7 +38,7 @@ public class MemberController {
     /**
      * 회원 단건 조회 요청 (접속자 기준)
      */
-    @PostMapping("/member/profile")
+    @GetMapping("/member/profile")
     public ResponseEntity<MemberDto> profile() {
         log.info("profile");
         return ResponseEntity.ok(memberService.findProfile());
