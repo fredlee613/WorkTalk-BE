@@ -9,5 +9,5 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface QnaCommentRepository extends JpaRepository<QnaComment, Long> {
 
-    QnaComment findByQnaId(Long qnaId); //QnA 선택
+    QnaComment findByQnaCommentId(Long qnaCommentId); //QnA 선택
 }

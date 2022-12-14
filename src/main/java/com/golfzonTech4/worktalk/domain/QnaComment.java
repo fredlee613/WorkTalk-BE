@@ -13,9 +13,11 @@ import java.time.LocalDateTime;
 @Setter
 @EqualsAndHashCode
 @Table(name = "QNA_COMMENT")
+@SequenceGenerator(name = "SEQ_QNA_COMMENT_GENERATOR", sequenceName = "SEQ_QNA_COMMENT", initialValue = 1, allocationSize = 50)
 public class QnaComment extends BaseTimeEntity implements Serializable {
+
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_CC_COMMENT_GENERATOR")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_QNA_COMMENT_GENERATOR")
     @Column(name = "QNA_COMMENT_ID")
     private Long qnaCommentId;
 

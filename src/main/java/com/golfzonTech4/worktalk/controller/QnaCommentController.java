@@ -32,18 +32,18 @@ public class QnaCommentController {
     }
 
     //답글 수정
-    @PostMapping("/qnacommentUpdate/{qnaId}")
-    public ResponseEntity<Qna> updateQnaComment(@Valid @RequestBody QnaCommentUpdateDto dto, @PathVariable Long qnaId){
+    @PostMapping("/qnacommentUpdate/{qnaCommentId}")
+    public ResponseEntity<Qna> updateQnaComment(@Valid @RequestBody QnaCommentUpdateDto dto, @PathVariable Long qnaCommentId){
 
-        qnaCommentService.updateQnaComment(qnaId, dto);
+        qnaCommentService.updateQnaComment(qnaCommentId, dto);
 
         return new ResponseEntity("수정완료", HttpStatus.OK);
     }
 
     ////답글 삭제
-    @DeleteMapping("/qnacommentDelete/{qnaId}")
-    public ResponseEntity<Void> deleteQnaComment(@PathVariable Long qnaId){
-        qnaCommentService.deleteQnaComment(qnaId);
+    @DeleteMapping("/qnacommentDelete/{qnaCommentId}")
+    public ResponseEntity<Void> deleteQnaComment(@PathVariable Long qnaCommentId){
+        qnaCommentService.deleteQnaComment(qnaCommentId);
         return ResponseEntity.ok().build();
     }
 

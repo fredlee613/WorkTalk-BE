@@ -7,5 +7,5 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface CustomerCommentRepository extends JpaRepository<CustomerComment, Long> {
 
-    CustomerComment findByCcId(Long ccId);
+    CustomerComment findByCcCommentId(Long ccCommentId);
 }

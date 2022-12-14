@@ -24,6 +24,8 @@ public class QnaDetailDto {
 
     private LocalDateTime lastModifiedDate;
 
+    private Long qnaCommentId;
+
     private String qnacomment;
 
     private LocalDateTime qclastModifiedDate;
@@ -32,19 +34,20 @@ public class QnaDetailDto {
 
 
     public QnaDetailDto(Long qnaId, Long spaceId, Long memberId, QnaType type, String content, LocalDateTime lastModifiedDate,
-                        String qnacomment, LocalDateTime qclastModifiedDate) {
+                        Long qnaCommentId, String qnacomment, LocalDateTime qclastModifiedDate) {
         this.qnaId = qnaId;
         this.spaceId = spaceId;
         this.memberId = memberId;
         this.type = type;
         this.content = content;
         this.lastModifiedDate = lastModifiedDate;
+        this.qnaCommentId = qnaCommentId;
         this.qnacomment = qnacomment;
         this.qclastModifiedDate = qclastModifiedDate;
     }
 
     public QnaDetailDto(Long qnaId, Long spaceId, Long memberId, QnaType type, String content, LocalDateTime lastModifiedDate,
-                        String qnacomment, LocalDateTime qclastModifiedDate, String spaceName) {
+                        Long qnaCommentId, String qnacomment, LocalDateTime qclastModifiedDate, String spaceName) {
         this.qnaId = qnaId;
         this.spaceId = spaceId;
         this.memberId = memberId;
@@ -52,6 +55,7 @@ public class QnaDetailDto {
         this.content = content;
         this.lastModifiedDate = lastModifiedDate;
         this.qnacomment = qnacomment;
+        this.qnaCommentId = qnaCommentId;
         this.qclastModifiedDate = qclastModifiedDate;
         this.spaceName = spaceName;
     }

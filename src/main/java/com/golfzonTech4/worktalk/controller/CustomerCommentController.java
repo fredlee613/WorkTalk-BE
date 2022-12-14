@@ -30,18 +30,18 @@ public class CustomerCommentController {
     }
 
     //답글 수정
-    @PostMapping("/customercommentUpdate/{ccId}")
-    public ResponseEntity<Qna> updateCustomerComment(@Valid @RequestBody CustomerCommentUpdateDto dto, @PathVariable Long ccId){
+    @PostMapping("/customercommentUpdate/{ccCommentId}")
+    public ResponseEntity<Qna> updateCustomerComment(@Valid @RequestBody CustomerCommentUpdateDto dto, @PathVariable Long ccCommentId){
 
-        customerCommentService.updateCustomerComment(ccId, dto);
+        customerCommentService.updateCustomerComment(ccCommentId, dto);
 
         return new ResponseEntity("수정완료", HttpStatus.OK);
     }
 
     //답글 삭제
-    @DeleteMapping("/customercommentDelete/{ccId}")
-    public ResponseEntity<Void> deleteCustomerComment(@PathVariable Long ccId){
-        customerCommentService.deleteCustomerComment(ccId);
+    @DeleteMapping("/customercommentDelete/{ccCommentId}")
+    public ResponseEntity<Void> deleteCustomerComment(@PathVariable Long ccCommentId){
+        customerCommentService.deleteCustomerComment(ccCommentId);
         return ResponseEntity.ok().build();
     }
 
