@@ -26,6 +26,7 @@ import java.util.stream.Collectors;
 
 import static com.golfzonTech4.worktalk.domain.QPay.pay;
 import static com.golfzonTech4.worktalk.domain.QReservation.reservation;
+import static com.golfzonTech4.worktalk.domain.QReview.review;
 import static com.golfzonTech4.worktalk.domain.QRoom.room;
 import static com.golfzonTech4.worktalk.domain.QSpace.space;
 import static com.golfzonTech4.worktalk.domain.QTempReservation.tempReservation;
@@ -81,9 +82,11 @@ public class ReservationSimpleRepositoryImpl implements ReservationSimpleReposit
                         reservation.paymentStatus,
                         reservation.room.roomType,
                         reservation.reserveAmount,
-                        reservation.cancelReason)
+                        reservation.cancelReason,
+                        review.reviewId)
                 )
                 .from(reservation)
+                .leftJoin(review).on(reservation.reserveId.eq(review.reservation.reserveId))
                 .where(reservation.member.name.eq(name), eqReserveStatus(reserveStatus), eqSpaceType(spaceType))
                 .orderBy(reservation.reserveId.desc())
                 .offset(pageRequest.getOffset())
@@ -116,10 +119,11 @@ public class ReservationSimpleRepositoryImpl implements ReservationSimpleReposit
 
         List<ReserveSimpleDto> content = queryFactory.select(new QReserveSimpleDto(room.roomName, reservation.paid, reservation.reserveId,
                         reservation.member.id, room.roomId, reservation.bookDate, reservation.member.name, reservation.reserveStatus,
-                        reservation.paymentStatus, room.roomType, reservation.reserveAmount, reservation.cancelReason))
+                        reservation.paymentStatus, room.roomType, reservation.reserveAmount, reservation.cancelReason, review.reviewId))
                 .from(reservation)
                 .innerJoin(room).on(reservation.room.roomId.eq(room.roomId))
                 .innerJoin(space).on(room.space.spaceId.eq(space.spaceId))
+                .leftJoin(review).on(reservation.reserveId.eq(review.reservation.reserveId))
                 .where(space.member.name.eq(name), eqReserveStatus(reserveStatus), eqSpaceType(spaceType))
                 .orderBy(reservation.reserveId.desc())
                 .offset(pageRequest.getOffset())
