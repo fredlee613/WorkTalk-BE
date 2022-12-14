@@ -1,6 +1,5 @@
 package com.golfzonTech4.worktalk.dto.space;
 
-import com.golfzonTech4.worktalk.domain.SpaceImg;
 import com.querydsl.core.annotations.QueryProjection;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -33,6 +32,8 @@ public class SpaceMainDto {
     private LocalDate checkOutDate;
     private int checkInTime;
     private int checkOutTime;
+
+    private String spaceStatus;
 
     @QueryProjection
     public SpaceMainDto(Long spaceId, String spaceName, String address, String detailAddress, int spaceType,
@@ -68,5 +69,15 @@ public class SpaceMainDto {
         this.address = address;
         this.detailAddress = detailAddress;
         this.spaceType = spaceType;
+    }
+
+    @QueryProjection
+    public SpaceMainDto(Long spaceId, String spaceName, String address, String detailAddress, int spaceType, String spaceStatus) {
+        this.spaceId = spaceId;
+        this.spaceName = spaceName;
+        this.address = address;
+        this.detailAddress = detailAddress;
+        this.spaceType = spaceType;
+        this.spaceStatus = spaceStatus;
     }
 }
