@@ -42,7 +42,7 @@ public class CustomerCenterRepositoryCustomImpl implements CustomerCenterReposit
                 )
                 .from(customerCenter)
                 .leftJoin(customerComment)
-                .on(customerCenter.ccId.eq(customerComment.ccId))
+                .on(customerCenter.ccId.eq(customerComment.ccCommentId))
                 .where(eqMemberType(memberType), eqccType(ccType))
                 .orderBy(customerCenter.ccId.desc())
                 .fetch();
