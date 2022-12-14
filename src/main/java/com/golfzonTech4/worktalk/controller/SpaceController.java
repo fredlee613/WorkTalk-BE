@@ -3,9 +3,11 @@ package com.golfzonTech4.worktalk.controller;
 import com.amazonaws.services.s3.AmazonS3;
 import com.golfzonTech4.worktalk.domain.Space;
 import com.golfzonTech4.worktalk.dto.space.SpaceInsertDto;
+import com.golfzonTech4.worktalk.dto.space.SpaceManageSortingDto;
 import com.golfzonTech4.worktalk.service.SpaceService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -60,9 +62,11 @@ public class SpaceController {
         return ResponseEntity.ok().build();
     }
 
+    //마스터 사무공간 관리 페이지 - 사무공간 타입, 승인상태 소팅
     @GetMapping("/master/spaceAll")
-    public ResponseEntity masterManageSpaces(@ModelAttribute String spaceStatus){
-        return ResponseEntity.ok(spaceService.getSpaceMasterPage(spaceStatus));
+    public ResponseEntity masterManageSpaces(@ModelAttribute SpaceManageSortingDto dto){
+        PageRequest pageRequest = PageRequest.of(dto.getPageNum(), 10);
+        return ResponseEntity.ok(spaceService.getSpaceMasterPage(pageRequest, dto));
     }
 
     //마스터의 사무공간 승인

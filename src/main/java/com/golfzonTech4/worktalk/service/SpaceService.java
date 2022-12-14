@@ -191,14 +191,10 @@ public class SpaceService {
         spaceRepository.deleteById(spaceId);
     }
 
-    public List<SpaceMasterDto> getSpaceMasterPage(String spaceStatus) {
+    public ListResult getSpaceMasterPage(PageRequest pageRequest, SpaceManageSortingDto dto) {
         log.info("getSpaceMasterPage()....");
-        List<SpaceMasterDto> space = spaceRepository.getSpaceMasterPage(spaceStatus);
-        if (space != null) {
-            return space;
-        }
-
-        throw new EntityNotFoundException("해당 사무공간을 찾지 못했습니다.");
+        PageImpl<SpaceMasterDto> result = spaceRepository.getSpaceMasterPage(pageRequest, dto);
+        return new ListResult(result.getTotalElements(), result.getContent());
     }
 
     @Transactional

@@ -1,9 +1,6 @@
 package com.golfzonTech4.worktalk.repository.space;
 
-import com.golfzonTech4.worktalk.dto.space.SpaceDetailDto;
-import com.golfzonTech4.worktalk.dto.space.SpaceMainDto;
-import com.golfzonTech4.worktalk.dto.space.SpaceMasterDto;
-import com.golfzonTech4.worktalk.dto.space.SpaceSearchDto;
+import com.golfzonTech4.worktalk.dto.space.*;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 
@@ -22,5 +19,5 @@ public interface SpaceRepositoryCustom {
 
     List<SpaceDetailDto> getSpaceDetailPage(Long spaceId); //사무공간 상세페이지
 
-    List<SpaceMasterDto> getSpaceMasterPage(String spaceStatus); //마스터의 사무공간 관리 페이지
+    PageImpl<SpaceMasterDto> getSpaceMasterPage(PageRequest pageRequest, SpaceManageSortingDto dto); //마스터의 사무공간 관리 페이지
 }
