@@ -141,8 +141,8 @@ public class SpaceRepositoryCustomImpl implements SpaceRepositoryCustom{
     }
 
     @Override
-    public List<SpaceMasterDto> getSpaceMasterPage(String spaceStatus) {
-        return queryFactory.select(
+    public PageImpl<SpaceMasterDto> getSpaceMasterPage(PageRequest pageRequest, SpaceManageSortingDto dto) {
+        List<SpaceMasterDto> content =  queryFactory.select(
                         new QSpaceMasterDto(
                                 space.spaceId,
                                 space.member.name,
@@ -152,15 +152,27 @@ public class SpaceRepositoryCustomImpl implements SpaceRepositoryCustom{
                                 space.spaceStatus
                                 ))
                 .from(space)
-                .where(eqSpaceStatus(spaceStatus))
+                .where(eqSpaceType(dto.getSearchSpaceType()), eqSpaceStatus(dto.getSearchSpaceStatus()))
+                .orderBy(space.spaceId.desc())
+                .offset(pageRequest.getOffset())
+                .limit(pageRequest.getPageSize())
                 .fetch();
+
+        long total = queryFactory
+                .select(space.count())
+                .from(space)
+                .where(eqSpaceType(dto.getSearchSpaceType()), eqSpaceStatus(dto.getSearchSpaceStatus()))
+                .fetchOne();
+
+        return new PageImpl<>(content, pageRequest, total);
+
     }
 
-    private BooleanExpression eqSpaceStatus(String spaceStatus) {
-        if(spaceStatus == null || spaceStatus.isEmpty()) {
+    private BooleanExpression eqSpaceStatus(String searchSpaceStatus) {
+        if(searchSpaceStatus == null || searchSpaceStatus.isEmpty()) {
             return null;
         }
-        return space.spaceStatus.eq(spaceStatus);
+        return space.spaceStatus.eq(searchSpaceStatus);
     }
 
     private BooleanExpression eqSpaceType(Integer searchSpaceType) {
