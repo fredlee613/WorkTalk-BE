@@ -15,12 +15,12 @@ import java.io.Serializable;
 public class CustomerComment extends BaseTimeEntity implements Serializable {
 
     @Id
-    @Column(name = "CC_ID")
-    private Long ccId;
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_CC_COMMENT_GENERATOR")
+    @Column(name = "CC_COMMENT_ID")
+    private Long ccCommentId;
 
-    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    @MapsId//@매핑한 연관관계를 기본키에도 매핑하기 위함
-    @JoinColumn(name = "CC_ID")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "CC_ID", nullable = false)
     private CustomerCenter customerCenter;
 
     @Column(name = "CONTENT", nullable = false, length = 2000)
