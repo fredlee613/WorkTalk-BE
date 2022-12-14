@@ -364,7 +364,7 @@ public class PayService {
      * 결제 내역 전체 조회 (사용자, 호스트)
      */
     public ListResult findByName(PayOrderSearch dto, PageRequest pageRequest) {
-        log.info("findByName: {}, {}");
+        log.info("findByName: {}, {}", dto, pageRequest);
         String name = SecurityUtil.getCurrentUsername().get();
         String role = SecurityUtil.getCurrentUserRole().get();
         if (role.equals(MemberType.ROLE_USER.toString())) {
