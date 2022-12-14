@@ -4,7 +4,6 @@ import com.golfzonTech4.worktalk.domain.QReservation;
 import com.golfzonTech4.worktalk.domain.QSpace;
 import com.golfzonTech4.worktalk.dto.space.*;
 import com.querydsl.core.types.dsl.BooleanExpression;
-import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageImpl;
@@ -87,7 +86,8 @@ public class SpaceRepositoryCustomImpl implements SpaceRepositoryCustom{
                                 space.spaceName,
                                 space.address,
                                 space.detailAddress,
-                                space.spaceType)
+                                space.spaceType,
+                                space.spaceStatus)
                 ).distinct()
                 .from(space)
                 .where(space.member.name.eq(name))
@@ -114,6 +114,7 @@ public class SpaceRepositoryCustomImpl implements SpaceRepositoryCustom{
                                 space.spaceId,
                                 space.member.name,
                                 space.member.email,
+                                space.member.tel,
                                 space.spaceName,
                                 space.spaceDetail,
                                 space.postcode,

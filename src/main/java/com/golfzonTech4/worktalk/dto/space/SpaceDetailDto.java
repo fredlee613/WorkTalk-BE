@@ -7,7 +7,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import javax.validation.constraints.NotEmpty;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -21,6 +20,8 @@ public class SpaceDetailDto {
     private String name;
 
     private String email;
+
+    private String tel;
 
     private String spaceName;
 
@@ -36,6 +37,7 @@ public class SpaceDetailDto {
 
     private int spaceType;
 
+
     private List<SpaceImgDto> spaceImgList = new ArrayList<>();
 
     private List<QnaDetailDto> qnaDetailDtoList = new ArrayList<>();
@@ -43,12 +45,13 @@ public class SpaceDetailDto {
     private List<ReviewDetailDto> reviewDetailDtoList = new ArrayList<>();
 
     @QueryProjection
-    public SpaceDetailDto(Long memberId, Long spaceId, String name, String email, String spaceName, String spaceDetail,
+    public SpaceDetailDto(Long memberId, Long spaceId, String name, String email, String tel, String spaceName, String spaceDetail,
                           String postcode, String address, String detailAddress, String regCode, int spaceType) {
         this.memberId = memberId;
         this.spaceId = spaceId;
         this.name = name;
         this.email = email;
+        this.tel = tel;
         this.spaceName = spaceName;
         this.spaceDetail = spaceDetail;
         this.postcode = postcode;
