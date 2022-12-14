@@ -27,7 +27,7 @@ public class MemberController {
     /**
      * MemberDetailDto 파라미터로 받아서 MemberService의 signup메서드를 호출
      */
-    @PostMapping("/join")
+    @PostMapping("/member/join")
     public ResponseEntity<Long> join(
             @Valid @RequestBody MemberDetailDto request) {
         log.info("signupUser: {}", request);
@@ -38,7 +38,7 @@ public class MemberController {
     /**
      * 회원 단건 조회 요청 (접속자 기준)
      */
-    @PostMapping("/profile")
+    @PostMapping("/member/profile")
     public ResponseEntity<MemberDto> profile() {
         log.info("profile");
         return ResponseEntity.ok(memberService.findProfile());
@@ -47,7 +47,7 @@ public class MemberController {
     /**
      * 회원 정보 수정 요청
      */
-    @PostMapping("/update")
+    @PostMapping("/member/update")
     public ResponseEntity<Long> update(
             @Valid @RequestBody MemberUpdateDto dto) {
         log.info("update: {}", dto);
@@ -57,7 +57,7 @@ public class MemberController {
     /**
      * 회원 탈퇴 요청
      */
-    @PostMapping("/leave/{memberId}")
+    @PostMapping("/member/leave/{memberId}")
     public ResponseEntity<Long> leave(
             @PathVariable(value = "memberId") Long memberId) {
         log.info("update: {}", memberId);
@@ -69,7 +69,7 @@ public class MemberController {
     /**
      * 사용자 명 중복 확인 요청
      */
-    @PostMapping("/nameCheck")
+    @PostMapping("/member/nameCheck")
     public ResponseEntity findDuplicated(@RequestBody MemberDetailDto request) {
         log.info("findDuplicated: {}", request);
         Member member = new Member();
