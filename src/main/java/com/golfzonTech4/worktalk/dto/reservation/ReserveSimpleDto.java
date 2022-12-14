@@ -28,8 +28,8 @@ public class ReserveSimpleDto {
     private RoomType roomType;
     private int reserveAmount;
     private List<PayDto> pays;
-
     private String cancelReason;
+    private Long reviewId;
 
     @QueryProjection
     public ReserveSimpleDto(String roomName, int paid, Long reserveId, Long memberId, Long roomId, BookDate bookDate, String name,
@@ -46,6 +46,25 @@ public class ReserveSimpleDto {
         this.roomType = roomType;
         this.reserveAmount = reserveAmount;
         this.cancelReason = cancelReason;
+    }
+
+    @QueryProjection
+    public ReserveSimpleDto(String roomName, int paid, Long reserveId, Long memberId, Long roomId, BookDate bookDate,
+                            String name, ReserveStatus reserveStatus, PaymentStatus paymentStatus, RoomType roomType,
+                            int reserveAmount, String cancelReason, Long reviewId) {
+        this.roomName = roomName;
+        this.paid = paid;
+        this.reserveId = reserveId;
+        this.memberId = memberId;
+        this.roomId = roomId;
+        this.bookDate = bookDate;
+        this.name = name;
+        this.reserveStatus = reserveStatus;
+        this.paymentStatus = paymentStatus;
+        this.roomType = roomType;
+        this.reserveAmount = reserveAmount;
+        this.cancelReason = cancelReason;
+        this.reviewId = reviewId;
     }
 
     @QueryProjection

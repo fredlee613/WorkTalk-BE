@@ -284,6 +284,9 @@ public class ReservationService {
      */
     public List<ReserveCheckDto> findBookedReservation(ReserveCheckDto dto) {
         log.info("findBookedReservation : {}", dto);
+
+        tempReservationRepository.deleteByTime(); // 작성한지 1분이 경과한 임시 데이터 삭제
+
         List<ReserveCheckDto> result = new ArrayList<>();
         if (dto.getRoomType().equals(RoomType.OFFICE)) {
             List<ReserveCheckDto> tempBookedOffices = tempReservationRepository.findBookedOffice(dto.getRoomId(), dto.getInitDate(), dto.getEndDate());

@@ -15,7 +15,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -31,6 +30,9 @@ public class TempReservationService {
     public Long reserveTemp(ReserveTempDto dto) {
         log.info("reserveTemp: {}", dto);
         BookDate bookDate = new BookDate(LocalDateTime.now(), dto.getCheckInDate(), dto.getCheckOutDate(), dto.getCheckInTime(), dto.getCheckOutTime());
+
+        // 중복 여부 검증 전 DB 최신화
+        tempRepository.deleteByTime(); // 작성한지 1분이 경과한 임시 데이터 삭제
 
         // 중복 여부 검증
         Room findRoom = roomRepository.findById(dto.getRoomId()).get();
