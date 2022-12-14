@@ -29,9 +29,6 @@ public class Room implements Serializable {
     @Column(name = "ROOM_DETAIL", nullable = true, length = 500)
     private String roomDetail;
 
-    @Column(name = "ROOM_IMG", nullable = true, length = 100)
-    private String roomImg;
-
     @Column(name = "ROOM_PRICE", nullable = false)
     private int roomPrice;
 

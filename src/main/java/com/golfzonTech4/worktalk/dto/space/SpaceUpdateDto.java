@@ -4,21 +4,17 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
+import org.springframework.web.multipart.MultipartFile;
 
-import javax.validation.constraints.NotEmpty;
+import java.util.List;
 
 @Getter @Setter @NoArgsConstructor @ToString
 public class SpaceUpdateDto {
-
-    private Long memberId;
-
-    private String name;
 
     private Long spaceId;
 
     private String spaceDetail;
 
-    private String spaceImg;
-
+    List<MultipartFile> multipartFileList;
 
 }

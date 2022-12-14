@@ -27,7 +27,7 @@ public class Member {
     @Column(name = "NAME", unique = true, nullable = false, length = 50)
     private String name;
 
-    @Column(name = "TEL", nullable = false, length = 20)
+    @Column(name = "TEL", nullable = true, length = 20)
     private String tel;
 
     @Enumerated(EnumType.STRING)
@@ -42,8 +42,7 @@ public class Member {
     @Column(name = "ACTIVATED", nullable = false)
     private int activated;
 
-    @JsonBackReference //순환참조를 방지하기 위한 어노테이션
-    @OneToMany(mappedBy = "member", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "member", cascade = CascadeType.ALL)
     private List<Space> spaces;
 
 }

@@ -15,12 +15,12 @@ import java.time.LocalDateTime;
 @Table(name = "QNA_COMMENT")
 public class QnaComment extends BaseTimeEntity implements Serializable {
     @Id
-    @Column(name = "QNA_ID")
-    private Long qnaId;
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_CC_COMMENT_GENERATOR")
+    @Column(name = "QNA_COMMENT_ID")
+    private Long qnaCommentId;
 
-    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    @MapsId//@매핑한 연관관계를 기본키에도 매핑하기 위함
-    @JoinColumn(name = "QNA_ID")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "QNA_ID", nullable = false)
     private Qna qna;
 
     @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
