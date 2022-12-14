@@ -28,7 +28,7 @@ public class RoomController {
 
     //호스트의 세부사무공간 등록
     @PostMapping("/host/roomCreate")
-    public ResponseEntity<Room> createRoom(@Valid RoomInsertDto dto, Space space){
+    public ResponseEntity<Room> createRoom(@Valid RoomInsertDto dto){
         log.info("createRoom : {}", dto);
         roomService.createRoom(dto);
 
