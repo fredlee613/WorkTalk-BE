@@ -3,12 +3,12 @@ package com.golfzonTech4.worktalk.service;
 import com.golfzonTech4.worktalk.domain.Room;
 import com.golfzonTech4.worktalk.domain.RoomImg;
 import com.golfzonTech4.worktalk.domain.Space;
-import com.golfzonTech4.worktalk.domain.SpaceImg;
 import com.golfzonTech4.worktalk.dto.room.RoomDetailDto;
+import com.golfzonTech4.worktalk.dto.room.RoomInsertDto;
+import com.golfzonTech4.worktalk.dto.room.RoomUpdateDto;
 import com.golfzonTech4.worktalk.repository.room.RoomImgRepository;
 import com.golfzonTech4.worktalk.repository.room.RoomRepository;
 import com.golfzonTech4.worktalk.repository.space.SpaceRepository;
-import com.golfzonTech4.worktalk.dto.room.RoomInsertDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
@@ -29,7 +29,6 @@ public class RoomService {
     private final RoomRepository roomRepository;
     private final RoomImgRepository roomImgRepository;
     private final SpaceRepository spaceRepository;
-
     private final AwsS3Service awsS3Service;
 
     //세부공간 등록
@@ -64,26 +63,48 @@ public class RoomService {
         return roomToCreate.getRoomId();
     }
 
-//    public List<Room> getRooms(Space space) {
-//        log.info("getRooms()....");
-//        return roomRepository.findAllBySpace(space);
-//    }
+    //세부사무공간 수정
+    @Transactional
+    public void updateRoom(RoomUpdateDto dto) {
+        log.info("updateRoom()....");
+        Room room = roomRepository.findByRoomId(dto.getRoomId());
 
+        List<RoomImg> imageurlList = new ArrayList<>();
+        if (dto.getMultipartFileList().isEmpty() || dto.getMultipartFileList() == null) {
+            imageurlList = roomImgRepository.findByRoom(room);
+        } else{
+            List<String> newImageurlList = new ArrayList<>();
+            newImageurlList.addAll(awsS3Service.upload(dto.getMultipartFileList()));
+            for (String imageurl : newImageurlList) {
+                RoomImg roomImg = new RoomImg();
+                roomImg.setRoom(room);
+                roomImg.setRoomImgUrl(imageurl);
+                roomImgRepository.save(roomImg);
+            }
+        }
+        room.setRoomDetail(dto.getRoomDetail());
+        room.setRoomPrice(dto.getRoomPrice());
+        room.setWorkStart(dto.getWorkStart());
+        room.setWorkEnd(dto.getWorkEnd());
+    }
+
+    //사무공간에 해당하는 세부공간들 가져오기
     public List<RoomDetailDto> getRooms(Long spaceId) {
         log.info("getRooms()....");
         return roomRepository.getRooms(spaceId);
     }
 
+    //세부사무공간 단일 선택
     public Room selectRoom(Long roomId){
         log.info("selectRoom()....");
         Room room = roomRepository.findByRoomId(roomId);
         if(room != null){
             return room;
         }
-
         throw new EntityNotFoundException("해당 사무공간을 찾지 못했습니다.");
     }
 
+    //세부사무공간 삭제
     @Transactional
     public void deleteRoom(Long roomId){
         log.info("deleteRoom()....");

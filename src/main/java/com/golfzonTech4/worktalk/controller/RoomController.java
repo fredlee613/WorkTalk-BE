@@ -1,8 +1,8 @@
 package com.golfzonTech4.worktalk.controller;
 
 import com.golfzonTech4.worktalk.domain.Room;
-import com.golfzonTech4.worktalk.domain.Space;
 import com.golfzonTech4.worktalk.dto.room.RoomInsertDto;
+import com.golfzonTech4.worktalk.dto.room.RoomUpdateDto;
 import com.golfzonTech4.worktalk.service.RoomService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -33,6 +33,13 @@ public class RoomController {
         roomService.createRoom(dto);
 
         return new ResponseEntity("입력완료", HttpStatus.OK);
+    }
+
+    //호스트 세부사무공간 수정(공간 설명, 이미지, 영업시간, 가격)
+    @PostMapping("/host/roomUpdate/{roomId}")
+    public ResponseEntity<Room> updateRoom(@Valid RoomUpdateDto dto){
+        roomService.updateRoom(dto);
+        return new ResponseEntity("수정완료",HttpStatus.OK);
     }
 
     //사무공간 상세페이지에서 세부공간 선택
