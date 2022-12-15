@@ -31,15 +31,10 @@ public class KakaoJoinService {
         member.setName(dto.getName());
         member.setMemberType(ROLE_USER);
         member.setImgName("profill.png");
-//        member.setKakaoYn("Y");
+        member.setKakaoYn("Y");
         member.setPw(passwordEncoder.encode(member.getPw()));
 
         return memberRepository.save(member).getId();
     }
-
-//    @Transactional
-//    public String kakaoLogin(OAuth2KakaoDto dto) {
-//
-//    }
 
 }

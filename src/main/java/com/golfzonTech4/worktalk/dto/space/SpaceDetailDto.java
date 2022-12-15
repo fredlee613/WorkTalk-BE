@@ -37,12 +37,7 @@ public class SpaceDetailDto {
 
     private int spaceType;
 
-
     private List<SpaceImgDto> spaceImgList = new ArrayList<>();
-
-    private List<QnaDetailDto> qnaDetailDtoList = new ArrayList<>();
-
-    private List<ReviewDetailDto> reviewDetailDtoList = new ArrayList<>();
 
     @QueryProjection
     public SpaceDetailDto(Long memberId, Long spaceId, String name, String email, String tel, String spaceName, String spaceDetail,

@@ -27,25 +27,13 @@ public class KakaoController {
     private final TokenProvider tokenProvider;
     private final AuthenticationManagerBuilder authenticationManagerBuilder;
 
-    private final KakaoJoinService oAuthService;
-
-//    @PostMapping("/kakaoJoin") // 카카오 간편회원 아닐 경우 -> 회원가입
-//    public ResponseEntity<TokenDto> kakaoJoin(@Valid @RequestBody OAuth2KakaoDto dto) {
-//        log.info("OAuth2KakaoDto : {}", dto);
-//
-//        String jwt = oAuthService.join(dto);
-//
-//        HttpHeaders httpHeaders = new HttpHeaders(); // response header 저장
-//        httpHeaders.add(JwtFilter.AUTHORIZATION_HEADER, "Bearer " + jwt);
-//
-//        return new ResponseEntity<>(new TokenDto(jwt), httpHeaders, HttpStatus.OK); // response body에도 저장
-//    }
+    private final KakaoJoinService kakaoJoinService;
 
     @PostMapping("/kakaoLogin")
     public ResponseEntity<TokenDto> kakaoLogin(@Valid @RequestBody KakaoProfileDto dto) {
         log.info("OAuth2KakaoDto : {}", dto);
 
-        if(dto.isMember() == false) oAuthService.join(dto);
+        if(dto.isMember() == false) kakaoJoinService.join(dto);
 
         UsernamePasswordAuthenticationToken authenticationToken =
                 new UsernamePasswordAuthenticationToken(dto.getEmail(), dto.getPw()); // 토큰 생성
