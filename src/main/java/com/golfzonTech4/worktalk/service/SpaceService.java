@@ -113,7 +113,7 @@ public class SpaceService {
         return spaceRepository.save(findSpace);
     }
 
-    //사무공간 상세페이지
+    //사무공간 단일 선택
     public Space selectSpace(Long spaceId) {
         log.info("selectSpace()....");
         Space space = spaceRepository.findBySpaceId(spaceId);
@@ -124,6 +124,7 @@ public class SpaceService {
         throw new EntityNotFoundException("해당 사무공간을 찾지 못했습니다.");
     }
 
+    //사무공간 상세페이지
     public List<SpaceDetailDto> getSpaceDetailPage(Long spaceId) {
         log.info("selectSpace()....");
         List<SpaceDetailDto> space = spaceRepository.getSpaceDetailPage(spaceId);
