@@ -70,47 +70,26 @@ public class SpaceService {
         return spaceToCreate.getSpaceId();
     }
 
-    //사무공간 다중이미지 등록
-//    @Transactional
-//    public Long uploadSpaceImage(SpaceImgDto dto, List<MultipartFile> multipartFileList) {
-//
-//        Space findSpace = spaceRepository.findBySpaceId(dto.getSpaceId());
-//        List<String> imageurlList = new ArrayList<>();
-//        if (multipartFileList.size() > 0) {
-//            imageurlList.addAll(awsS3Service.upload(multipartFileList));
-//        } else {
-//            imageurlList.add(null);
-//        }
-//
-//        for (String imageurl : imageurlList) {
-//            SpaceImg spaceImgToCreate = new SpaceImg();
-//            BeanUtils.copyProperties(dto, spaceImgToCreate);
-//            spaceImgToCreate.setSpace(findSpace);
-//            spaceImgToCreate.setSpaceImgUrl(imageurl);
-//            spaceImgRepository.save(spaceImgToCreate);
-//        }
-//
-//        return findSpace.getSpaceId();
-//
-//    }
-
     //사무공간 수정
     @Transactional
-    public Space updateSpace(SpaceUpdateDto dto) {
+    public void updateSpace(SpaceUpdateDto dto) {
         log.info("updateSpace()....");
-//        Long result = 0L;
-//        Optional<Member> optionalMember = memberRepository.findById(dto.getMemberId());
-//        if(!optionalMember.isPresent()){
-//            throw new EntityNotFoundException("Member Not Found");
-//        }
-//        Member member = optionalMember.get();
+        Space space = spaceRepository.findBySpaceId(dto.getSpaceId());
 
-        Space findSpace = spaceRepository.findBySpaceId(dto.getSpaceId());
-        findSpace.setSpaceDetail(dto.getSpaceDetail());
-//        findSpace.setSpaceImg(dto.getSpaceImg());
-        //변경감지 사용
-//        return "수정완료";
-        return spaceRepository.save(findSpace);
+        List<SpaceImg> imageurlList = new ArrayList<>();
+        if (dto.getMultipartFileList().isEmpty() || dto.getMultipartFileList() == null) {
+            imageurlList = spaceImgRepository.findBySpace(space);
+        } else{
+            List<String> newImageurlList = new ArrayList<>();
+            newImageurlList.addAll(awsS3Service.upload(dto.getMultipartFileList()));
+            for (String imageurl : newImageurlList) {
+                SpaceImg spaceImg = new SpaceImg();
+                spaceImg.setSpace(space);
+                spaceImg.setSpaceImgUrl(imageurl);
+                spaceImgRepository.save(spaceImg);
+            }
+        }
+        space.setSpaceDetail(dto.getSpaceDetail());
     }
 
     //사무공간 단일 선택
@@ -174,30 +153,21 @@ public class SpaceService {
 
     }
 
-
-//    //유저-사무공간 리스트 조회
-//    public List<SpaceMainDto> getMainPage(SpaceSearchDto dto){
-//        return spaceRepository.getMainPage(dto.getSearchSpaceType(), dto.getSearchSpaceName(), dto.getSearchAddress());
-//    }
-//
-//    //유저-사무공간 리스트 조회
-//    public List<Space> findAllBySpaceStatus(){
-//        log.info("findAllBySpaceStatus()....");
-//        return spaceRepository.findAllBySpaceStatus();
-//    }
-
+    //사무공간 삭제
     @Transactional
     public void deleteSpace(Long spaceId) {
         log.info("deleteSpace()....");
         spaceRepository.deleteById(spaceId);
     }
 
+    //유저 메인페이지
     public ListResult getSpaceMasterPage(PageRequest pageRequest, SpaceManageSortingDto dto) {
         log.info("getSpaceMasterPage()....");
         PageImpl<SpaceMasterDto> result = spaceRepository.getSpaceMasterPage(pageRequest, dto);
         return new ListResult(result.getTotalElements(), result.getContent());
     }
 
+    //마스터의 사무공간 검수승인
     @Transactional
     public Space ApprovedSpace(Long spaceId) {
         log.info("ApprovedSpace()....");
@@ -207,6 +177,7 @@ public class SpaceService {
         return space;
     }
 
+    //마스터의 사무공간 거절
     @Transactional
     public Space RejectedSpace(Long spaceId) {
         log.info("RejectedSpace()....");

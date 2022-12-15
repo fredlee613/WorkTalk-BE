@@ -1,4 +1,4 @@
-package com.golfzonTech4.worktalk.dto.space;
+package com.golfzonTech4.worktalk.dto.room;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -9,11 +9,19 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.List;
 
 @Getter @Setter @NoArgsConstructor @ToString
-public class SpaceUpdateDto {
+public class RoomUpdateDto {
 
     private Long spaceId;
 
-    private String spaceDetail;
+    private Long roomId;
+
+    private String roomDetail;
+
+    private int roomPrice;
+
+    private int workStart;
+
+    private int workEnd;
 
     List<String> imageUrlList;
 
