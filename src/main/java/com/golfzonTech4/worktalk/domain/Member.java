@@ -42,6 +42,10 @@ public class Member {
     @Column(name = "ACTIVATED", nullable = false)
     private int activated;
 
+//    @ColumnDefault("'N'")
+//    @Column(name = "KAKAO_YN", nullable = true, length = 10)
+//    private String KakaoYn;
+
     @OneToMany(mappedBy = "member", cascade = CascadeType.ALL)
     private List<Space> spaces;
 
