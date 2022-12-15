@@ -47,7 +47,7 @@ public class SpaceController {
     }
 
     //호스트 사무공간 수정(사무공간 설명, 이미지)
-    @PostMapping("/host/space_update/{spaceId}")
+    @PostMapping("/host/spaceUpdate/{spaceId}")
     public ResponseEntity<Space> updateSpace(@Valid SpaceUpdateDto dto){
         spaceService.updateSpace(dto);
         return new ResponseEntity("수정완료",HttpStatus.OK);
