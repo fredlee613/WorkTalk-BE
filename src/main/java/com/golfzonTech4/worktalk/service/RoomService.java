@@ -1,9 +1,12 @@
 package com.golfzonTech4.worktalk.service;
 
+import com.amazonaws.AmazonServiceException;
+import com.amazonaws.services.s3.AmazonS3;
 import com.golfzonTech4.worktalk.domain.Room;
 import com.golfzonTech4.worktalk.domain.RoomImg;
 import com.golfzonTech4.worktalk.domain.Space;
 import com.golfzonTech4.worktalk.dto.room.RoomDetailDto;
+import com.golfzonTech4.worktalk.dto.room.RoomImgDto;
 import com.golfzonTech4.worktalk.dto.room.RoomInsertDto;
 import com.golfzonTech4.worktalk.dto.room.RoomUpdateDto;
 import com.golfzonTech4.worktalk.repository.room.RoomImgRepository;
@@ -12,6 +15,7 @@ import com.golfzonTech4.worktalk.repository.space.SpaceRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -30,6 +34,11 @@ public class RoomService {
     private final RoomImgRepository roomImgRepository;
     private final SpaceRepository spaceRepository;
     private final AwsS3Service awsS3Service;
+
+    @Value("${cloud.aws.s3.bucket}")
+    private String bucket;
+
+    private final AmazonS3 amazonS3;
 
     //세부공간 등록
     @Transactional
@@ -109,6 +118,19 @@ public class RoomService {
     public void deleteRoom(Long roomId){
         log.info("deleteRoom()....");
         roomRepository.deleteById(roomId);
+    }
+
+    // 이미지 삭제
+    public void deleteRoomImg(RoomImgDto dto){
+        Optional<RoomImg> findRoomImg = roomImgRepository.findById(dto.getRoomImgId());
+        String roomImgUrl = findRoomImg.get().getRoomImgUrl();
+        try {
+            log.info("deleteSpaceImg : ", roomImgUrl.substring(roomImgUrl.lastIndexOf("/")+1));
+            amazonS3.deleteObject(this.bucket, roomImgUrl.substring(roomImgUrl.lastIndexOf("/")+1)); // s3에서 이미지 삭제
+        } catch (AmazonServiceException e){
+            log.error(e.getErrorMessage());
+        }
+        roomImgRepository.deleteById(dto.getRoomImgId()); // DB에서 이미지 삭제
     }
 
 

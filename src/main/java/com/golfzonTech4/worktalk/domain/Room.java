@@ -38,4 +38,7 @@ public class Room implements Serializable {
     @Column(name = "WORK_END", nullable = false)
     private int workEnd;
 
+    @Column(name = "OFFERING_OPTION", nullable = true, length = 500)
+    private String offeringOption;
+
 }
