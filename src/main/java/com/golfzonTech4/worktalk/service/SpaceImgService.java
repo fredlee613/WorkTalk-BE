@@ -29,7 +29,7 @@ public class SpaceImgService {
         Optional<SpaceImg> findSpaceImg = spaceImgRepository.findById(dto.getSpaceImgId());
         String spaceImgUrl = findSpaceImg.get().getSpaceImgUrl();
         try {
-            log.info("deleteSpaceImg : ", spaceImgUrl.substring(spaceImgUrl.lastIndexOf("/")+1));
+            log.info("deleteSpaceImg : {}", spaceImgUrl.substring(spaceImgUrl.lastIndexOf("/")+1));
             amazonS3.deleteObject(this.bucket, spaceImgUrl.substring(spaceImgUrl.lastIndexOf("/")+1)); // s3에서 이미지 삭제
         } catch (AmazonServiceException e){
             log.error(e.getErrorMessage());
