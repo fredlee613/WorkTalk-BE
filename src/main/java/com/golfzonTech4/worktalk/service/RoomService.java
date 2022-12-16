@@ -5,10 +5,7 @@ import com.amazonaws.services.s3.AmazonS3;
 import com.golfzonTech4.worktalk.domain.Room;
 import com.golfzonTech4.worktalk.domain.RoomImg;
 import com.golfzonTech4.worktalk.domain.Space;
-import com.golfzonTech4.worktalk.dto.room.RoomDetailDto;
-import com.golfzonTech4.worktalk.dto.room.RoomImgDto;
-import com.golfzonTech4.worktalk.dto.room.RoomInsertDto;
-import com.golfzonTech4.worktalk.dto.room.RoomUpdateDto;
+import com.golfzonTech4.worktalk.dto.room.*;
 import com.golfzonTech4.worktalk.repository.room.RoomImgRepository;
 import com.golfzonTech4.worktalk.repository.room.RoomRepository;
 import com.golfzonTech4.worktalk.repository.space.SpaceRepository;
@@ -120,13 +117,13 @@ public class RoomService {
         log.info("deleteRoom()....");
         roomRepository.deleteById(roomId);
     }
-
     // 이미지 삭제
-    public void deleteRoomImg(RoomImgDto dto){
+    @Transactional
+    public void deleteRoomImg(RoomImgDeleteDto dto){
         Optional<RoomImg> findRoomImg = roomImgRepository.findById(dto.getRoomImgId());
         String roomImgUrl = findRoomImg.get().getRoomImgUrl();
         try {
-            log.info("deleteSpaceImg : ", roomImgUrl.substring(roomImgUrl.lastIndexOf("/")+1));
+            log.info("deleteRoomImg : {}", roomImgUrl.substring(roomImgUrl.lastIndexOf("/")+1));
             amazonS3.deleteObject(this.bucket, roomImgUrl.substring(roomImgUrl.lastIndexOf("/")+1)); // s3에서 이미지 삭제
         } catch (AmazonServiceException e){
             log.error(e.getErrorMessage());
