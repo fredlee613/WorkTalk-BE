@@ -236,6 +236,16 @@ public class ReservationSimpleRepositoryImpl implements ReservationSimpleReposit
     }
 
     @Override
+    public List<Long> findByRooms(Long roomId) {
+        return null;
+    }
+
+    @Override
+    public List<Long> findBySpaces(Long spaceId) {
+        return null;
+    }
+
+    @Override
     public Optional<ReserveSimpleDto> findRoomName(Long reserveId) {
         log.info("findRoomName : {}", reserveId);
         ReserveSimpleDto result = queryFactory.select(new QReserveSimpleDto(reservation.room.roomName, reservation.bookDate))

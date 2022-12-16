@@ -1,15 +1,12 @@
 package com.golfzonTech4.worktalk.domain;
 
 import lombok.Getter;
-import lombok.NonNull;
 import lombok.ToString;
 
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
-import javax.validation.constraints.NotNull;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.Period;
 import java.time.temporal.ChronoUnit;
 
 @Embeddable
