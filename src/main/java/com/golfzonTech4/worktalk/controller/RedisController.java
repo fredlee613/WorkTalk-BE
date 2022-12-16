@@ -39,7 +39,7 @@ public class RedisController {
             @ApiResponse(responseCode = "500", description = "INTERNAL SERVER ERROR")
     })
     @PostMapping("/redis/reservation/choose")
-    public ResponseEntity choose(@RequestBody ReserveTempDto dto)  {
+    public ResponseEntity choose(@RequestBody ReserveTempDto dto) throws InterruptedException {
 
         log.info("choose: {}", dto);
         String result = facade.chooseRoom(dto);
