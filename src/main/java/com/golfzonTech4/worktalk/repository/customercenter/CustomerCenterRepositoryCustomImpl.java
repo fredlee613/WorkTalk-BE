@@ -36,6 +36,7 @@ public class CustomerCenterRepositoryCustomImpl implements CustomerCenterReposit
                                 customerCenter.content,
                                 customerCenter.type,
                                 customerCenter.lastModifiedDate,
+                                customerComment.ccCommentId,
                                 customerComment.content,
                                 customerComment.lastModifiedDate
                                 )

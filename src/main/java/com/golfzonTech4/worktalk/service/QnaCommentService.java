@@ -69,10 +69,9 @@ public class QnaCommentService {
         log.info("deleteQnaComment()....");
 
         Optional<String> currentUsername = SecurityUtil.getCurrentUsername();
-        if (!currentUsername.isPresent()) throw new EntityNotFoundException("Member Not Found");
 
         Optional<QnaComment> optionalQnaComment = Optional.ofNullable(qnaCommentRepository.findByQnaCommentId(qnaCommentId));
-
+        if (!currentUsername.isPresent()) throw new EntityNotFoundException("Member Not Found");
         Member findMember = memberService.findByName(currentUsername.get());
         //qna작성자와 접속자가 같은지 확인
         if (findMember.getId() == optionalQnaComment.get().getMember().getId()) {

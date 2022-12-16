@@ -1,12 +1,10 @@
 package com.golfzonTech4.worktalk.domain;
 
-import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 
 import javax.persistence.*;
 import java.io.Serializable;
-import java.time.LocalDateTime;
 
 @Entity
 @Getter
@@ -24,7 +22,7 @@ public class QnaComment extends BaseTimeEntity implements Serializable {
     @JoinColumn(name = "QNA_ID", nullable = false)
     private Qna qna;
 
-    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "MEMBER_ID", nullable = false)
     private Member member;
 
