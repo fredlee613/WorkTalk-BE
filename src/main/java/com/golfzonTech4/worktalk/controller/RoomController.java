@@ -57,7 +57,7 @@ public class RoomController {
     }
 
     //세부공간 이미지 선택 삭제
-    @PostMapping("/roomImgDelete")
+    @DeleteMapping("/roomImgDelete")
     public ResponseEntity<Room> roomImgDelete(@ModelAttribute RoomImgDto dto){
         log.info("roomImgDelete : {}", dto);
         roomService.deleteRoomImg(dto);

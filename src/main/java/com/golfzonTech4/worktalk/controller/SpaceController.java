@@ -1,10 +1,7 @@
 package com.golfzonTech4.worktalk.controller;
 
 import com.golfzonTech4.worktalk.domain.Space;
-import com.golfzonTech4.worktalk.dto.space.SpaceImgDto;
-import com.golfzonTech4.worktalk.dto.space.SpaceInsertDto;
-import com.golfzonTech4.worktalk.dto.space.SpaceManageSortingDto;
-import com.golfzonTech4.worktalk.dto.space.SpaceUpdateDto;
+import com.golfzonTech4.worktalk.dto.space.*;
 import com.golfzonTech4.worktalk.service.SpaceImgService;
 import com.golfzonTech4.worktalk.service.SpaceService;
 import lombok.RequiredArgsConstructor;
@@ -82,8 +79,8 @@ public class SpaceController {
     }
 
     //사무공간 이미지 선택 삭제
-    @PostMapping("/spaceImgDelete")
-    public ResponseEntity<Space> spaceImgDelete(@ModelAttribute SpaceImgDto dto){
+    @DeleteMapping("/spaceImgDelete")
+    public ResponseEntity<Space> spaceImgDelete(@ModelAttribute SpaceImgDeleteDto dto){
         log.info("spaceImgDelete : {}", dto);
         spaceImgService.deleteSpaceImg(dto);
 
