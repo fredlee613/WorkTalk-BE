@@ -27,4 +27,5 @@ public class RoomUpdateDto {
 
     List<MultipartFile> multipartFileList;
 
+    private String offeringOption;
 }
