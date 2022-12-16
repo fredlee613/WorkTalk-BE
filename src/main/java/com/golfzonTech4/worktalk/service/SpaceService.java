@@ -77,9 +77,7 @@ public class SpaceService {
         Space space = spaceRepository.findBySpaceId(dto.getSpaceId());
 
         List<SpaceImg> imageurlList = new ArrayList<>();
-        if (dto.getMultipartFileList().isEmpty() || dto.getMultipartFileList() == null) {
-            imageurlList = spaceImgRepository.findBySpace(space);
-        } else{
+        if (!dto.getMultipartFileList().isEmpty() || dto.getMultipartFileList() != null) {
             List<String> newImageurlList = new ArrayList<>();
             newImageurlList.addAll(awsS3Service.upload(dto.getMultipartFileList()));
             for (String imageurl : newImageurlList) {
@@ -88,6 +86,8 @@ public class SpaceService {
                 spaceImg.setSpaceImgUrl(imageurl);
                 spaceImgRepository.save(spaceImg);
             }
+        } else{
+            imageurlList = spaceImgRepository.findBySpace(space);
         }
         space.setSpaceDetail(dto.getSpaceDetail());
     }

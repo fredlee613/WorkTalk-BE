@@ -79,9 +79,7 @@ public class RoomService {
         Room room = roomRepository.findByRoomId(dto.getRoomId());
 
         List<RoomImg> imageurlList = new ArrayList<>();
-        if (dto.getMultipartFileList().isEmpty() || dto.getMultipartFileList() == null) {
-            imageurlList = roomImgRepository.findByRoom(room);
-        } else{
+        if (!dto.getMultipartFileList().isEmpty() || dto.getMultipartFileList() != null) {
             List<String> newImageurlList = new ArrayList<>();
             newImageurlList.addAll(awsS3Service.upload(dto.getMultipartFileList()));
             for (String imageurl : newImageurlList) {
@@ -90,6 +88,8 @@ public class RoomService {
                 roomImg.setRoomImgUrl(imageurl);
                 roomImgRepository.save(roomImg);
             }
+        } else{
+            imageurlList = roomImgRepository.findByRoom(room);
         }
         room.setRoomDetail(dto.getRoomDetail());
         room.setRoomPrice(dto.getRoomPrice());
