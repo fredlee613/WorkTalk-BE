@@ -95,6 +95,7 @@ public class RoomService {
         room.setRoomPrice(dto.getRoomPrice());
         room.setWorkStart(dto.getWorkStart());
         room.setWorkEnd(dto.getWorkEnd());
+        room.setOfferingOption(dto.getOfferingOption());
     }
 
     //사무공간에 해당하는 세부공간들 가져오기

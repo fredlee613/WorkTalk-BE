@@ -36,7 +36,8 @@ public class RoomRepositoryCustomImpl implements RoomRepositoryCustom{
                                 room.roomType,
                                 room.roomPrice,
                                 room.workStart,
-                                room.workEnd))
+                                room.workEnd,
+                                room.offeringOption))
                 .from(room)
                 .where(room.space.spaceId.eq(spaceId))
                 .orderBy(room.roomPrice.asc())

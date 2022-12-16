@@ -10,7 +10,6 @@ import java.io.Serializable;
 @Entity
 @Getter
 @Setter
-@EqualsAndHashCode
 @SequenceGenerator(name = "SEQ_CC_COMMENT_GENERATOR", sequenceName = "SEQ_CC_COMMENT", initialValue = 1, allocationSize = 50)
 @Table(name = "CUSTOMER_COMMENT")
 public class CustomerComment extends BaseTimeEntity implements Serializable {
