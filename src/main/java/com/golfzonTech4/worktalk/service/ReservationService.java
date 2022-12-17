@@ -70,6 +70,8 @@ public class ReservationService {
         // 노쇼로 이용이 제한된 사용자일 경우 예외 처리
         if (findMember.getActivated() == 0) {
             throw new IllegalAccessException("이용이 제한된 계정입니다.");
+        } else if (findMember.getTel() == null) {
+            throw new IllegalAccessException("연락처가 없는 회원입니다.");
         }
         log.info("findMember : {}", findMember.toString());
 

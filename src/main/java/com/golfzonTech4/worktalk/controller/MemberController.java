@@ -9,6 +9,7 @@ import com.golfzonTech4.worktalk.dto.member.MemberUpdateDto;
 import com.golfzonTech4.worktalk.repository.ListResult;
 import com.golfzonTech4.worktalk.repository.member.MemberRepository;
 import com.golfzonTech4.worktalk.service.MemberService;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -16,7 +17,9 @@ import org.springframework.web.bind.annotation.*;
 import retrofit2.http.Path;
 
 import javax.validation.Valid;
+import java.util.Map;
 
+@Tag(name = "MemberController", description = "회원 정보 관련 api입니다.")
 @RestController
 @RequiredArgsConstructor
 @Slf4j
@@ -118,5 +121,16 @@ public class MemberController {
         // 가입된 정보가 없을 경우 예외 처리
         memberService.changePw(email);
         return ResponseEntity.ok().build();
+    }
+
+    /**
+     * 메일 조회(소셜 로그인 여부 확인)
+     */
+    @GetMapping("/member/isKakao")
+    public ResponseEntity<Map<String, String>> isKakao(@RequestParam(value = "email") String email) {
+        log.info("isKakao : {}", email);
+        // 가입된 정보가 없을 경우 예외 처리
+        Map<String, String> result = memberService.isKakao(email);
+        return ResponseEntity.ok(result);
     }
 }

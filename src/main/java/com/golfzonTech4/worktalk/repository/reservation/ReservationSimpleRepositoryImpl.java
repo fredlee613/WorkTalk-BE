@@ -162,6 +162,19 @@ public class ReservationSimpleRepositoryImpl implements ReservationSimpleReposit
     }
 
     @Override
+    public List<ReserveSimpleDto> findBySpace(Long spaceId) {
+        log.info("findBySpace");
+        return queryFactory.select(new QReserveSimpleDto(room.roomName, reservation.paid, reservation.reserveId,
+                        reservation.member.id, room.roomId, reservation.bookDate, reservation.member.name, reservation.reserveStatus,
+                        reservation.paymentStatus, room.roomType, reservation.reserveAmount, reservation.cancelReason, review.reviewId))
+                .from(reservation)
+                .innerJoin(room).on(reservation.room.roomId.eq(room.roomId))
+                .innerJoin(space).on(room.space.spaceId.eq(space.spaceId))
+                .where(space.spaceId.eq(spaceId),reservation.reserveStatus.eq(ReserveStatus.BOOKED))
+                .fetch();
+    }
+
+    @Override
     public Long countNoShow(Long memberId, ReserveStatus reserveStatus) {
         log.info("findAllByTime : {}, {}", memberId, reserveStatus);
 
@@ -233,16 +246,6 @@ public class ReservationSimpleRepositoryImpl implements ReservationSimpleReposit
                                         .and(reservation.bookDate.checkOutTime.goe(checkOutTime))))
                 )
                 .fetch();
-    }
-
-    @Override
-    public List<Long> findByRooms(Long roomId) {
-        return null;
-    }
-
-    @Override
-    public List<Long> findBySpaces(Long spaceId) {
-        return null;
     }
 
     @Override
