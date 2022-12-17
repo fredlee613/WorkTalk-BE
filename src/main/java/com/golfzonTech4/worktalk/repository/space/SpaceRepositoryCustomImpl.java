@@ -29,7 +29,6 @@ public class SpaceRepositoryCustomImpl implements SpaceRepositoryCustom{
         this.queryFactory = new JPAQueryFactory(em);
     }
     QSpace space = QSpace.space;
-    QReservation subReservation = new QReservation("sub");
 
     @Override
     public PageImpl<SpaceMainDto> getMainSpacePage(PageRequest pageRequest, SpaceSearchDto dto) {
@@ -45,11 +44,10 @@ public class SpaceRepositoryCustomImpl implements SpaceRepositoryCustom{
                 ).distinct()
                 .from(space)
                 .leftJoin(room).on(room.space.spaceId.eq(space.spaceId))
-                .leftJoin(reservation).on(reservation.room.roomId.eq(room.roomId))
+                .leftJoin(reservation).on(reservation.room.roomId.eq(room.roomId).and(possibleDate(dto.getSearchSpaceType(), dto.getSearchStartDate(),
+                        dto.getSearchEndDate(), dto.getSearchStartTime(), dto.getSearchEndTime())))
                 .where(eqSpaceType(dto.getSearchSpaceType()), containName(dto.getSearchSpaceName()),
-                        containAddress(dto.getSearchAddress()), space.spaceStatus.eq("approved"),
-                        possibleDate(dto.getSearchSpaceType(), dto.getSearchStartDate(),
-                                dto.getSearchEndDate(), dto.getSearchStartTime(), dto.getSearchEndTime()))
+                        containAddress(dto.getSearchAddress()), space.spaceStatus.eq("approved"), ifsearchDate(dto.getSearchStartDate()))
                 .orderBy(space.spaceId.desc())
                 .offset(pageRequest.getOffset())
                 .limit(pageRequest.getPageSize())
@@ -67,11 +65,10 @@ public class SpaceRepositoryCustomImpl implements SpaceRepositoryCustom{
                 .select(space.countDistinct())
                 .from(space)
                 .leftJoin(room).on(room.space.spaceId.eq(space.spaceId))
-                .leftJoin(reservation).on(reservation.room.roomId.eq(room.roomId))
+                .leftJoin(reservation).on(reservation.room.roomId.eq(room.roomId).and(possibleDate(dto.getSearchSpaceType(), dto.getSearchStartDate(),
+                        dto.getSearchEndDate(), dto.getSearchStartTime(), dto.getSearchEndTime())))
                 .where(eqSpaceType(dto.getSearchSpaceType()), containName(dto.getSearchSpaceName()),
-                        containAddress(dto.getSearchAddress()), space.spaceStatus.eq("approved"),
-                        possibleDate(dto.getSearchSpaceType(), dto.getSearchStartDate(),
-                                dto.getSearchEndDate(), dto.getSearchStartTime(), dto.getSearchEndTime()))
+                        containAddress(dto.getSearchAddress()), space.spaceStatus.eq("approved"), ifsearchDate(dto.getSearchStartDate()))
                 .fetchOne();
 
         return new PageImpl<>(content, pageRequest, total);
@@ -150,7 +147,7 @@ public class SpaceRepositoryCustomImpl implements SpaceRepositoryCustom{
                                 space.spaceType,
                                 space.regCode,
                                 space.spaceStatus
-                                ))
+                        ))
                 .from(space)
                 .where(eqSpaceType(dto.getSearchSpaceType()), eqSpaceStatus(dto.getSearchSpaceStatus()))
                 .orderBy(space.spaceId.desc())
@@ -203,14 +200,23 @@ public class SpaceRepositoryCustomImpl implements SpaceRepositoryCustom{
             return null;
         }
         else if(spaceType == 1){
-            return reservation.bookDate.checkInDate.between(searchStartDate, searchEndDate)
-                    .or(reservation.bookDate.checkOutDate.between(searchStartDate, searchEndDate));
+            return reservation.bookDate.checkOutDate.goe(searchStartDate)
+                    .and(reservation.bookDate.checkInDate.loe(searchEndDate));
         }
         else {
             return reservation.bookDate.checkInDate.eq(searchStartDate)
-                    .and(reservation.bookDate.checkInTime.between(searchStartTime, searchEndTime))
-                    .or(reservation.bookDate.checkOutTime.between(searchStartTime, searchEndTime));
+                    .and(reservation.bookDate.checkOutTime.goe(searchStartTime))
+                    .and(reservation.bookDate.checkInTime.loe(searchEndTime));
         }
+
+    }
+
+    //날짜검색을 할때만 필요한 조건
+    private BooleanExpression ifsearchDate(LocalDate searchStartDate){
+        if(searchStartDate == null) {
+            return null;
+        }
+        return reservation.reserveId.isNull();
     }
 
 
