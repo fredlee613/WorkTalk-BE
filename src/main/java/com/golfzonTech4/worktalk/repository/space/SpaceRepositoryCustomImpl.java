@@ -206,7 +206,7 @@ public class SpaceRepositoryCustomImpl implements SpaceRepositoryCustom{
         else {
             return reservation.bookDate.checkInDate.eq(searchStartDate)
                     .and(reservation.bookDate.checkOutTime.goe(searchStartTime))
-                    .and(reservation.bookDate.checkInTime.loe(searchEndTime));
+                            .and(reservation.bookDate.checkInTime.loe(searchEndTime));
         }
 
     }

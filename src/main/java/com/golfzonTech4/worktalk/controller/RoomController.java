@@ -1,6 +1,7 @@
 package com.golfzonTech4.worktalk.controller;
 
 import com.golfzonTech4.worktalk.domain.Room;
+import com.golfzonTech4.worktalk.dto.room.RoomImgDeleteDto;
 import com.golfzonTech4.worktalk.dto.room.RoomInsertDto;
 import com.golfzonTech4.worktalk.dto.room.RoomUpdateDto;
 import com.golfzonTech4.worktalk.service.RoomService;
@@ -49,10 +50,19 @@ public class RoomController {
     }
 
     //세부공간 삭제
-    @DeleteMapping("/host/spaceDelete/{roomId}")
+    @DeleteMapping("/host/roomDelete/{roomId}")
     public ResponseEntity<Void> deleteRoom(@PathVariable Long roomId){
         roomService.deleteRoom(roomId);
         return ResponseEntity.ok().build();
+    }
+
+    //세부공간 이미지 선택 삭제
+    @DeleteMapping("/roomImgDelete")
+    public ResponseEntity<Room> roomImgDelete(@ModelAttribute RoomImgDeleteDto dto){
+        log.info("roomImgDelete : {}", dto);
+        roomService.deleteRoomImg(dto);
+
+        return new ResponseEntity("삭제완료",HttpStatus.OK);
     }
 
 }

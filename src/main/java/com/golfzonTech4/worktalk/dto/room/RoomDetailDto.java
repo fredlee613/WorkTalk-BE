@@ -15,6 +15,7 @@ public class RoomDetailDto {
     private Long roomId;
 
     private String roomName;
+
     private String roomDetail;
 
     private RoomType roomType;
@@ -27,9 +28,11 @@ public class RoomDetailDto {
 
     private List<RoomImgDto> roomImgDtoList = new ArrayList<>();
 
+    private String offeringOption;
+
     @QueryProjection
     public RoomDetailDto(Long roomId, String roomName, String roomDetail,
-                         RoomType roomType, int roomPrice, int workStart, int workEnd) {
+                         RoomType roomType, int roomPrice, int workStart, int workEnd, String offeringOption) {
         this.roomId = roomId;
         this.roomName = roomName;
         this.roomDetail = roomDetail;
@@ -37,5 +40,6 @@ public class RoomDetailDto {
         this.roomPrice = roomPrice;
         this.workStart = workStart;
         this.workEnd = workEnd;
+        this.offeringOption = offeringOption;
     }
 }

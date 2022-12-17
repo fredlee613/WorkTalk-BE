@@ -3,6 +3,7 @@ package com.golfzonTech4.worktalk.service;
 import com.amazonaws.AmazonServiceException;
 import com.amazonaws.services.s3.AmazonS3;
 import com.golfzonTech4.worktalk.domain.SpaceImg;
+import com.golfzonTech4.worktalk.dto.space.SpaceImgDeleteDto;
 import com.golfzonTech4.worktalk.dto.space.SpaceImgDto;
 import com.golfzonTech4.worktalk.repository.space.SpaceImgRepository;
 import lombok.RequiredArgsConstructor;
@@ -24,11 +25,11 @@ public class SpaceImgService {
     private final SpaceImgRepository spaceImgRepository;
 
     // 이미지 삭제
-    public void deleteSpaceImg(SpaceImgDto dto){
+    public void deleteSpaceImg(SpaceImgDeleteDto dto){
         Optional<SpaceImg> findSpaceImg = spaceImgRepository.findById(dto.getSpaceImgId());
         String spaceImgUrl = findSpaceImg.get().getSpaceImgUrl();
         try {
-            log.info("deleteSpaceImg : ", spaceImgUrl.substring(spaceImgUrl.lastIndexOf("/")+1));
+            log.info("deleteSpaceImg : {}", spaceImgUrl.substring(spaceImgUrl.lastIndexOf("/")+1));
             amazonS3.deleteObject(this.bucket, spaceImgUrl.substring(spaceImgUrl.lastIndexOf("/")+1)); // s3에서 이미지 삭제
         } catch (AmazonServiceException e){
             log.error(e.getErrorMessage());
