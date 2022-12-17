@@ -8,13 +8,14 @@ import lombok.extern.slf4j.Slf4j;
 
 import javax.persistence.EntityManager;
 import java.util.List;
+import java.util.Optional;
 
 import static com.golfzonTech4.worktalk.domain.QMember.member;
 import static com.golfzonTech4.worktalk.domain.QPenalty.penalty;
 import static com.golfzonTech4.worktalk.domain.QReservation.reservation;
 
 @Slf4j
-public class MemberRepositoryImpl implements MemberRepositoryCustom{
+public class MemberRepositoryImpl implements MemberRepositoryCustom {
     private final JPAQueryFactory queryFactory;
 
     public MemberRepositoryImpl(EntityManager em) {
@@ -39,6 +40,16 @@ public class MemberRepositoryImpl implements MemberRepositoryCustom{
                 .on(member.id.eq(penalty.member.id))
                 .where(eqActivated(activated), member.memberType.eq(MemberType.ROLE_USER))
                 .fetch();
+    }
+
+    @Override
+    public Optional<Member> findByWorkTalk(String email) {
+        Member result = queryFactory
+                .select(member)
+                .from(member)
+                .where(member.KakaoYn.eq("N"))
+                .fetchOne();
+        return Optional.ofNullable(result);
     }
 
 

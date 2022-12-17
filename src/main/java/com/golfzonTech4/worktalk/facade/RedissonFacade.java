@@ -52,28 +52,4 @@ public class RedissonFacade {
         }
         return result.get(0);
     }
-//    @Transactional
-//    public String chooseRoom(ReserveTempDto dto) throws InterruptedException {
-//        log.info("chooseRoom: {}", dto);
-//        RSemaphore semaphore = redissonClient.getSemaphore("mySemaphore");
-//        log.info("get Semaphore...");
-//        // 싱글 스레드 permit & 5초 대기
-//        boolean res = semaphore.tryAcquire(5, 5, TimeUnit.SECONDS);
-//        log.info("try acquire Semaphore...");
-//        log.info("res: {}", res);
-//        List<String> result = new ArrayList<>();
-//
-//        if (res) {
-//            try {
-//                log.info("try....");
-//                String findKey = redisReservationService.reserveTemp(dto);
-//                result.add(findKey);
-//                log.info("findKey: {}", findKey);
-//            } finally {
-//                semaphore.release();
-//            }
-//        }
-//        return result.get(0);
-//    }
-
 }

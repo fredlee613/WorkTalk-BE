@@ -6,13 +6,17 @@ import com.golfzonTech4.worktalk.dto.reservation.ReserveCheckDto;
 import com.golfzonTech4.worktalk.dto.reservation.ReserveDto;
 import com.golfzonTech4.worktalk.dto.reservation.ReserveOrderSearch;
 import com.golfzonTech4.worktalk.dto.reservation.ReserveTempDto;
+import com.golfzonTech4.worktalk.facade.RedissonFacade;
 import com.golfzonTech4.worktalk.repository.ListResult;
-import com.golfzonTech4.worktalk.repository.member.MemberRepository;
-import com.golfzonTech4.worktalk.repository.reservation.ReservationSimpleRepository;
 import com.golfzonTech4.worktalk.service.ReservationService;
-import com.golfzonTech4.worktalk.service.TempReservationService;
+import com.golfzonTech4.worktalk.service.TempRedisReservationService;
 import com.golfzonTech4.worktalk.util.SecurityUtil;
 import com.siot.IamportRestClient.exception.IamportResponseException;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
@@ -27,18 +31,25 @@ import java.util.List;
 @Slf4j
 public class ReservationController {
     private final ReservationService reservationService;
-    private final ReservationSimpleRepository repository;
-    private final TempReservationService tempReservationService;
-    private final MemberRepository memberRepository;
+    private final TempRedisReservationService redisReservationService;
+    private final RedissonFacade facade;
 
     /**
      * 예약 날짜 및 시간 선택
      */
+    @Operation(summary = "예약 일자 선택", description = "해당 공간에 예약 여부를 확인 후 없을 시 임시 예약이 진행됩니다.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "OK",
+                    content = @Content(schema = @Schema(implementation = String.class))),
+            @ApiResponse(responseCode = "400", description = "BAD REQUEST"),
+            @ApiResponse(responseCode = "404", description = "NOT FOUND"),
+            @ApiResponse(responseCode = "500", description = "INTERNAL SERVER ERROR")
+    })
     @PostMapping("/reservation/choose")
-    public ResponseEntity<Long> choose(@RequestBody ReserveTempDto dto)  {
+    public ResponseEntity<String> choose(@RequestBody ReserveTempDto dto) throws InterruptedException {
 
         log.info("choose: {}", dto);
-        Long result = tempReservationService.reserveTemp(dto);
+        String result = facade.chooseRoom(dto);
         return ResponseEntity.ok(result);
     }
 
@@ -46,10 +57,10 @@ public class ReservationController {
      * 해당 임시 예약건 삭제 요청
      */
     @GetMapping("/reservation/delete/{tempReserveId}")
-    public ResponseEntity<Long> delete(@PathVariable Long tempReserveId)  {
+    public ResponseEntity<Long> delete(@PathVariable String tempReserveId)  {
 
         log.info("delete: {}", tempReserveId);
-        tempReservationService.deleteTemp(tempReserveId);
+        redisReservationService.deleteTemp(tempReserveId);
         return ResponseEntity.ok().build();
     }
 

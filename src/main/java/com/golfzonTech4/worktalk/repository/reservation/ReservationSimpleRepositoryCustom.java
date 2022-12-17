@@ -20,19 +20,13 @@ public interface ReservationSimpleRepositoryCustom {
     public ListResult findAllByUser(String name, Integer paid, PaymentStatus paymentStatus, ReserveStatus reserveStatus);
     PageImpl<ReserveSimpleDto> findAllByUserPage(String name, PageRequest pageRequest,
                                                  ReserveStatus reserveStatus, Integer spaceType);
-
     PageImpl<ReserveSimpleDto> findAllByHostPage(String name, PageRequest pageRequest,
                                                  ReserveStatus reserveStatus, Integer spaceType);
     List<ReserveSimpleDto> findAllByTime();
     Long countNoShow(Long memberId, ReserveStatus reserveStatus);
-
     List<ReserveCheckDto> findBookedOffice(Long roomId, LocalDate initDate, LocalDate endDate);
     List<ReserveCheckDto> findBookedRoom(Long roomId, LocalDate initDate);
     List<ReserveCheckDto> checkBookedRoom(Long roomId, LocalDate initDate, Integer checkInTime, Integer checkOutTime);
-
-    List<Long> findByRooms(Long roomId);
-    List<Long> findBySpaces(Long spaceId);
-
-
+    List<ReserveSimpleDto> findBySpace(Long spaceId);
     Optional<ReserveSimpleDto> findRoomName(Long reserveId);
 }
