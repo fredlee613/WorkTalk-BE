@@ -1,4 +1,4 @@
-package com.golfzonTech4.worktalk.domain;
+package com.golfzonTech4.worktalk.config;
 
 import com.siot.IamportRestClient.IamportClient;
 import lombok.extern.slf4j.Slf4j;
@@ -8,7 +8,7 @@ import org.springframework.context.annotation.Configuration;
 
 @Slf4j
 @Configuration
-public class MyIamport {
+public class IamportConfig {
 
     @Value("${iamport.key}")
     String key;

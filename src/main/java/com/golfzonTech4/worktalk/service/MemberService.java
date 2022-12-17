@@ -138,7 +138,7 @@ public class MemberService {
     /**
      * 회원 이메일 찾기 서비스
      */
-    public void findEmail(String email) {
+    public void isJoined(String email) {
         log.info("findDuplicatesName : {}", email);
         Optional<Member> result = memberRepository.findByEmail(email);
         if (result.isEmpty()) {
@@ -202,8 +202,8 @@ public class MemberService {
         return dto;
     }
 
-    public Map<String, String> isKakao(String email) {
-        log.info("isKakao: {}", email);
+    public Map<String, String> findEmail(String email) {
+        log.info("findEmail: {}", email);
         Optional<Member> result = memberRepository.findByEmail(email);
         if (result.isEmpty()) {
             return null;
