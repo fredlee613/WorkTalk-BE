@@ -1,5 +1,6 @@
 package com.golfzonTech4.worktalk.service;
 
+import com.golfzonTech4.worktalk.config.IamportConfig;
 import com.golfzonTech4.worktalk.domain.*;
 import com.golfzonTech4.worktalk.dto.mileage.MileageDto;
 import com.golfzonTech4.worktalk.dto.pay.PayInsertDto;
@@ -44,7 +45,7 @@ public class PayService {
     private final PayRepository payRepository;
     private final ReservationRepository reservationRepository;
     private final MileageService mileageService;
-    private final MyIamport myIamport;
+    private final IamportConfig iamportConfig;
     private final MailService mailService;
     private final PayRepositoryQuery payRepositoryQuery;
 
@@ -68,7 +69,7 @@ public class PayService {
 
     public void verify(String imp_uid, int payAmount) throws IamportResponseException, IOException {
         log.info("");
-        IamportResponse<Payment> response = myIamport.getClient().paymentByImpUid(imp_uid);
+        IamportResponse<Payment> response = iamportConfig.getClient().paymentByImpUid(imp_uid);
         BigDecimal serverAmount = response.getResponse().getAmount();
         BigDecimal clientAmount = BigDecimal.valueOf(payAmount);
         log.info("clientAmount : {}, serverAmount : {}", clientAmount, serverAmount);
@@ -141,7 +142,7 @@ public class PayService {
         ScheduleData scheduleData = new ScheduleData(dto.getCustomer_uid());
         scheduleData.addSchedule(scheduleEntry);
 
-        IamportResponse<List<Schedule>> response = myIamport.getClient().subscribeSchedule(scheduleData); // 예약 결제
+        IamportResponse<List<Schedule>> response = iamportConfig.getClient().subscribeSchedule(scheduleData); // 예약 결제
         log.info("result >>> {}", response.getMessage());
 
         Pay bookedPay = Pay.builder().reservation(findReservation).merchantUid(merchant_uid)
@@ -167,7 +168,7 @@ public class PayService {
     @Transactional
     public int cancelPay(Long reserveId, Integer flag) throws IamportResponseException, IOException {
         log.info("cancelByHost");
-        IamportClient client = myIamport.getClient();
+        IamportClient client = iamportConfig.getClient();
         List<PayInsertDto> findPays = payRepository.findAlByReserveId(reserveId);
         log.info("findPays.size() : {}", findPays.size());
         int count = 0;
@@ -215,7 +216,7 @@ public class PayService {
     @Transactional
     public int cancelPrepaid(Long reserveId, Integer flag) throws IamportResponseException, IOException {
         log.info("cancelPrepaid");
-        IamportClient client = myIamport.getClient();
+        IamportClient client = iamportConfig.getClient();
         List<PayInsertDto> findPays = payRepository.findAlByReserveId(reserveId);
         log.info("findPays.size() : {}", findPays.size());
         int count = 0;
@@ -268,7 +269,7 @@ public class PayService {
     @Transactional
     public int cancelPostPaid(Long reserveId, Integer flag) throws IamportResponseException, IOException {
         log.info("cancelPostPaid");
-        IamportClient client = myIamport.getClient();
+        IamportClient client = iamportConfig.getClient();
         List<PayInsertDto> findPays = payRepository.findAlByReserveId(reserveId);
         log.info("findPays.size() : {}", findPays.size());
         int count = 0;
@@ -312,7 +313,7 @@ public class PayService {
     @Transactional(rollbackFor = {Exception.class})
     public void postpaid(PayWebhookDto dto) throws IamportResponseException, IOException {
         log.info("postpaid: {}}", dto);
-        IamportClient client = myIamport.getClient();
+        IamportClient client = iamportConfig.getClient();
         Payment paidPay = client.paymentByImpUid(dto.getImp_uid()).getResponse();
         String status = paidPay.getStatus();
         log.info("status: {}", status);
@@ -338,7 +339,7 @@ public class PayService {
             ScheduleData scheduleData = new ScheduleData(findPay.getCustomerUid());
             scheduleData.addSchedule(scheduleEntry);
 
-            IamportResponse<List<Schedule>> response = myIamport.getClient().subscribeSchedule(scheduleData); // 예약 결제
+            IamportResponse<List<Schedule>> response = iamportConfig.getClient().subscribeSchedule(scheduleData); // 예약 결제
             log.info("IamportResponse<List<Schedule>> : {}", response.toString());
             Reservation findReservation = reservationRepository.findById(findPay.getReservation().getReserveId()).get();
             // 예약 결제 알림 메일 발송

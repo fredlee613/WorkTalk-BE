@@ -2,23 +2,18 @@ package com.golfzonTech4.worktalk.controller;
 
 import com.golfzonTech4.worktalk.domain.TempRedisReservation;
 import com.golfzonTech4.worktalk.dto.reservation.ReserveCheckDto;
-import com.golfzonTech4.worktalk.dto.reservation.ReserveDto;
 import com.golfzonTech4.worktalk.dto.reservation.ReserveTempDto;
 import com.golfzonTech4.worktalk.facade.RedissonFacade;
 import com.golfzonTech4.worktalk.service.TempRedisReservationService;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.Schema;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+@Tag(name = "RedisController", description = "레디스 테스트 관련 api입니다.")
 @RestController
 @RequiredArgsConstructor
 @Slf4j
@@ -30,14 +25,6 @@ public class RedisController {
     /**
      * 예약 날짜 및 시간 선택
      */
-    @Operation(summary = "예약 일자 선택", description = "해당 공간에 예약 여부를 확인 후 없을 시 임시 예약이 진행됩니다.", tags = { "RedisController" })
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "OK",
-                    content = @Content(schema = @Schema(implementation = String.class))),
-            @ApiResponse(responseCode = "400", description = "BAD REQUEST"),
-            @ApiResponse(responseCode = "404", description = "NOT FOUND"),
-            @ApiResponse(responseCode = "500", description = "INTERNAL SERVER ERROR")
-    })
     @PostMapping("/redis/reservation/choose")
     public ResponseEntity choose(@RequestBody ReserveTempDto dto) throws InterruptedException {
 
