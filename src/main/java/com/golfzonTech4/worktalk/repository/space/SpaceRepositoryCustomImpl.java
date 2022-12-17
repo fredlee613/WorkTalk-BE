@@ -147,7 +147,7 @@ public class SpaceRepositoryCustomImpl implements SpaceRepositoryCustom{
                                 space.spaceType,
                                 space.regCode,
                                 space.spaceStatus
-                                ))
+                        ))
                 .from(space)
                 .where(eqSpaceType(dto.getSearchSpaceType()), eqSpaceStatus(dto.getSearchSpaceStatus()))
                 .orderBy(space.spaceId.desc())
