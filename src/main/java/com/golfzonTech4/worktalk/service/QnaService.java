@@ -5,13 +5,19 @@ import com.golfzonTech4.worktalk.domain.Qna;
 import com.golfzonTech4.worktalk.domain.Space;
 import com.golfzonTech4.worktalk.dto.qna.QnaDetailDto;
 import com.golfzonTech4.worktalk.dto.qna.QnaInsertDto;
+import com.golfzonTech4.worktalk.dto.qna.QnaSearchDto;
 import com.golfzonTech4.worktalk.dto.qna.QnaUpdateDto;
+import com.golfzonTech4.worktalk.dto.space.SpaceManageSortingDto;
+import com.golfzonTech4.worktalk.dto.space.SpaceMasterDto;
+import com.golfzonTech4.worktalk.repository.ListResult;
 import com.golfzonTech4.worktalk.repository.qna.QnaRepository;
 import com.golfzonTech4.worktalk.repository.space.SpaceRepository;
 import com.golfzonTech4.worktalk.util.SecurityUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -97,6 +103,13 @@ public class QnaService {
         if (currentUsername.isEmpty()) throw new EntityNotFoundException("Member not found");
 
         return qnaRepository.findQnaDtoListByMember(currentUsername.get());
+    }
+
+    //호스트가 가지고 있는 사무공간의 QnA 관리페이지
+    public ListResult getQnaHostManagePage(PageRequest pageRequest, QnaSearchDto dto) {
+        log.info("getQnaHostManagePage()....");
+        PageImpl<QnaDetailDto> result = qnaRepository.findQnaDtoListbyHostSpace(pageRequest, dto);
+        return new ListResult(result.getTotalElements(), result.getContent());
     }
 
 }

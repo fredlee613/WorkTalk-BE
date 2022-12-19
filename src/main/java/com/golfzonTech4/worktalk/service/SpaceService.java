@@ -160,7 +160,7 @@ public class SpaceService {
         spaceRepository.deleteById(spaceId);
     }
 
-    //유저 메인페이지
+    //마스터 관리페이지
     public ListResult getSpaceMasterPage(PageRequest pageRequest, SpaceManageSortingDto dto) {
         log.info("getSpaceMasterPage()....");
         PageImpl<SpaceMasterDto> result = spaceRepository.getSpaceMasterPage(pageRequest, dto);

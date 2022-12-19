@@ -1,6 +1,5 @@
 package com.golfzonTech4.worktalk.repository.space;
 
-import com.golfzonTech4.worktalk.domain.QReservation;
 import com.golfzonTech4.worktalk.domain.QSpace;
 import com.golfzonTech4.worktalk.dto.space.*;
 import com.querydsl.core.types.dsl.BooleanExpression;
@@ -17,6 +16,7 @@ import java.util.stream.Collectors;
 
 import static com.golfzonTech4.worktalk.domain.QReservation.reservation;
 import static com.golfzonTech4.worktalk.domain.QRoom.room;
+import static com.golfzonTech4.worktalk.domain.QSpace.space;
 import static com.golfzonTech4.worktalk.domain.QSpaceImg.spaceImg;
 
 @Slf4j
@@ -28,7 +28,6 @@ public class SpaceRepositoryCustomImpl implements SpaceRepositoryCustom{
     public SpaceRepositoryCustomImpl(EntityManager em){
         this.queryFactory = new JPAQueryFactory(em);
     }
-    QSpace space = QSpace.space;
 
     @Override
     public PageImpl<SpaceMainDto> getMainSpacePage(PageRequest pageRequest, SpaceSearchDto dto) {
