@@ -337,7 +337,7 @@ public class ReservationService {
                 flag = true;
             }
         } else {
-            List<ReserveCheckDto> list = reservationSimpleRepository.checkBookedRoom(room.getRoomId(), temp.getBookDate().getCheckInDate(), temp.getBookDate().getCheckInTime(), temp.getBookDate().getCheckOutTime());
+            List<ReserveCheckDto> list = reservationSimpleRepository.checkBookedRoom(room.getRoomId(), room.getRoomType(), temp.getBookDate().getCheckInDate(), temp.getBookDate().getCheckInTime(), temp.getBookDate().getCheckOutTime());
             if (!list.isEmpty()) {
                 log.info("Room list : {}", list);
                 flag = true;

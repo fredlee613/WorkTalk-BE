@@ -3,6 +3,7 @@ package com.golfzonTech4.worktalk.repository.reservation;
 import com.golfzonTech4.worktalk.domain.PaymentStatus;
 import com.golfzonTech4.worktalk.domain.Reservation;
 import com.golfzonTech4.worktalk.domain.ReserveStatus;
+import com.golfzonTech4.worktalk.domain.RoomType;
 import com.golfzonTech4.worktalk.dto.reservation.ReserveCheckDto;
 import com.golfzonTech4.worktalk.dto.reservation.ReserveSimpleDto;
 import com.golfzonTech4.worktalk.repository.ListResult;
@@ -26,7 +27,7 @@ public interface ReservationSimpleRepositoryCustom {
     Long countNoShow(Long memberId, ReserveStatus reserveStatus);
     List<ReserveCheckDto> findBookedOffice(Long roomId, LocalDate initDate, LocalDate endDate);
     List<ReserveCheckDto> findBookedRoom(Long roomId, LocalDate initDate);
-    List<ReserveCheckDto> checkBookedRoom(Long roomId, LocalDate initDate, Integer checkInTime, Integer checkOutTime);
+    List<ReserveCheckDto> checkBookedRoom(Long roomId, RoomType roomType, LocalDate initDate, Integer checkInTime, Integer checkOutTime);
     List<Long> findBySpace(Long spaceId);
     Optional<ReserveSimpleDto> findRoomName(Long reserveId);
 }
