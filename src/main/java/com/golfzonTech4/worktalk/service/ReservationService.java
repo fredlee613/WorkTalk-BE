@@ -331,14 +331,19 @@ public class ReservationService {
         List<ReserveCheckDto> result = null;
         Boolean flag = false;
         if (room.getRoomType().equals(RoomType.OFFICE)) {
-            if (!reservationSimpleRepository.findBookedOffice(room.getRoomId(), temp.getBookDate().getCheckInDate(), temp.getBookDate().getCheckOutDate()).isEmpty()) {
+            List<ReserveCheckDto> list = reservationSimpleRepository.findBookedOffice(room.getRoomId(), temp.getBookDate().getCheckInDate(), temp.getBookDate().getCheckOutDate());
+            if (!list.isEmpty()) {
+                log.info("Office list : {}", list);
                 flag = true;
             }
         } else {
-            if (!reservationSimpleRepository.checkBookedRoom(room.getRoomId(), temp.getBookDate().getCheckInDate(), temp.getBookDate().getCheckInTime(), temp.getBookDate().getCheckOutTime()).isEmpty()) {
+            List<ReserveCheckDto> list = reservationSimpleRepository.checkBookedRoom(room.getRoomId(), temp.getBookDate().getCheckInDate(), temp.getBookDate().getCheckInTime(), temp.getBookDate().getCheckOutTime());
+            if (!list.isEmpty()) {
+                log.info("Room list : {}", list);
                 flag = true;
             }
         }
+        log.info("flag : {}", flag);
         return flag;
     }
 
