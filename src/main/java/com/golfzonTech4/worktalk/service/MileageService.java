@@ -43,7 +43,7 @@ public class MileageService {
 
         Mileage mileage = Mileage.builder()
                 .pay(findPay)
-                .status(Mileage_status.SAVED)
+                .status(Mileage_status.TO_BE_SAVED)
                 .mileageAmount(dto.getMileageAmount())
                 .mileageDate(LocalDate.now())
                 .member(member)
@@ -78,6 +78,18 @@ public class MileageService {
                 .build();
 
         return mileageRepository.save(mileage).getMileageId();
+    }
+
+    /**
+     * 마일리지 적립 로직
+     */
+    @Transactional
+    public void add(Long reserveId) {
+        log.info("add : {}", reserveId);
+        Optional<Mileage> result = mileageRepository.findByReservation(reserveId);
+        if (result.isPresent()) {
+            result.get().setStatus(Mileage_status.SAVED);
+        }
     }
 
     /**

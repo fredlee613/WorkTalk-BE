@@ -1,12 +1,19 @@
 package com.golfzonTech4.worktalk.repository.mileage;
 
+import com.golfzonTech4.worktalk.domain.Mileage;
 import com.golfzonTech4.worktalk.domain.Mileage_status;
+import com.golfzonTech4.worktalk.domain.QPay;
+import com.golfzonTech4.worktalk.domain.QReservation;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.persistence.EntityManager;
 
+import java.util.Optional;
+
 import static com.golfzonTech4.worktalk.domain.QMileage.mileage;
+import static com.golfzonTech4.worktalk.domain.QPay.pay;
+import static com.golfzonTech4.worktalk.domain.QReservation.reservation;
 
 @Slf4j
 public class MileageRepositoryImpl implements MileageRepositoryCustom{
@@ -39,6 +46,17 @@ public class MileageRepositoryImpl implements MileageRepositoryCustom{
                 .where(mileage.member.id.eq(memberId)
                         .and(mileage.status.eq(Mileage_status.USED)))
                 .fetchOne();
+    }
+
+    @Override
+    public Optional<Mileage> findByReservation(Long reserveId) {
+        Mileage findMileage = queryFactory.select(mileage)
+                .from(mileage)
+                .innerJoin(pay).on(mileage.pay.payId.eq(pay.payId))
+                .innerJoin(reservation).on(pay.reservation.reserveId.eq(reservation.reserveId))
+                .where(mileage.status.eq(Mileage_status.TO_BE_SAVED))
+                .fetchOne();
+        return Optional.ofNullable(findMileage);
     }
 
 }

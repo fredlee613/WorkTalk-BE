@@ -1,10 +1,7 @@
 package com.golfzonTech4.worktalk.repository.pay;
 
 import com.golfzonTech4.worktalk.domain.*;
-import com.golfzonTech4.worktalk.dto.pay.PayInsertDto;
-import com.golfzonTech4.worktalk.dto.pay.PaySimpleDto;
-import com.golfzonTech4.worktalk.dto.pay.QPayInsertDto;
-import com.golfzonTech4.worktalk.dto.pay.QPaySimpleDto;
+import com.golfzonTech4.worktalk.dto.pay.*;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.siot.IamportRestClient.response.Payment;
@@ -118,9 +115,9 @@ public class PayRepositoryImpl implements PayRepositoryCustom {
     }
 
     @Override
-    public List<PaySimpleDto> findRooms(String name) {
+    public List<PayRoomDto> findRooms(String name) {
 
-        List<PaySimpleDto> content = queryFactory.select(new QPaySimpleDto(room.roomName))
+        List<PayRoomDto> content = queryFactory.select(new QPayRoomDto(room.roomName, space.spaceType))
                 .from(pay)
                 .join(reservation).on(pay.reservation.reserveId.eq(reservation.reserveId))
                 .join(room).on(reservation.room.roomId.eq(room.roomId))
