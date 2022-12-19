@@ -26,7 +26,7 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
 import static com.golfzonTech4.worktalk.domain.MemberType.ROLE_USER;
-
+//
 @Slf4j
 @Service
 @RequiredArgsConstructor
