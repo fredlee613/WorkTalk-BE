@@ -1,12 +1,10 @@
 package com.golfzonTech4.worktalk.controller;
 
 import com.golfzonTech4.worktalk.domain.Member;
-import com.golfzonTech4.worktalk.dto.member.MemberDetailDto;
-import com.golfzonTech4.worktalk.dto.member.MemberDto;
-import com.golfzonTech4.worktalk.dto.member.MemberSerachDto;
-import com.golfzonTech4.worktalk.dto.member.MemberUpdateDto;
+import com.golfzonTech4.worktalk.dto.member.*;
 import com.golfzonTech4.worktalk.repository.ListResult;
 import com.golfzonTech4.worktalk.service.MemberService;
+import com.golfzonTech4.worktalk.util.SecurityUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -19,6 +17,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.util.HashMap;
 import java.util.Map;
 
 @Tag(name = "MemberController", description = "회원 정보 관련 api입니다.")
@@ -191,6 +190,28 @@ public class MemberController {
     public ResponseEntity<Map<String, String>> findEmail(@RequestParam(value = "email") String email) {
         log.info("findEmail : {}", email);
         Map<String, String> result = memberService.findEmail(email);
+        return ResponseEntity.ok(result);
+    }
+
+    /**
+     * 사용자 예약 가능 여부
+     */
+    @Operation(summary = "사용자 예약 가능 여부", description = "요청한 회원의 이용제한 여부, 연락처 유무 여부를 확인.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "OK",
+                    content = @Content(schema = @Schema(implementation = Map.class))),
+            @ApiResponse(responseCode = "400", description = "BAD REQUEST"),
+            @ApiResponse(responseCode = "404", description = "NOT FOUND"),
+            @ApiResponse(responseCode = "500", description = "가입되지 않은 회원 정보입니다.")
+    })
+    @GetMapping("/member/isValid")
+    public ResponseEntity<Map<String, Object>> isValid() {
+        log.info("isValid");
+        String name = SecurityUtil.getCurrentUsername().get();
+        Member findMember = memberService.findByName(name);
+        Map<String, Object> result = new HashMap<>();
+        result.put("activated", findMember.getActivated());
+        result.put("tel", findMember.getTel());
         return ResponseEntity.ok(result);
     }
 }

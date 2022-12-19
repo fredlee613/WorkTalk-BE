@@ -16,7 +16,6 @@ public class MemberDetailDto {
     private String pw;
     @NotEmpty
     private String name;
-    @NotEmpty
     private String tel;
     private MemberType memberType;
     private int activated;

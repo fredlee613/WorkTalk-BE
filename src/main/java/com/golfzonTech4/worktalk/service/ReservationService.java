@@ -54,7 +54,9 @@ public class ReservationService {
         log.info("reserve : {}", payDto);
 
         TempRedisReservation temp = redisReservationService.findById(payDto.getTempReserveID());
+        if (temp == null) throw new IllegalStateException("만료된 예약건입니다. 다시 선택해주세요");
         log.info("tempReservation : {}", temp);
+
 
         Room findRoom = roomRepository.findByRoomId(temp.getRoomId());
         log.info("findRoom : {}", findRoom.toString());
