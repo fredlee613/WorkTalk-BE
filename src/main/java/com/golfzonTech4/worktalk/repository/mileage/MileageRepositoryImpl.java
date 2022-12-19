@@ -29,11 +29,13 @@ public class MileageRepositoryImpl implements MileageRepositoryCustom{
      */
     @Override
     public Integer getTotalSave(Long memberId) {
-        return queryFactory.select(mileage.mileageAmount.sum())
+        Integer result = queryFactory.select(mileage.mileageAmount.sum())
                 .from(mileage)
                 .where(mileage.member.id.eq(memberId)
                         .and(mileage.status.eq(Mileage_status.SAVED)))
                 .fetchOne();
+        if (result == null) return 0;
+        return result;
     }
 
     /**
@@ -41,11 +43,27 @@ public class MileageRepositoryImpl implements MileageRepositoryCustom{
      */
     @Override
     public Integer getTotalUse(Long memberId) {
-        return queryFactory.select(mileage.mileageAmount.sum())
+        Integer result = queryFactory.select(mileage.mileageAmount.sum())
                 .from(mileage)
                 .where(mileage.member.id.eq(memberId)
                         .and(mileage.status.eq(Mileage_status.USED)))
                 .fetchOne();
+        if (result == null) return 0;
+        return result;
+    }
+
+    /**
+     * 적립예정인 마일리지의 총 합
+     */
+    @Override
+    public Integer getTotalToBeSaved(Long memberId) {
+        Integer result = queryFactory.select(mileage.mileageAmount.sum())
+                .from(mileage)
+                .where(mileage.member.id.eq(memberId)
+                        .and(mileage.status.eq(Mileage_status.TO_BE_SAVED)))
+                .fetchOne();
+        if (result == null) return 0;
+        return result;
     }
 
     @Override
