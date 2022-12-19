@@ -365,7 +365,7 @@ public class ReservationService {
         log.info("validAmount : {}, {}, {}, {}", actualAmount, room, bookDate, mileageUsage);
         int period;
         if (room.getRoomType() == RoomType.OFFICE)
-            period = BookDate.getPeriodDate(bookDate.getCheckOutDate(), bookDate.getCheckInDate());
+            period = BookDate.getPeriodDate(bookDate.getCheckOutDate(), bookDate.getCheckInDate()) + 1;
         else period = BookDate.getPeriodHours(bookDate.getCheckInTime(), bookDate.getCheckOutTime());
         int expectedAmount = room.getRoomPrice() * period - mileageUsage;
         log.info("expectedAmount : {}", expectedAmount);
