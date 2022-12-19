@@ -6,9 +6,11 @@ import java.util.Optional;
 
 public interface MileageRepositoryCustom {
 
-    public Integer getTotalSave(Long memberId);
+    Integer getTotalSave(Long memberId);
 
-    public Integer getTotalUse(Long memberId);
+    Integer getTotalUse(Long memberId);
 
-    public Optional<Mileage> findByReservation(Long reserveId);
+    Integer getTotalToBeSaved(Long memberId);
+
+    Optional<Mileage> findByReservation(Long reserveId);
 }

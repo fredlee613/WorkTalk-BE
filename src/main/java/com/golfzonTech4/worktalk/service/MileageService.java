@@ -117,8 +117,10 @@ public class MileageService {
      */
     public ListResult findAllByName() {
         String currentUser = SecurityUtil.getCurrentUsername().get();
+        Member findMember = memberRepository.findByName(currentUser).get();
         List<MileageFindDto> findMileages = mileageRepository.findAllByName(currentUser);
-        return new ListResult((long) getTotal(), findMileages);
+        int totalToBeSaved = mileageRepository.getTotalToBeSaved(findMember.getId());
+        return new ListResult((long) getTotal(), (long)totalToBeSaved, findMileages);
     }
 
     /**
@@ -129,11 +131,9 @@ public class MileageService {
         String currentUser = SecurityUtil.getCurrentUsername().get();
         Member findMember = memberRepository.findByName(currentUser).get();
 
-        Integer totalSave = mileageRepository.getTotalSave(findMember.getId());
-        totalSave = totalSave == null ? 0 : totalSave;
+        int totalSave = mileageRepository.getTotalSave(findMember.getId());
 
-        Integer totalUse = mileageRepository.getTotalUse(findMember.getId());
-        totalUse = totalUse == null ? 0 : totalUse;
+        int totalUse = mileageRepository.getTotalUse(findMember.getId());
 
         int total = totalSave - totalUse;
         return total;

@@ -8,6 +8,11 @@ import lombok.Data;
 public class ListResult<T> {
 
     private Long count;
+    private Long sum;
     private T data;
 
+    public ListResult(Long count, T data) {
+        this.count = count;
+        this.data = data;
+    }
 }
