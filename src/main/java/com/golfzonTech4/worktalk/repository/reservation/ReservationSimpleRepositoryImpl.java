@@ -171,7 +171,7 @@ public class ReservationSimpleRepositoryImpl implements ReservationSimpleReposit
                 .from(reservation)
                 .innerJoin(room).on(reservation.room.roomId.eq(room.roomId))
                 .innerJoin(space).on(room.space.spaceId.eq(space.spaceId))
-                .where(space.spaceId.eq(spaceId),reservation.reserveStatus.eq(ReserveStatus.BOOKED))
+                .where(space.spaceId.eq(spaceId), reservation.reserveStatus.eq(ReserveStatus.BOOKED))
                 .fetch();
     }
 
@@ -220,13 +220,14 @@ public class ReservationSimpleRepositoryImpl implements ReservationSimpleReposit
                 .from(reservation)
                 .where(reservation.bookDate.checkInDate.eq(initDate)
                         .and(reservation.room.roomId.eq(roomId))
-                        .and(reservation.room.roomType.ne(RoomType.OFFICE)))
+                        .and(reservation.room.roomType.ne(RoomType.OFFICE))
+                        .and(reservation.reserveStatus.eq(ReserveStatus.BOOKED)))
                 .fetch();
     }
 
     @Override
     public List<ReserveCheckDto> checkBookedRoom(Long roomId, RoomType roomType, LocalDate initDate, Integer checkInTime, Integer checkOutTime) {
-        log.info("checkBookedRoom : {}, {}, {}, {}", roomId, initDate, checkInTime, checkOutTime);
+        log.info("checkBookedRoom : {}, {}, {}, {}, {}", roomId, roomType, initDate, checkInTime, checkOutTime);
         return queryFactory.select(new QReserveCheckDto(
                         reservation.room.roomId,
                         reservation.bookDate.checkInDate,
@@ -238,13 +239,14 @@ public class ReservationSimpleRepositoryImpl implements ReservationSimpleReposit
                 .where(reservation.bookDate.checkInDate.eq(initDate)
                         .and(reservation.room.roomId.eq(roomId))
                         .and(reservation.room.roomType.eq(roomType))
+                        .and(reservation.reserveStatus.eq(ReserveStatus.BOOKED))
                         .and(reservation.bookDate.checkInTime.goe(checkInTime).and(reservation.bookDate.checkInTime.lt(checkOutTime))
                                 .or(reservation.bookDate.checkInTime.loe(checkInTime)
                                         .and(reservation.bookDate.checkOutTime.goe(checkOutTime)))
                                 .or(reservation.bookDate.checkInTime.loe(checkInTime)
                                         .and(reservation.bookDate.checkOutTime.gt(checkInTime).and(reservation.bookDate.checkOutTime.loe(checkOutTime)))))
-                                .or(reservation.bookDate.checkInTime.loe(checkInTime)
-                                        .and(reservation.bookDate.checkOutTime.goe(checkOutTime)))
+                        .or(reservation.bookDate.checkInTime.loe(checkInTime)
+                                .and(reservation.bookDate.checkOutTime.goe(checkOutTime)))
                 )
                 .fetch();
     }
