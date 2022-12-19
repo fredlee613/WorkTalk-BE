@@ -1,6 +1,5 @@
 package com.golfzonTech4.worktalk.repository.room;
 
-import com.golfzonTech4.worktalk.domain.QRoom;
 import com.golfzonTech4.worktalk.dto.room.QRoomDetailDto;
 import com.golfzonTech4.worktalk.dto.room.QRoomImgDto;
 import com.golfzonTech4.worktalk.dto.room.RoomDetailDto;
