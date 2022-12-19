@@ -225,7 +225,7 @@ public class ReservationSimpleRepositoryImpl implements ReservationSimpleReposit
     }
 
     @Override
-    public List<ReserveCheckDto> checkBookedRoom(Long roomId, LocalDate initDate, Integer checkInTime, Integer checkOutTime) {
+    public List<ReserveCheckDto> checkBookedRoom(Long roomId, RoomType roomType, LocalDate initDate, Integer checkInTime, Integer checkOutTime) {
         log.info("checkBookedRoom : {}, {}, {}, {}", roomId, initDate, checkInTime, checkOutTime);
         return queryFactory.select(new QReserveCheckDto(
                         reservation.room.roomId,
@@ -237,7 +237,7 @@ public class ReservationSimpleRepositoryImpl implements ReservationSimpleReposit
                 .from(reservation)
                 .where(reservation.bookDate.checkInDate.eq(initDate)
                         .and(reservation.room.roomId.eq(roomId))
-                        .and(reservation.room.roomType.ne(RoomType.OFFICE))
+                        .and(reservation.room.roomType.eq(roomType))
                         .and(reservation.bookDate.checkInTime.goe(checkInTime).and(reservation.bookDate.checkInTime.lt(checkOutTime))
                                 .or(reservation.bookDate.checkInTime.loe(checkInTime)
                                         .and(reservation.bookDate.checkOutTime.goe(checkOutTime)))

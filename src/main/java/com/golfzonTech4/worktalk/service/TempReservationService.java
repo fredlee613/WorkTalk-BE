@@ -41,7 +41,7 @@ public class TempReservationService {
             List<ReserveCheckDto> tempOffices = tempRepository.findBookedOffice(dto.getRoomId(), dto.getCheckInDate(), dto.getCheckOutDate());
             if (!reserveOffices.isEmpty() || !tempOffices.isEmpty()) throw new IllegalStateException("이미 예약된 공간입니다.");
         } else {
-            List<ReserveCheckDto> reserveRooms = reserveRepository.checkBookedRoom(dto.getRoomId(), dto.getCheckInDate(), dto.getCheckInTime(), dto.getCheckOutTime());
+            List<ReserveCheckDto> reserveRooms = reserveRepository.checkBookedRoom(dto.getRoomId(), RoomType.DESK, dto.getCheckInDate(), dto.getCheckInTime(), dto.getCheckOutTime());
             List<ReserveCheckDto> tempRooms = tempRepository.checkBookedRoom(dto.getRoomId(), dto.getCheckInDate(), dto.getCheckInTime(), dto.getCheckOutTime());
             if (!reserveRooms.isEmpty() || !tempRooms.isEmpty()) throw new IllegalStateException("이미 예약된 공간입니다.");
         }
