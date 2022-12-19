@@ -161,12 +161,13 @@ public class ReservationSimpleRepositoryImpl implements ReservationSimpleReposit
         return result;
     }
 
+    /**
+     * 예약 상태가 예약 완료인 예약들 중 특정 공간에 해당되는 예약 ID 값을 조회
+     */
     @Override
-    public List<ReserveSimpleDto> findBySpace(Long spaceId) {
+    public List<Long> findBySpace(Long spaceId) {
         log.info("findBySpace");
-        return queryFactory.select(new QReserveSimpleDto(room.roomName, reservation.paid, reservation.reserveId,
-                        reservation.member.id, room.roomId, reservation.bookDate, reservation.member.name, reservation.reserveStatus,
-                        reservation.paymentStatus, room.roomType, reservation.reserveAmount, reservation.cancelReason, review.reviewId))
+        return queryFactory.select(reservation.reserveId)
                 .from(reservation)
                 .innerJoin(room).on(reservation.room.roomId.eq(room.roomId))
                 .innerJoin(space).on(room.space.spaceId.eq(space.spaceId))

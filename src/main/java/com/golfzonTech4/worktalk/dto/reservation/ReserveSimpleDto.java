@@ -97,6 +97,11 @@ public class ReserveSimpleDto {
     }
 
     @QueryProjection
+    public ReserveSimpleDto(Long reserveId) {
+        this.reserveId = reserveId;
+    }
+
+    @QueryProjection
     public ReserveSimpleDto(String roomName, BookDate bookDate) {
         this.roomName = roomName;
         this.bookDate = bookDate;
