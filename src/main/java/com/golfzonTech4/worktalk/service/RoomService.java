@@ -1,17 +1,18 @@
 package com.golfzonTech4.worktalk.service;
 
+import com.amazonaws.AmazonServiceException;
+import com.amazonaws.services.s3.AmazonS3;
 import com.golfzonTech4.worktalk.domain.Room;
 import com.golfzonTech4.worktalk.domain.RoomImg;
 import com.golfzonTech4.worktalk.domain.Space;
-import com.golfzonTech4.worktalk.dto.room.RoomDetailDto;
-import com.golfzonTech4.worktalk.dto.room.RoomInsertDto;
-import com.golfzonTech4.worktalk.dto.room.RoomUpdateDto;
+import com.golfzonTech4.worktalk.dto.room.*;
 import com.golfzonTech4.worktalk.repository.room.RoomImgRepository;
 import com.golfzonTech4.worktalk.repository.room.RoomRepository;
 import com.golfzonTech4.worktalk.repository.space.SpaceRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -30,6 +31,11 @@ public class RoomService {
     private final RoomImgRepository roomImgRepository;
     private final SpaceRepository spaceRepository;
     private final AwsS3Service awsS3Service;
+
+    @Value("${cloud.aws.s3.bucket}")
+    private String bucket;
+
+    private final AmazonS3 amazonS3;
 
     //세부공간 등록
     @Transactional
@@ -69,10 +75,8 @@ public class RoomService {
         log.info("updateRoom()....");
         Room room = roomRepository.findByRoomId(dto.getRoomId());
 
-        List<RoomImg> imageurlList = new ArrayList<>();
-        if (dto.getMultipartFileList().isEmpty() || dto.getMultipartFileList() == null) {
-            imageurlList = roomImgRepository.findByRoom(room);
-        } else{
+
+        if (dto.getMultipartFileList() != null) {
             List<String> newImageurlList = new ArrayList<>();
             newImageurlList.addAll(awsS3Service.upload(dto.getMultipartFileList()));
             for (String imageurl : newImageurlList) {
@@ -86,6 +90,7 @@ public class RoomService {
         room.setRoomPrice(dto.getRoomPrice());
         room.setWorkStart(dto.getWorkStart());
         room.setWorkEnd(dto.getWorkEnd());
+        room.setOfferingOption(dto.getOfferingOption());
     }
 
     //사무공간에 해당하는 세부공간들 가져오기
@@ -110,6 +115,19 @@ public class RoomService {
     public void deleteRoom(Long roomId){
         log.info("deleteRoom()....");
         roomRepository.deleteById(roomId);
+    }
+    // 이미지 삭제
+    @Transactional
+    public void deleteRoomImg(RoomImgDeleteDto dto){
+        Optional<RoomImg> findRoomImg = roomImgRepository.findById(dto.getRoomImgId());
+        String roomImgUrl = findRoomImg.get().getRoomImgUrl();
+        try {
+            log.info("deleteRoomImg : {}", roomImgUrl.substring(roomImgUrl.lastIndexOf("/")+1));
+            amazonS3.deleteObject(this.bucket, roomImgUrl.substring(roomImgUrl.lastIndexOf("/")+1)); // s3에서 이미지 삭제
+        } catch (AmazonServiceException e){
+            log.error(e.getErrorMessage());
+        }
+        roomImgRepository.deleteById(dto.getRoomImgId()); // DB에서 이미지 삭제
     }
 
 

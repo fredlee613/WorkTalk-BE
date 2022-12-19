@@ -7,6 +7,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
+import org.springframework.format.annotation.DateTimeFormat;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -17,7 +18,7 @@ import java.time.LocalDateTime;
 @ToString
 public class ReserveTempDto {
 
-    private Long tempReserveId; // 예약 고유 번호
+    private String tempReserveId; // 예약 고유 번호
 
     private Long memberId; // 예약 회원
 
@@ -25,10 +26,14 @@ public class ReserveTempDto {
 
     private LocalDateTime reserveDate; // 예약 시간
 
+    private Long spaceType; // 공간 종류
+
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd", timezone = "Asia/Seoul")
+    @DateTimeFormat(pattern = "yyyy-MM-dd")
     private LocalDate checkInDate; // 사용 시작 일자
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd", timezone = "Asia/Seoul")
+    @DateTimeFormat(pattern = "yyyy-MM-dd")
     private LocalDate checkOutDate; // 사용 종료 일자
 
     private Integer checkInTime; // 사용 시작 시간

@@ -20,7 +20,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.security.Security;
 import java.time.LocalDate;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Service
@@ -136,7 +138,7 @@ public class MemberService {
     /**
      * 회원 이메일 찾기 서비스
      */
-    public void findEmail(String email) {
+    public void isJoined(String email) {
         log.info("findDuplicatesName : {}", email);
         Optional<Member> result = memberRepository.findByEmail(email);
         if (result.isEmpty()) {
@@ -174,31 +176,17 @@ public class MemberService {
 
     @Transactional
     public void changePw(String email) {
-        Optional<Member> result = memberRepository.findByEmail(email);
+        Optional<Member> result = memberRepository.findByWorkTalk(email);
         if (result.isPresent()) {
+            if (result.get().getKakaoYn().equals("Y")) {
+                throw new IllegalStateException("소셜로그인을 이용중인 계정입니다.");
+            }
             int changePw = mailService.pwMail(email);
             String newPw = String.valueOf(changePw);
             log.info("newPw : {}", newPw);
             result.get().setPw(passwordEncoder.encode(newPw));
         } else throw new IllegalStateException("가입 정보가 없는 이메일입니다.");
     }
-
-    // member -> memberDetailDto
-    private static MemberDetailDto getMemberDetailDto(Member member) {
-        MemberDetailDto memberDetailDto = new MemberDetailDto();
-        
-        // 추후 생성자로 수정
-        memberDetailDto.setId(member.getId());
-        memberDetailDto.setEmail(member.getEmail());
-        memberDetailDto.setPw(member.getPw());
-        memberDetailDto.setName(member.getName());
-        memberDetailDto.setTel(member.getTel());
-        memberDetailDto.setMemberType(member.getMemberType());
-        memberDetailDto.setImgName(member.getImgName());
-
-        return memberDetailDto;
-    }
-
     public MemberDto findProfile() {
         String name = SecurityUtil.getCurrentUsername().get();
         log.info("findProfile: {}", name);
@@ -213,4 +201,34 @@ public class MemberService {
                 .build();
         return dto;
     }
+
+    public Map<String, String> findEmail(String email) {
+        log.info("findEmail: {}", email);
+        Optional<Member> result = memberRepository.findByEmail(email);
+        if (result.isEmpty()) {
+            return null;
+        } else {
+            HashMap<String, String> map = new HashMap<>();
+            map.put("KakaoYn", result.get().getKakaoYn());
+            map.put("email", result.get().getEmail());
+            return map;
+        }
+    }
+
+    // member -> memberDetailDto
+    private static MemberDetailDto getMemberDetailDto(Member member) {
+        MemberDetailDto memberDetailDto = new MemberDetailDto();
+
+        // 추후 생성자로 수정
+        memberDetailDto.setId(member.getId());
+        memberDetailDto.setEmail(member.getEmail());
+        memberDetailDto.setPw(member.getPw());
+        memberDetailDto.setName(member.getName());
+        memberDetailDto.setTel(member.getTel());
+        memberDetailDto.setMemberType(member.getMemberType());
+        memberDetailDto.setImgName(member.getImgName());
+
+        return memberDetailDto;
+    }
+
 }

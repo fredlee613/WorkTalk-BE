@@ -24,8 +24,6 @@ public class RoomInsertDto {
 
     private String roomDetail;
 
-    private String roomImg;
-
     @NotNull(message = "가격을 입력해주세요")
     private int roomPrice;
 
@@ -36,5 +34,7 @@ public class RoomInsertDto {
     private int workEnd;
 
     List<MultipartFile> multipartFileList;
+
+    private String offeringOption;
 
 }

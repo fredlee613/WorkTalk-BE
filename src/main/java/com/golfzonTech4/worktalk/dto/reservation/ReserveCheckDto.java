@@ -1,6 +1,5 @@
 package com.golfzonTech4.worktalk.dto.reservation;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import com.golfzonTech4.worktalk.domain.RoomType;
 import com.querydsl.core.annotations.QueryProjection;
 import lombok.Data;
@@ -23,6 +22,7 @@ public class ReserveCheckDto {
     private LocalDate endDate;
     private Integer initTime;
     private Integer endTime;
+    private Long spaceType;
 
     @QueryProjection
     public ReserveCheckDto(Long roomId, LocalDate initDate, LocalDate endDate, Integer initTime, Integer endTime) {

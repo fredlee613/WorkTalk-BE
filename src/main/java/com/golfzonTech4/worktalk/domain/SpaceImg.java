@@ -21,9 +21,6 @@ public class SpaceImg {
     @Column(name = "SPACE_IMG_URL", length = 200)
     private String spaceImgUrl;
 
-    @Column(name = "REP_IMG_YN", length = 20)
-    private String repImgYn; //대표 이미지 여부
-
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "SPACE_ID", nullable = false)
     private Space space;

@@ -17,6 +17,7 @@ public class PayInsertDto {
 
     private Long payId; // 결제 데이터 고유 키
     private Long reserveId; // 해당 결제가 이루어진 예약건
+    private String tempReserveID; // 임시 예약 데이터 key값
     private String customer_uid; // 고객 고유 빌링키
     private String imp_uid; // 아임포트 결제 거래 번호
     private String merchant_uid; // 가맹점 고유 번호

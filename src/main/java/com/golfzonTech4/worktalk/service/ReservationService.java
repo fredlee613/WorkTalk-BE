@@ -42,8 +42,9 @@ public class ReservationService {
     private final ReservationRepository reservationRepository;
     private final ReservationSimpleRepository reservationSimpleRepository;
     private final PenaltyService penaltyService;
-    private final TempReservationRepository tempReservationRepository;
+    private final TempRedisReservationService redisReservationService;
     private final PayService payService;
+
 
     /**
      * 예약 기능
@@ -52,8 +53,10 @@ public class ReservationService {
     public Long reserve(PayInsertDto payDto) throws IamportResponseException, IOException, IllegalAccessException {
         log.info("reserve : {}", payDto);
 
-        TempReservation temp = tempReservationRepository.findById(payDto.getReserveId()).get();
+        TempRedisReservation temp = redisReservationService.findById(payDto.getTempReserveID());
+        if (temp == null) throw new IllegalStateException("만료된 예약건입니다. 다시 선택해주세요");
         log.info("tempReservation : {}", temp);
+
 
         Room findRoom = roomRepository.findByRoomId(temp.getRoomId());
         log.info("findRoom : {}", findRoom.toString());
@@ -69,10 +72,10 @@ public class ReservationService {
         // 노쇼로 이용이 제한된 사용자일 경우 예외 처리
         if (findMember.getActivated() == 0) {
             throw new IllegalAccessException("이용이 제한된 계정입니다.");
+        } else if (findMember.getTel() == null) {
+            throw new IllegalAccessException("연락처가 없는 회원입니다.");
         }
         log.info("findMember : {}", findMember.toString());
-
-
 
         // 오피스의 경우 체크인 일자가 체크아웃 일자보다 늦을 경우 예외처리
         // 그 외의 경우 체크인 시간이 체크아웃 시간보다 늦을 경우 예외처리
@@ -115,7 +118,7 @@ public class ReservationService {
      * 예약 시간 관련 시간 검증
      */
     private static void validateDateTime(RoomType roomType, BookDate bookDate) {
-        log.info("validateDateTime.... {}, {}",roomType, bookDate);
+        log.info("validateDateTime.... {}, {}", roomType, bookDate);
         if (roomType.equals(RoomType.OFFICE)) {
             // 오피스의 경우 날짜 비교
             if (!BookDate.validDate(bookDate.getCheckInDate(), bookDate.getCheckOutDate())) {
@@ -285,20 +288,16 @@ public class ReservationService {
     public List<ReserveCheckDto> findBookedReservation(ReserveCheckDto dto) {
         log.info("findBookedReservation : {}", dto);
 
-        tempReservationRepository.deleteByTime(); // 작성한지 1분이 경과한 임시 데이터 삭제
-
         List<ReserveCheckDto> result = new ArrayList<>();
-        if (dto.getRoomType().equals(RoomType.OFFICE)) {
-            List<ReserveCheckDto> tempBookedOffices = tempReservationRepository.findBookedOffice(dto.getRoomId(), dto.getInitDate(), dto.getEndDate());
-            List<ReserveCheckDto> reservedOffices = reservationSimpleRepository.findBookedOffice(dto.getRoomId(), dto.getInitDate(), dto.getEndDate());
-            result.addAll(tempBookedOffices);
-            result.addAll(reservedOffices);
+        List<ReserveCheckDto> reservedRooms;
+        List<ReserveCheckDto> tempBookedRooms = redisReservationService.findTempRooms(dto.getRoomId(), dto.getSpaceType(), dto.getInitDate(), dto.getEndDate(), dto.getInitTime(), dto.getEndTime());
+        if (dto.getSpaceType() == 1) {
+            reservedRooms = reservationSimpleRepository.findBookedOffice(dto.getRoomId(), dto.getInitDate(), dto.getEndDate());
         } else {
-            List<ReserveCheckDto> tempBookedRooms = tempReservationRepository.findBookedRoom(dto.getRoomId(), dto.getInitDate());
-            List<ReserveCheckDto> reservedRooms = reservationSimpleRepository.findBookedRoom(dto.getRoomId(), dto.getInitDate());
-            result.addAll(tempBookedRooms);
-            result.addAll(reservedRooms);
+            reservedRooms = reservationSimpleRepository.findBookedRoom(dto.getRoomId(), dto.getInitDate());
         }
+        result.addAll(tempBookedRooms);
+        result.addAll(reservedRooms);
         return result;
     }
 
@@ -308,7 +307,7 @@ public class ReservationService {
      * 그 외의 사무공간의 경우 시간별로 조회
      * 임시 테이블 제외 => 결제 전 확인
      */
-    public void checkReservations(Room room, TempReservation temp) {
+    public void checkReservations(Room room, TempRedisReservation temp) {
         log.info("checkReservations : {}", room, temp);
         List<ReserveCheckDto> result = null;
         if (room.getRoomType().equals(RoomType.OFFICE)) {
@@ -344,8 +343,9 @@ public class ReservationService {
     static boolean validAmount(int actualAmount, Room room, BookDate bookDate, int mileageUsage) {
         log.info("validAmount : {}, {}, {}, {}", actualAmount, room, bookDate, mileageUsage);
         int period;
-        if (room.getRoomType() == RoomType.OFFICE)  period = BookDate.getPeriodDate(bookDate.getCheckOutDate(), bookDate.getCheckInDate());
-        else  period = BookDate.getPeriodHours(bookDate.getCheckInTime(), bookDate.getCheckOutTime());
+        if (room.getRoomType() == RoomType.OFFICE)
+            period = BookDate.getPeriodDate(bookDate.getCheckOutDate(), bookDate.getCheckInDate());
+        else period = BookDate.getPeriodHours(bookDate.getCheckInTime(), bookDate.getCheckOutTime());
         int expectedAmount = room.getRoomPrice() * period - mileageUsage;
         log.info("expectedAmount : {}", expectedAmount);
         if (actualAmount == expectedAmount) {
