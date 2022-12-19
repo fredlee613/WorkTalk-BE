@@ -339,7 +339,7 @@ public class ReservationService {
                 flag = true;
             }
         } else {
-            if (reservationSimpleRepository.checkBookedRoom(room.getRoomId(), temp.getBookDate().getCheckInDate(), temp.getBookDate().getCheckInTime(), temp.getBookDate().getCheckOutTime()).isEmpty()) {
+            if (!reservationSimpleRepository.checkBookedRoom(room.getRoomId(), temp.getBookDate().getCheckInDate(), temp.getBookDate().getCheckInTime(), temp.getBookDate().getCheckOutTime()).isEmpty()) {
                 flag = true;
             }
         }
