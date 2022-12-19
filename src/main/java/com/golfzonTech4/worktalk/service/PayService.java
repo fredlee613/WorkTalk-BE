@@ -3,10 +3,7 @@ package com.golfzonTech4.worktalk.service;
 import com.golfzonTech4.worktalk.config.IamportConfig;
 import com.golfzonTech4.worktalk.domain.*;
 import com.golfzonTech4.worktalk.dto.mileage.MileageDto;
-import com.golfzonTech4.worktalk.dto.pay.PayInsertDto;
-import com.golfzonTech4.worktalk.dto.pay.PayOrderSearch;
-import com.golfzonTech4.worktalk.dto.pay.PaySimpleDto;
-import com.golfzonTech4.worktalk.dto.pay.PayWebhookDto;
+import com.golfzonTech4.worktalk.dto.pay.*;
 import com.golfzonTech4.worktalk.repository.ListResult;
 import com.golfzonTech4.worktalk.repository.pay.PayRepository;
 import com.golfzonTech4.worktalk.repository.pay.query.PayRepositoryQuery;
@@ -33,6 +30,7 @@ import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
@@ -47,7 +45,6 @@ public class PayService {
     private final MileageService mileageService;
     private final IamportConfig iamportConfig;
     private final MailService mailService;
-    private final PayRepositoryQuery payRepositoryQuery;
 
     /**
      * 결제 데이터 검증 및 저장 로직
@@ -357,13 +354,17 @@ public class PayService {
     /**
      * 결제건이 있는 방들의 이름 조회
      */
-    public HashSet<String> findRooms() {
+    public List<PayRoomDto> findRooms() {
         log.info("findRooms: {}, {}");
         String name = SecurityUtil.getCurrentUsername().get();
-        List<PaySimpleDto> rooms = payRepository.findRooms(name);
-        HashSet<String> result = new HashSet<>();
-        for (PaySimpleDto room : rooms) {
-            result.add(room.getRoomName());
+        List<PayRoomDto> rooms = payRepository.findRooms(name);
+        List<String> roomNames = new ArrayList<>();
+        List<PayRoomDto> result = new ArrayList<>();
+        for (PayRoomDto room : rooms) {
+            if (!roomNames.contains(room.getRoomName())) {
+                result.add(new PayRoomDto(room.getRoomName(), room.getSpaceType()));
+                roomNames.add(room.getRoomName());
+            }
         }
         return result;
     }
@@ -385,7 +386,7 @@ public class PayService {
     }
 
     /**
-     * 마일리지 적립 매서드
+     * 마일리지 적립예정 매서드
      */
     private void saveMileage(PayInsertDto dto, Pay savedPay) {
         int mileageSave = dto.getMileageSave();

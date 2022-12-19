@@ -5,6 +5,7 @@ import com.golfzonTech4.worktalk.domain.*;
 import com.golfzonTech4.worktalk.dto.pay.PayInsertDto;
 import com.golfzonTech4.worktalk.dto.penalty.PenaltyDto;
 import com.golfzonTech4.worktalk.dto.reservation.ReserveCheckDto;
+import com.golfzonTech4.worktalk.dto.reservation.ReserveDto;
 import com.golfzonTech4.worktalk.dto.reservation.ReserveOrderSearch;
 import com.golfzonTech4.worktalk.dto.reservation.ReserveSimpleDto;
 import com.golfzonTech4.worktalk.exception.NotFoundMemberException;
@@ -42,9 +43,9 @@ public class ReservationService {
     private final ReservationSimpleRepository reservationSimpleRepository;
     private final PenaltyService penaltyService;
     private final TempRedisReservationService redisReservationService;
+    private final MileageService mileageService;
     private final PayService payService;
     private final IamportConfig iamport;
-
 
     /**
      * 예약 기능
@@ -283,7 +284,7 @@ public class ReservationService {
         log.info("countNoShow : {}", memberId);
         return reservationSimpleRepository.countNoShow(memberId, ReserveStatus.NOSHOW);
     }
-
+    
     public ListResult findAllByName(ReserveOrderSearch dto, PageRequest pageRequest) {
         log.info("findAllByName : {}, {}", dto, pageRequest);
         String name = SecurityUtil.getCurrentUsername().get();
@@ -359,6 +360,7 @@ public class ReservationService {
     public void end(Long reserveId) {
         Reservation findReservation = reservationRepository.findById(reserveId).get();
         findReservation.setReserveStatus(ReserveStatus.USED);
+        mileageService.add(findReservation.getReserveId());
     }
 
     /**

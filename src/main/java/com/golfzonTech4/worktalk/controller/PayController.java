@@ -2,6 +2,7 @@ package com.golfzonTech4.worktalk.controller;
 
 import com.golfzonTech4.worktalk.dto.pay.PayInsertDto;
 import com.golfzonTech4.worktalk.dto.pay.PayOrderSearch;
+import com.golfzonTech4.worktalk.dto.pay.PayRoomDto;
 import com.golfzonTech4.worktalk.dto.pay.PayWebhookDto;
 import com.golfzonTech4.worktalk.repository.ListResult;
 import com.golfzonTech4.worktalk.service.PayService;
@@ -19,6 +20,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Set;
 
 @Tag(name = "PayController", description = "결제 관련 api입니다.")
@@ -78,7 +80,7 @@ public class PayController {
             @ApiResponse(responseCode = "500", description = "INTERNAL SERVER ERROR")
     })
     @GetMapping("/payments/rooms")
-    public ResponseEntity<Set<String>> findRooms() {
+    public ResponseEntity<List<PayRoomDto>> findRooms() {
         log.info("findRooms");
         return ResponseEntity.ok(payService.findRooms());
     }

@@ -2,6 +2,7 @@ package com.golfzonTech4.worktalk.repository.pay;
 
 import com.golfzonTech4.worktalk.domain.PaymentStatus;
 import com.golfzonTech4.worktalk.dto.pay.PayInsertDto;
+import com.golfzonTech4.worktalk.dto.pay.PayRoomDto;
 import com.golfzonTech4.worktalk.dto.pay.PaySimpleDto;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -20,6 +21,6 @@ public interface PayRepositoryCustom {
     public PageImpl<PaySimpleDto> findByHost(String name, LocalDateTime reserveDate, PaymentStatus paymentStatus,
                                              Integer spaceType, String roomName, PageRequest pageRequest);
 
-    public List<PaySimpleDto> findRooms(String name);
+    public List<PayRoomDto> findRooms(String name);
 
 }
