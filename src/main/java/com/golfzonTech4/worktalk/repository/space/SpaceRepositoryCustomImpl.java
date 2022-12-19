@@ -1,6 +1,6 @@
 package com.golfzonTech4.worktalk.repository.space;
 
-import com.golfzonTech4.worktalk.domain.QSpace;
+import com.golfzonTech4.worktalk.domain.ReserveStatus;
 import com.golfzonTech4.worktalk.dto.space.*;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
@@ -46,7 +46,7 @@ public class SpaceRepositoryCustomImpl implements SpaceRepositoryCustom{
                 .leftJoin(reservation).on(reservation.room.roomId.eq(room.roomId).and(possibleDate(dto.getSearchSpaceType(), dto.getSearchStartDate(),
                         dto.getSearchEndDate(), dto.getSearchStartTime(), dto.getSearchEndTime())))
                 .where(eqSpaceType(dto.getSearchSpaceType()), containName(dto.getSearchSpaceName()),
-                        containAddress(dto.getSearchAddress()), space.spaceStatus.eq("approved"), ifsearchDate(dto.getSearchStartDate()))
+                        containAddress(dto.getSearchAddress()), space.spaceStatus.eq("approved"), reservation.reserveStatus.ne(ReserveStatus.valueOf("BOOKED")), ifsearchDate(dto.getSearchStartDate()))
                 .orderBy(space.spaceId.desc())
                 .offset(pageRequest.getOffset())
                 .limit(pageRequest.getPageSize())
@@ -204,8 +204,8 @@ public class SpaceRepositoryCustomImpl implements SpaceRepositoryCustom{
         }
         else {
             return reservation.bookDate.checkInDate.eq(searchStartDate)
-                    .and(reservation.bookDate.checkOutTime.goe(searchStartTime))
-                            .and(reservation.bookDate.checkInTime.loe(searchEndTime));
+                    .and(reservation.bookDate.checkOutTime.gt(searchStartTime))
+                    .and(reservation.bookDate.checkInTime.lt(searchEndTime));
         }
 
     }

@@ -1,6 +1,7 @@
 package com.golfzonTech4.worktalk.repository.member;
 
-import com.golfzonTech4.worktalk.domain.*;
+import com.golfzonTech4.worktalk.domain.Member;
+import com.golfzonTech4.worktalk.domain.MemberType;
 import com.golfzonTech4.worktalk.dto.member.*;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
@@ -12,10 +13,9 @@ import java.util.Optional;
 
 import static com.golfzonTech4.worktalk.domain.QMember.member;
 import static com.golfzonTech4.worktalk.domain.QPenalty.penalty;
-import static com.golfzonTech4.worktalk.domain.QReservation.reservation;
 
 @Slf4j
-public class MemberRepositoryImpl implements MemberRepositoryCustom {
+public class MemberRepositoryImpl implements MemberRepositoryCustom{
     private final JPAQueryFactory queryFactory;
 
     public MemberRepositoryImpl(EntityManager em) {
@@ -50,6 +50,15 @@ public class MemberRepositoryImpl implements MemberRepositoryCustom {
                 .where(member.KakaoYn.eq("N"))
                 .fetchOne();
         return Optional.ofNullable(result);
+    }
+
+    @Override
+    public HostDto findActivated(String name) {
+        return queryFactory
+                .select(new QHostDto(member.id, member.name, member.activated))
+                .from(member)
+                .where(member.activated.eq(1), member.name.eq(name))
+                .fetchOne();
     }
 
 

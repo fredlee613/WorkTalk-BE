@@ -1,8 +1,6 @@
 package com.golfzonTech4.worktalk.controller;
 
 import com.golfzonTech4.worktalk.domain.Qna;
-import com.golfzonTech4.worktalk.dto.qna.QnaInsertDto;
-import com.golfzonTech4.worktalk.dto.qna.QnaUpdateDto;
 import com.golfzonTech4.worktalk.dto.review.ReviewInsertDto;
 import com.golfzonTech4.worktalk.dto.review.ReviewUpdateDto;
 import com.golfzonTech4.worktalk.service.ReviewService;

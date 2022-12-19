@@ -38,9 +38,10 @@ public class CustomerCenterDetailDto {
         this.title = title;
         this.content = content;
         this.type = type;
-        this.ccCommentId = ccCommentId;
         this.lastModifiedDate = lastModifiedDate;
+        this.ccCommentId = ccCommentId;
         this.ccContent = ccContent;
         this.ccLastModifiedDate = ccLastModifiedDate;
     }
+
 }

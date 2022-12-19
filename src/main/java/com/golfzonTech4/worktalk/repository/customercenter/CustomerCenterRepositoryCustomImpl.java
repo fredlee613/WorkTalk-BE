@@ -3,6 +3,7 @@ package com.golfzonTech4.worktalk.repository.customercenter;
 import com.golfzonTech4.worktalk.domain.CcType;
 import com.golfzonTech4.worktalk.domain.MemberType;
 import com.golfzonTech4.worktalk.dto.customercenter.CustomerCenterDetailDto;
+import com.golfzonTech4.worktalk.dto.customercenter.CustomerCenterSearchDto;
 import com.golfzonTech4.worktalk.dto.customercenter.QCustomerCenterDetailDto;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
@@ -25,8 +26,8 @@ public class CustomerCenterRepositoryCustomImpl implements CustomerCenterReposit
     }
 
     @Override
-    public List<CustomerCenterDetailDto> customerManagePage(MemberType memberType, CcType ccType) {
-        log.info("memberType:{}",memberType);
+    public List<CustomerCenterDetailDto> customerManagePage(CustomerCenterSearchDto dto) {
+        log.info("memberType:{}",dto.getSearchMemberType());
         return queryFactory
                 .select(
                         new QCustomerCenterDetailDto(
@@ -42,25 +43,48 @@ public class CustomerCenterRepositoryCustomImpl implements CustomerCenterReposit
                                 )
                 )
                 .from(customerCenter)
-                .leftJoin(customerComment)
-                .on(customerCenter.ccId.eq(customerComment.ccCommentId))
-                .where(eqMemberType(memberType), eqccType(ccType))
+                .leftJoin(customerComment).on(customerCenter.ccId.eq(customerComment.ccCommentId))
+                .where(eqMemberType(dto.getSearchMemberType()), eqccType(dto.getSearchccType()))
                 .orderBy(customerCenter.ccId.desc())
                 .fetch();
     }
 
-    private BooleanExpression eqMemberType(MemberType memberType) {
-        if (memberType == null) {
-            return null;
-        }
-        return customerCenter.member.memberType.eq(memberType);
+    @Override
+    public List<CustomerCenterDetailDto> findccDtoListByMember(String name, CcType ccType) {
+        log.info("memberType:{}", name);
+        return queryFactory
+                .select(
+                        new QCustomerCenterDetailDto(
+                                customerCenter.ccId,
+                                customerCenter.member.id,
+                                customerCenter.title,
+                                customerCenter.content,
+                                customerCenter.type,
+                                customerCenter.lastModifiedDate,
+                                customerComment.ccCommentId,
+                                customerComment.content,
+                                customerComment.lastModifiedDate
+                        )
+                )
+                .from(customerCenter)
+                .leftJoin(customerComment).on(customerCenter.ccId.eq(customerComment.ccCommentId))
+                .where(customerCenter.member.name.eq(name), eqccType(ccType))
+                .orderBy(customerCenter.ccId.desc())
+                .fetch();
     }
 
-    private BooleanExpression eqccType(CcType ccType) {
-        if (ccType == null) {
+    private BooleanExpression eqMemberType(MemberType searchMemberType) {
+        if (searchMemberType == null) {
             return null;
         }
-        return customerCenter.type.eq(ccType);
+        return customerCenter.member.memberType.eq(searchMemberType);
+    }
+
+    private BooleanExpression eqccType(CcType searchccType) {
+        if (searchccType == null) {
+            return null;
+        }
+        return customerCenter.type.eq(searchccType);
     }
 
 }
