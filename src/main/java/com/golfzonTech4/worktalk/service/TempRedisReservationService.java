@@ -113,8 +113,8 @@ public class TempRedisReservationService {
     }
 
     static Boolean isBetweenTime(LocalDate checkInDate, int checkInTime, int checkOutTime, LocalDate initDate, int initTime, int endTime) {
-        if (checkInDate.isEqual(initDate) && ((checkInTime >= initTime && checkInTime <= endTime) ||
-                (checkOutTime >= initTime && checkOutTime <= endTime))) {
+        if (checkInDate.isEqual(initDate) && ((checkInTime >= initTime && checkInTime < endTime) ||
+                (checkOutTime > initTime && checkOutTime <= endTime))) {
             return true;
         } else return false;
     }
