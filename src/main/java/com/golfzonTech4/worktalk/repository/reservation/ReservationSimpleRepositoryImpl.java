@@ -237,13 +237,13 @@ public class ReservationSimpleRepositoryImpl implements ReservationSimpleReposit
                 .where(reservation.bookDate.checkInDate.eq(initDate)
                         .and(reservation.room.roomId.eq(roomId))
                         .and(reservation.room.roomType.ne(RoomType.OFFICE))
-                        .and(reservation.bookDate.checkInTime.between(checkInTime, checkOutTime)
+                        .and(reservation.bookDate.checkInTime.goe(checkInTime).and(reservation.bookDate.checkInTime.lt(checkOutTime))
                                 .or(reservation.bookDate.checkInTime.loe(checkInTime)
                                         .and(reservation.bookDate.checkOutTime.goe(checkOutTime)))
                                 .or(reservation.bookDate.checkInTime.loe(checkInTime)
-                                        .and(reservation.bookDate.checkOutTime.between(checkInTime, checkOutTime)))
+                                        .and(reservation.bookDate.checkOutTime.gt(checkInTime).and(reservation.bookDate.checkOutTime.loe(checkOutTime)))))
                                 .or(reservation.bookDate.checkInTime.loe(checkInTime)
-                                        .and(reservation.bookDate.checkOutTime.goe(checkOutTime))))
+                                        .and(reservation.bookDate.checkOutTime.goe(checkOutTime)))
                 )
                 .fetch();
     }
