@@ -244,9 +244,9 @@ public class ReservationSimpleRepositoryImpl implements ReservationSimpleReposit
                                 .or(reservation.bookDate.checkInTime.loe(checkInTime)
                                         .and(reservation.bookDate.checkOutTime.goe(checkOutTime)))
                                 .or(reservation.bookDate.checkInTime.loe(checkInTime)
-                                        .and(reservation.bookDate.checkOutTime.gt(checkInTime).and(reservation.bookDate.checkOutTime.loe(checkOutTime)))))
-                        .or(reservation.bookDate.checkInTime.loe(checkInTime)
-                                .and(reservation.bookDate.checkOutTime.goe(checkOutTime)))
+                                        .and(reservation.bookDate.checkOutTime.gt(checkInTime).and(reservation.bookDate.checkOutTime.loe(checkOutTime))))
+                                .or(reservation.bookDate.checkInTime.loe(checkInTime)
+                                        .and(reservation.bookDate.checkOutTime.goe(checkOutTime))))
                 )
                 .fetch();
     }
