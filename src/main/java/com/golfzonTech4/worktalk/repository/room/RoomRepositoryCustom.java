@@ -8,4 +8,5 @@ public interface RoomRepositoryCustom {
 
     List<RoomDetailDto> getRooms(Long spaceId);
 
+    List<RoomDetailDto> getRoomDetailPage(Long roomId);
 }

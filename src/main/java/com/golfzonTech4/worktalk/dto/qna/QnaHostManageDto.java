@@ -1,15 +1,16 @@
 package com.golfzonTech4.worktalk.dto.qna;
 
 import com.golfzonTech4.worktalk.domain.QnaType;
-import com.querydsl.core.annotations.QueryProjection;
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.time.LocalDateTime;
 
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
-public class QnaDetailDto {
+public class QnaHostManageDto {
     private Long qnaId;
 
     private Long spaceId;
@@ -30,8 +31,9 @@ public class QnaDetailDto {
 
     private String spaceName;
 
-    public QnaDetailDto(Long qnaId, Long spaceId, Long memberId, QnaType type, String content, LocalDateTime lastModifiedDate,
-                        Long qnaCommentId, String qnacomment, LocalDateTime qclastModifiedDate) {
+
+    public QnaHostManageDto(Long qnaId, Long spaceId, Long memberId, QnaType type, String content, LocalDateTime lastModifiedDate,
+                            Long qnaCommentId, String qnacomment, LocalDateTime qclastModifiedDate) {
         this.qnaId = qnaId;
         this.spaceId = spaceId;
         this.memberId = memberId;
@@ -43,9 +45,8 @@ public class QnaDetailDto {
         this.qclastModifiedDate = qclastModifiedDate;
     }
 
-    @QueryProjection
-    public QnaDetailDto(Long qnaId, Long spaceId, Long memberId, QnaType type, String content, LocalDateTime lastModifiedDate,
-                        Long qnaCommentId, String qnacomment, LocalDateTime qclastModifiedDate, String spaceName) {
+    public QnaHostManageDto(Long qnaId, Long spaceId, Long memberId, QnaType type, String content, LocalDateTime lastModifiedDate,
+                            Long qnaCommentId, String qnacomment, LocalDateTime qclastModifiedDate, String spaceName) {
         this.qnaId = qnaId;
         this.spaceId = spaceId;
         this.memberId = memberId;

@@ -46,7 +46,7 @@ public class RoomController {
     //사무공간 상세페이지에서 세부공간 선택
     @GetMapping("/roomOne/{roomId}")
     public ResponseEntity findOneSpace(@PathVariable("roomId") final Long roomId){
-        return ResponseEntity.ok(roomService.selectRoom(roomId));
+        return ResponseEntity.ok(roomService.getRoomDetailPage(roomId));
     }
 
     //세부공간 삭제

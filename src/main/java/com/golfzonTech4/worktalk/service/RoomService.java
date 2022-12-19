@@ -100,12 +100,13 @@ public class RoomService {
     }
 
     //세부사무공간 단일 선택
-    public Room selectRoom(Long roomId){
-        log.info("selectRoom()....");
-        Room room = roomRepository.findByRoomId(roomId);
-        if(room != null){
+    public List<RoomDetailDto> getRoomDetailPage(Long roomId) {
+        log.info("selectSpace()....");
+        List<RoomDetailDto> room = roomRepository.getRoomDetailPage(roomId);
+        if (room != null) {
             return room;
         }
+
         throw new EntityNotFoundException("해당 사무공간을 찾지 못했습니다.");
     }
 

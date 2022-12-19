@@ -16,7 +16,7 @@ public class Room implements Serializable {
     @Column(name = "ROOM_ID")
     private Long roomId;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "SPACE_ID", nullable = false)
     private Space space;
 

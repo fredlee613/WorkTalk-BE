@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import static com.golfzonTech4.worktalk.domain.QRoom.room;
 import static com.golfzonTech4.worktalk.domain.QRoomImg.roomImg;
 
 @Slf4j
@@ -27,7 +28,6 @@ public class RoomRepositoryCustomImpl implements RoomRepositoryCustom{
 
     @Override
     public List<RoomDetailDto> getRooms(Long spaceId) {
-        QRoom room = QRoom.room;
         List<RoomDetailDto> content = queryFactory.select(
                         new QRoomDetailDto(
                                 room.roomId,
@@ -40,6 +40,38 @@ public class RoomRepositoryCustomImpl implements RoomRepositoryCustom{
                                 room.offeringOption))
                 .from(room)
                 .where(room.space.spaceId.eq(spaceId))
+                .orderBy(room.roomPrice.asc())
+                .fetch();
+
+        List<Long> roomIds = content.stream().map(RoomDetailDto::getRoomId).collect(Collectors.toList());
+
+        List<RoomImgDto> images = queryFactory.select(new QRoomImgDto(roomImg.roomImgId, roomImg.roomImgUrl, roomImg.room.roomId))
+                .from(roomImg)
+                .where(roomImg.room.roomId.in(roomIds))
+                .fetch();
+
+        Map<Long, List<RoomImgDto>> imgIdsMap = images.stream().collect(Collectors.groupingBy(RoomImgDto::getRoomId));
+
+        content.forEach(r -> r.setRoomImgDtoList(imgIdsMap.get(r.getRoomId())));
+
+
+        return content;
+    }
+
+    @Override
+    public List<RoomDetailDto> getRoomDetailPage(Long roomId) {
+        List<RoomDetailDto> content = queryFactory.select(
+                        new QRoomDetailDto(
+                                room.roomId,
+                                room.roomName,
+                                room.roomDetail,
+                                room.roomType,
+                                room.roomPrice,
+                                room.workStart,
+                                room.workEnd,
+                                room.offeringOption))
+                .from(room)
+                .where(room.roomId.eq(roomId))
                 .orderBy(room.roomPrice.asc())
                 .fetch();
 
