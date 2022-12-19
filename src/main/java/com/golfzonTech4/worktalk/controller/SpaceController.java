@@ -87,4 +87,11 @@ public class SpaceController {
         return new ResponseEntity("삭제완료",HttpStatus.OK);
     }
 
+    //호스트 가입 승인 여부
+    @GetMapping("/hostActivated")
+    public ResponseEntity<Object> hostActivated() {
+        boolean result = spaceService.findHostActivated(); // 승인 대기 상태면 false, 승인완료면 true
+        return new ResponseEntity<Object>(result, HttpStatus.OK);
+    }
+
 }

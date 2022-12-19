@@ -4,6 +4,7 @@ import com.golfzonTech4.worktalk.domain.Member;
 import com.golfzonTech4.worktalk.domain.Review;
 import com.golfzonTech4.worktalk.domain.Space;
 import com.golfzonTech4.worktalk.domain.SpaceImg;
+import com.golfzonTech4.worktalk.dto.member.HostDto;
 import com.golfzonTech4.worktalk.dto.space.*;
 import com.golfzonTech4.worktalk.repository.ListResult;
 import com.golfzonTech4.worktalk.repository.ReviewRepository;
@@ -183,6 +184,15 @@ public class SpaceService {
         log.info(String.valueOf(spaceId));
         space.setSpaceStatus("rejected");    //변경감지
         return space;
+    }
+
+    //호스트 가입 승인 여부 확인
+    public boolean findHostActivated() {
+        Optional<String> currentUsername = SecurityUtil.getCurrentUsername();
+        HostDto dto = memberRepository.findActivated(currentUsername.get());
+        boolean result = (dto != null) ? true : false;
+
+        return result;
     }
 
 }

@@ -1,5 +1,6 @@
 package com.golfzonTech4.worktalk.controller;
 
+import com.golfzonTech4.worktalk.domain.CcType;
 import com.golfzonTech4.worktalk.domain.Qna;
 import com.golfzonTech4.worktalk.dto.customercenter.CustomerCenterInsertDto;
 import com.golfzonTech4.worktalk.dto.customercenter.CustomerCenterUpdateDto;
@@ -26,16 +27,10 @@ public class CustomerCenterController {
         return ResponseEntity.ok(customerCenterService.getccMasterManage(dto));
     }
 
-    //마스터페이지에서 1대1문의 문의타입 sorting
-//    @GetMapping("/customerCenter/type")
-//    public ResponseEntity customerCenterMasterccType(@ModelAttribute CustomerCenterSearchDto dto){
-//        return ResponseEntity.ok(customerCenterService.getccMasterManage(dto));
-//    }
-
     //마이페이지에서 1대1문의 리스트 출력
     @GetMapping("/myCustomerCenter")
-    public ResponseEntity myPageccList(){
-        return ResponseEntity.ok(customerCenterService.getMyCustomerCenterList());
+    public ResponseEntity myPageccList(@ModelAttribute CcType ccType){
+        return ResponseEntity.ok(customerCenterService.getMyCustomerCenterList(ccType));
     }
 
     //1대1문의 작성

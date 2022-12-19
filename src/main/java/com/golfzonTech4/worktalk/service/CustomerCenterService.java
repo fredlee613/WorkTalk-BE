@@ -1,5 +1,6 @@
 package com.golfzonTech4.worktalk.service;
 
+import com.golfzonTech4.worktalk.domain.CcType;
 import com.golfzonTech4.worktalk.domain.CustomerCenter;
 import com.golfzonTech4.worktalk.domain.Member;
 import com.golfzonTech4.worktalk.dto.customercenter.CustomerCenterDetailDto;
@@ -77,22 +78,13 @@ public class CustomerCenterService {
             throw new EntityNotFoundException("삭제 권한이 없습니다.");
     }
 
-    public List<CustomerCenterDetailDto> getMyCustomerCenterList() {
+    public List<CustomerCenterDetailDto> getMyCustomerCenterList(CcType ccType) {
         log.info("getMyCustomerCenterList()....");
 
         Optional<String> currentUsername = SecurityUtil.getCurrentUsername();
         if (currentUsername.isEmpty()) throw new EntityNotFoundException("Member not found");
 
-        return customerCenterRepository.findccDtoListByMember(currentUsername.get());
-    }
-
-    public List<CustomerCenterDetailDto> getAllCustomerCenterList() {
-        log.info("getAllCustomerCenterList()....");
-
-        Optional<String> currentUsername = SecurityUtil.getCurrentUsername();
-        if (currentUsername.isEmpty()) throw new EntityNotFoundException("Member not found");
-
-        return customerCenterRepository.findAllcc();
+        return customerCenterRepository.findccDtoListByMember(currentUsername.get(), ccType);
     }
 
     public List<CustomerCenterDetailDto> getccMasterManage(CustomerCenterSearchDto dto) {
@@ -101,7 +93,7 @@ public class CustomerCenterService {
         Optional<String> currentUsername = SecurityUtil.getCurrentUsername();
         if (currentUsername.isEmpty()) throw new EntityNotFoundException("Member not found");
 
-        return customerCenterRepository.customerManagePage(dto.getSearchMemberType(), dto.getSearchccType());
+        return customerCenterRepository.customerManagePage(dto);
     }
 
 }
