@@ -67,15 +67,17 @@ public class PayService {
         return savedPay;
     }
 
-    public void verify(String imp_uid, int payAmount) throws IamportResponseException, IOException {
-        log.info("");
+    public Boolean verify(String imp_uid, int payAmount) throws IamportResponseException, IOException {
+        log.info("verify");
+        Boolean flag = false;
         IamportResponse<Payment> response = iamportConfig.getClient().paymentByImpUid(imp_uid);
         BigDecimal serverAmount = response.getResponse().getAmount();
         BigDecimal clientAmount = BigDecimal.valueOf(payAmount);
         log.info("clientAmount : {}, serverAmount : {}", clientAmount, serverAmount);
         if (!clientAmount.equals(serverAmount)) {
-            new IllegalStateException("잘못된 가격값입니다.");
+            flag = true;
         }
+        return flag;
     }
 
     /**
@@ -86,7 +88,10 @@ public class PayService {
     public Long prepaid(PayInsertDto dto) throws IamportResponseException, IOException {
         log.info("prepaid: {}", dto);
         // 가격 검증
-        verify(dto.getImp_uid(), dto.getPayAmount());
+        if (verify(dto.getImp_uid(), dto.getPayAmount())) {
+            iamportConfig.getClient().cancelPaymentByImpUid(new CancelData(dto.getImp_uid(), true));
+            throw new IllegalStateException("잘못된 가격 값입니다.");
+        }
 
         Pay savedPay = save(dto);
 
@@ -115,7 +120,10 @@ public class PayService {
 
         log.info("findReservation : {}", findReservation);
 
-        verify(dto.getImp_uid(), dto.getPayAmount());
+        if (verify(dto.getImp_uid(), dto.getPayAmount())) {
+            iamportConfig.getClient().cancelPaymentByImpUid(new CancelData(dto.getImp_uid(), true));
+            throw new IllegalStateException("잘못된 가격 값입니다.");
+        }
 
         Pay deposit = Pay.builder().reservation(findReservation).impUid(dto.getImp_uid())
                 .merchantUid(dto.getMerchant_uid()).payStatus(PaymentStatus.DEPOSIT)
@@ -136,7 +144,6 @@ public class PayService {
         ScheduleEntry scheduleEntry = new ScheduleEntry(
                 merchant_uid,
                 Timestamp.valueOf(endDate), // 자동 결제 시점 설정 (퇴실시간 + 1)
-//                Timestamp.valueOf(LocalDateTime.now().plusMinutes(3)), // 테스트용 자동 결제 시점 설정 (퇴실시간 + 30초)
                 BigDecimal.valueOf(balance)); // 자동 결제 금액 설정 (총 금액의 80프로)
 
         ScheduleData scheduleData = new ScheduleData(dto.getCustomer_uid());

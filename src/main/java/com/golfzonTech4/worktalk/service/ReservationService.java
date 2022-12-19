@@ -1,5 +1,6 @@
 package com.golfzonTech4.worktalk.service;
 
+import com.golfzonTech4.worktalk.config.IamportConfig;
 import com.golfzonTech4.worktalk.domain.*;
 import com.golfzonTech4.worktalk.dto.pay.PayInsertDto;
 import com.golfzonTech4.worktalk.dto.penalty.PenaltyDto;
@@ -15,7 +16,9 @@ import com.golfzonTech4.worktalk.repository.reservation.ReservationSimpleReposit
 import com.golfzonTech4.worktalk.repository.reservation.query.ReservationRepositoryQuery;
 import com.golfzonTech4.worktalk.repository.reservation.temp.TempReservationRepository;
 import com.golfzonTech4.worktalk.util.SecurityUtil;
+import com.siot.IamportRestClient.IamportClient;
 import com.siot.IamportRestClient.exception.IamportResponseException;
+import com.siot.IamportRestClient.request.CancelData;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageImpl;
@@ -44,6 +47,7 @@ public class ReservationService {
     private final PenaltyService penaltyService;
     private final TempRedisReservationService redisReservationService;
     private final PayService payService;
+    private final IamportConfig iamport;
 
 
     /**
@@ -52,9 +56,13 @@ public class ReservationService {
     @Transactional(rollbackFor = {Exception.class})
     public Long reserve(PayInsertDto payDto) throws IamportResponseException, IOException, IllegalAccessException {
         log.info("reserve : {}", payDto);
+        IamportClient client = iamport.getClient();
 
         TempRedisReservation temp = redisReservationService.findById(payDto.getTempReserveID());
-        if (temp == null) throw new IllegalStateException("만료된 예약건입니다. 다시 선택해주세요");
+        if (temp == null) {
+            client.cancelPaymentByImpUid(new CancelData(payDto.getImp_uid(), true));
+            throw new IllegalStateException("만료된 예약건입니다. 다시 선택해주세요");
+        }
         log.info("tempReservation : {}", temp);
 
 
@@ -62,75 +70,90 @@ public class ReservationService {
         log.info("findRoom : {}", findRoom.toString());
 
         // 예약 중복 검증
-        checkReservations(findRoom, temp); // 이미 확정된 예약건이 있을 경우 예외 발생
-
-        Optional<String> currentUsername = SecurityUtil.getCurrentUsername();
-        // 로그인 값이 없을 경우 예외처리
-        if (currentUsername.isEmpty()) throw new NotFoundMemberException("Member not found");
-
-        Member findMember = memberRepository.findByName(currentUsername.get()).get();
-        // 노쇼로 이용이 제한된 사용자일 경우 예외 처리
-        if (findMember.getActivated() == 0) {
-            throw new IllegalAccessException("이용이 제한된 계정입니다.");
-        } else if (findMember.getTel() == null) {
-            throw new IllegalAccessException("연락처가 없는 회원입니다.");
+        if (checkReservations(findRoom, temp)) {// 이미 확정된 예약건이 있을 경우 예외 발생}
+            client.cancelPaymentByImpUid(new CancelData(payDto.getImp_uid(), true));
+            throw new IllegalAccessException("이미 예약이 진행된 방입니다. 다시 선택해주세요");
         }
-        log.info("findMember : {}", findMember.toString());
+            
 
-        // 오피스의 경우 체크인 일자가 체크아웃 일자보다 늦을 경우 예외처리
-        // 그 외의 경우 체크인 시간이 체크아웃 시간보다 늦을 경우 예외처리
-        log.info("validating time....");
-        validateDateTime(findRoom.getRoomType(), temp.getBookDate());
+            Optional<String> currentUsername = SecurityUtil.getCurrentUsername();
+            // 로그인 값이 없을 경우 예외처리
+        if (currentUsername.isEmpty()) {
+            client.cancelPaymentByImpUid(new CancelData(payDto.getImp_uid(), true));
+            throw new NotFoundMemberException("없는 사용자입니다.");
+        }
+
+            Member findMember = memberRepository.findByName(currentUsername.get()).get();
+            // 노쇼로 이용이 제한된 사용자일 경우 예외 처리
+            if (findMember.getActivated() == 0) {
+                client.cancelPaymentByImpUid(new CancelData(payDto.getImp_uid(), true));
+                throw new IllegalAccessException("이용이 제한된 계정입니다.");
+            } else if (findMember.getTel() == null) {
+                client.cancelPaymentByImpUid(new CancelData(payDto.getImp_uid(), true));
+                throw new IllegalAccessException("연락처가 없는 회원입니다.");
+            }
+            log.info("findMember : {}", findMember.toString());
+
+            // 오피스의 경우 체크인 일자가 체크아웃 일자보다 늦을 경우 예외처리
+            // 그 외의 경우 체크인 시간이 체크아웃 시간보다 늦을 경우 예외처리
+            log.info("validating time....");
+        if (validateDateTime(findRoom.getRoomType(), temp.getBookDate())) {
+            client.cancelPaymentByImpUid(new CancelData(payDto.getImp_uid(), true));
+            throw new IllegalAccessException("잘못된 시간 값입니다.");
+        }
 
         // 가격 검증
         if (!validAmount(payDto.getReserveAmount(), findRoom, temp.getBookDate(), payDto.getMileageUsage())) {
+            client.cancelPaymentByImpUid(new CancelData(payDto.getImp_uid(), true));
             throw new IllegalArgumentException("잘못된 가격값입니다.");
         }
 
-        PaymentStatus paymentStatus;
-        if (payDto.getPayStatus() == PaymentStatus.DEPOSIT || payDto.getPayStatus() == PaymentStatus.PREPAID) {
-            paymentStatus = PaymentStatus.PREPAID;
-        } else {
-            paymentStatus = PaymentStatus.POSTPAID;
-        }
-        Reservation reservation = Reservation.makeReservation(
-                findMember, findRoom, temp.getBookDate(), payDto.getReserveAmount(), paymentStatus);
+            PaymentStatus paymentStatus;
+            if (payDto.getPayStatus() == PaymentStatus.DEPOSIT || payDto.getPayStatus() == PaymentStatus.PREPAID) {
+                paymentStatus = PaymentStatus.PREPAID;
+            } else {
+                paymentStatus = PaymentStatus.POSTPAID;
+            }
+            Reservation reservation = Reservation.makeReservation(
+                    findMember, findRoom, temp.getBookDate(), payDto.getReserveAmount(), paymentStatus);
 
-        Reservation result = reservationRepository.save(reservation);
-        payDto.setReserveId(result.getReserveId());
+            Reservation result = reservationRepository.save(reservation);
+            payDto.setReserveId(result.getReserveId());
 
-        if (payDto.getPayStatus() == PaymentStatus.DEPOSIT) {  // 결제 유형에 따른 분기: 1. 선결제 중 보증금만 결제
-            log.info("prepaid....");
-            payService.prepaid(payDto);
-        } else if (payDto.getPayStatus() == PaymentStatus.PREPAID) { // 결제 유형에 따른 분기: 2. 선결제 중 전액 결제
-            log.info("prepaid....");
-            payService.prepaid(payDto);
-            log.info("setPaid to 1....");
-            result.setPaid(1);
-        } else { // 결제 유형에 따른 분기: 3. 후결제 (보증금 결제 후 예약)
-            log.info("schedule....");
-            payService.schedule(payDto);
+            if (payDto.getPayStatus() == PaymentStatus.DEPOSIT) {  // 결제 유형에 따른 분기: 1. 선결제 중 보증금만 결제
+                log.info("prepaid....");
+                payService.prepaid(payDto);
+            } else if (payDto.getPayStatus() == PaymentStatus.PREPAID) { // 결제 유형에 따른 분기: 2. 선결제 중 전액 결제
+                log.info("prepaid....");
+                payService.prepaid(payDto);
+                log.info("setPaid to 1....");
+                result.setPaid(1);
+            } else { // 결제 유형에 따른 분기: 3. 후결제 (보증금 결제 후 예약)
+                log.info("schedule....");
+                payService.schedule(payDto);
+            }
+            return result.getReserveId();
         }
-        return result.getReserveId();
-    }
 
     /**
      * 예약 시간 관련 시간 검증
      */
-    private static void validateDateTime(RoomType roomType, BookDate bookDate) {
+    private static Boolean validateDateTime(RoomType roomType, BookDate bookDate) {
         log.info("validateDateTime.... {}, {}", roomType, bookDate);
+        Boolean flag = false;
         if (roomType.equals(RoomType.OFFICE)) {
             // 오피스의 경우 날짜 비교
             if (!BookDate.validDate(bookDate.getCheckInDate(), bookDate.getCheckOutDate())) {
                 log.info("result : {}, {} .... failed!!", bookDate.getCheckInDate(), bookDate.getCheckOutDate());
-                throw new IllegalArgumentException("잘못된 날짜값 입력입니다.");
+                flag = true;
             }
         } else {
             // 그 외의 경우 시간 비교
             if (!BookDate.validTime(bookDate.getCheckInTime(), bookDate.getCheckOutTime())) {
-                throw new IllegalArgumentException("잘못된 시간값 입력입니다.");
+                flag = true;
             }
         }
+        return flag;
     }
 
     /**
@@ -307,18 +330,20 @@ public class ReservationService {
      * 그 외의 사무공간의 경우 시간별로 조회
      * 임시 테이블 제외 => 결제 전 확인
      */
-    public void checkReservations(Room room, TempRedisReservation temp) {
+    public Boolean checkReservations(Room room, TempRedisReservation temp) {
         log.info("checkReservations : {}", room, temp);
         List<ReserveCheckDto> result = null;
+        Boolean flag = false;
         if (room.getRoomType().equals(RoomType.OFFICE)) {
             if (!reservationSimpleRepository.findBookedOffice(room.getRoomId(), temp.getBookDate().getCheckInDate(), temp.getBookDate().getCheckOutDate()).isEmpty()) {
-                throw new IllegalStateException("이미 예약건이 존재합니다");
+                flag = true;
             }
         } else {
             if (reservationSimpleRepository.checkBookedRoom(room.getRoomId(), temp.getBookDate().getCheckInDate(), temp.getBookDate().getCheckInTime(), temp.getBookDate().getCheckOutTime()).isEmpty()) {
-                throw new IllegalStateException("이미 예약건이 존재합니다.");
+                flag = true;
             }
         }
+        return flag;
     }
 
 
