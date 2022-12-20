@@ -73,7 +73,7 @@ public class PenaltyService {
         return new ListResult((long) findPenalties.size(), findPenalties);
     }
 
-    @Scheduled(cron = "0 0 * * * *")
+    @Scheduled(cron = "0 0 0 * * *")
     @Transactional
     public void updatePenalties() {
         List<Penalty> penalties = penaltyRepository.findAll();
