@@ -3,11 +3,8 @@ package com.golfzonTech4.worktalk.service;
 import com.golfzonTech4.worktalk.domain.BookDate;
 import com.golfzonTech4.worktalk.domain.TempRedisReservation;
 import com.golfzonTech4.worktalk.dto.reservation.ReserveCheckDto;
-import com.golfzonTech4.worktalk.dto.reservation.ReserveDto;
 import com.golfzonTech4.worktalk.dto.reservation.ReserveTempDto;
-import com.golfzonTech4.worktalk.repository.reservation.ReservationSimpleRepository;
 import com.golfzonTech4.worktalk.repository.reservation.redis.TempReservationRedisRepository;
-import com.golfzonTech4.worktalk.repository.room.RoomRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -17,7 +14,6 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 @Slf4j
 @Service
