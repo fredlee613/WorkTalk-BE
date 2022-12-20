@@ -1,22 +1,23 @@
 package com.golfzonTech4.worktalk.service;
 
-import com.golfzonTech4.worktalk.domain.CcType;
 import com.golfzonTech4.worktalk.domain.CustomerCenter;
 import com.golfzonTech4.worktalk.domain.Member;
 import com.golfzonTech4.worktalk.dto.customercenter.CustomerCenterDetailDto;
 import com.golfzonTech4.worktalk.dto.customercenter.CustomerCenterInsertDto;
-import com.golfzonTech4.worktalk.dto.customercenter.CustomerCenterUpdateDto;
 import com.golfzonTech4.worktalk.dto.customercenter.CustomerCenterSearchDto;
+import com.golfzonTech4.worktalk.dto.customercenter.CustomerCenterUpdateDto;
+import com.golfzonTech4.worktalk.repository.ListResult;
 import com.golfzonTech4.worktalk.repository.customercenter.CustomerCenterRepository;
 import com.golfzonTech4.worktalk.util.SecurityUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityNotFoundException;
-import java.util.List;
 import java.util.Optional;
 
 @Slf4j
@@ -26,12 +27,13 @@ import java.util.Optional;
 public class CustomerCenterService {
     private final CustomerCenterRepository customerCenterRepository;
     private final MemberService memberService;
+
     @Transactional
-    public CustomerCenter createCustmerCenter(CustomerCenterInsertDto dto){
+    public CustomerCenter createCustmerCenter(CustomerCenterInsertDto dto) {
         log.info("createCustmerCenter()....");
         Optional<String> member = SecurityUtil.getCurrentUsername();
 
-        if(!member.isPresent()) throw new EntityNotFoundException("Member Not Found");
+        if (!member.isPresent()) throw new EntityNotFoundException("Member Not Found");
 
         Member findMember = memberService.findByName(member.get());
 
@@ -39,7 +41,7 @@ public class CustomerCenterService {
         BeanUtils.copyProperties(dto, ccToCreate);
         ccToCreate.setMember(findMember);
 
-        return  customerCenterRepository.save(ccToCreate);
+        return customerCenterRepository.save(ccToCreate);
     }
 
     @Transactional
@@ -58,11 +60,11 @@ public class CustomerCenterService {
             CustomerCenter customerCenter = optionalCustomerCenter.get();
             customerCenter.setContent(dto.getContent());//dirty checking
         } else
-        throw new EntityNotFoundException("수정 권한이 없습니다.");
+            throw new EntityNotFoundException("수정 권한이 없습니다.");
     }
 
     @Transactional
-    public void deleteCustomerCenter(Long ccId){
+    public void deleteCustomerCenter(Long ccId) {
         log.info("deleteCustomerCenter()....");
 
         Optional<String> currentUsername = SecurityUtil.getCurrentUsername();
@@ -78,22 +80,21 @@ public class CustomerCenterService {
             throw new EntityNotFoundException("삭제 권한이 없습니다.");
     }
 
-    public List<CustomerCenterDetailDto> getMyCustomerCenterList(CcType ccType) {
+    public ListResult getMyCustomerCenterList(PageRequest pageRequest, CustomerCenterSearchDto dto) {
         log.info("getMyCustomerCenterList()....");
 
         Optional<String> currentUsername = SecurityUtil.getCurrentUsername();
         if (currentUsername.isEmpty()) throw new EntityNotFoundException("Member not found");
 
-        return customerCenterRepository.findccDtoListByMember(currentUsername.get(), ccType);
+        PageImpl<CustomerCenterDetailDto> result = customerCenterRepository.findccDtoListByMember(currentUsername.get(), pageRequest, dto);
+        return new ListResult(result.getTotalElements(), result.getContent());
     }
 
-    public List<CustomerCenterDetailDto> getccMasterManage(CustomerCenterSearchDto dto) {
+    public ListResult getccMasterManage(PageRequest pageRequest, CustomerCenterSearchDto dto) {
         log.info("getccMasterManage()....");
 
-        Optional<String> currentUsername = SecurityUtil.getCurrentUsername();
-        if (currentUsername.isEmpty()) throw new EntityNotFoundException("Member not found");
-
-        return customerCenterRepository.customerManagePage(dto);
+        PageImpl<CustomerCenterDetailDto> result = customerCenterRepository.customerManagePage(pageRequest, dto);
+        return new ListResult(result.getTotalElements(), result.getContent());
     }
 
 }

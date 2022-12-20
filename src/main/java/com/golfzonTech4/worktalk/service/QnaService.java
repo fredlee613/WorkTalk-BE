@@ -7,8 +7,6 @@ import com.golfzonTech4.worktalk.dto.qna.QnaDetailDto;
 import com.golfzonTech4.worktalk.dto.qna.QnaInsertDto;
 import com.golfzonTech4.worktalk.dto.qna.QnaSearchDto;
 import com.golfzonTech4.worktalk.dto.qna.QnaUpdateDto;
-import com.golfzonTech4.worktalk.dto.space.SpaceManageSortingDto;
-import com.golfzonTech4.worktalk.dto.space.SpaceMasterDto;
 import com.golfzonTech4.worktalk.repository.ListResult;
 import com.golfzonTech4.worktalk.repository.qna.QnaRepository;
 import com.golfzonTech4.worktalk.repository.space.SpaceRepository;
@@ -22,7 +20,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityNotFoundException;
-import java.util.List;
 import java.util.Optional;
 
 @Slf4j
@@ -36,13 +33,13 @@ public class QnaService {
     private final MemberService memberService;
 
     @Transactional
-    public Qna createQna(QnaInsertDto dto){
+    public Qna createQna(QnaInsertDto dto) {
         log.info("createQna()....");
         Optional<String> member = SecurityUtil.getCurrentUsername();
         Optional<Space> space = Optional.ofNullable(spaceRepository.findBySpaceId(dto.getSpaceId()));
 
-        if(!member.isPresent()) throw new EntityNotFoundException("Member Not Found");
-        if(!space.isPresent()) throw new EntityNotFoundException("Space Not Found");
+        if (!member.isPresent()) throw new EntityNotFoundException("Member Not Found");
+        if (!space.isPresent()) throw new EntityNotFoundException("Space Not Found");
 
         Member findMember = memberService.findByName(member.get());
         Space findSpace = spaceRepository.findBySpaceId(dto.getSpaceId());
@@ -52,7 +49,7 @@ public class QnaService {
         qnaToCreate.setMember(findMember);
         qnaToCreate.setSpace(findSpace);
 
-        return  qnaRepository.save(qnaToCreate);
+        return qnaRepository.save(qnaToCreate);
     }
 
     @Transactional
@@ -71,11 +68,11 @@ public class QnaService {
             Qna qna = optionalQna.get();
             qna.setContent(dto.getContent());//dirty checking
         } else
-        throw new EntityNotFoundException("수정 권한이 없습니다.");
+            throw new EntityNotFoundException("수정 권한이 없습니다.");
     }
 
     @Transactional
-    public void deleteQna(Long qnaId){
+    public void deleteQna(Long qnaId) {
         log.info("deleteQna()....");
 
         Optional<String> currentUsername = SecurityUtil.getCurrentUsername();
@@ -91,23 +88,29 @@ public class QnaService {
             throw new EntityNotFoundException("삭제 권한이 없습니다.");
     }
 
-    public List<QnaDetailDto> getQnasBySpace(Long spaceId) {
+    public ListResult getQnasBySpace(PageRequest pageRequest, Long spaceId) {
         log.info("getQnasBySpace()....");
-        return qnaRepository.findQnaDtoListBySpaceId(spaceId);
+        PageImpl<QnaDetailDto> result = qnaRepository.findQnaDtoListBySpaceId(pageRequest, spaceId);
+        return new ListResult(result.getTotalElements(), result.getContent());
     }
 
-    public List<QnaDetailDto> getMyQnas() {
+    public ListResult getMyQnas(PageRequest pageRequest, QnaSearchDto dto) {
         log.info("getMyQnas()....");
 
         Optional<String> currentUsername = SecurityUtil.getCurrentUsername();
         if (currentUsername.isEmpty()) throw new EntityNotFoundException("Member not found");
+        dto.setSearchUser(currentUsername.get());
 
-        return qnaRepository.findQnaDtoListByMember(currentUsername.get());
+        PageImpl<QnaDetailDto> result = qnaRepository.findQnaDtoListByMember(pageRequest, dto);
+        return new ListResult(result.getTotalElements(), result.getContent());
     }
 
     //호스트가 가지고 있는 사무공간의 QnA 관리페이지
     public ListResult getQnaHostManagePage(PageRequest pageRequest, QnaSearchDto dto) {
         log.info("getQnaHostManagePage()....");
+        Optional<String> currentUsername = SecurityUtil.getCurrentUsername();
+        dto.setSearchHost(currentUsername.get());
+
         PageImpl<QnaDetailDto> result = qnaRepository.findQnaDtoListbyHostSpace(pageRequest, dto);
         return new ListResult(result.getTotalElements(), result.getContent());
     }

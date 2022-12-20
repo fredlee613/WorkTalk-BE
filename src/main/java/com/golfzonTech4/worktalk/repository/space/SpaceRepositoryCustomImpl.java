@@ -1,6 +1,5 @@
 package com.golfzonTech4.worktalk.repository.space;
 
-import com.golfzonTech4.worktalk.domain.ReserveStatus;
 import com.golfzonTech4.worktalk.dto.space.*;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
@@ -20,12 +19,12 @@ import static com.golfzonTech4.worktalk.domain.QSpace.space;
 import static com.golfzonTech4.worktalk.domain.QSpaceImg.spaceImg;
 
 @Slf4j
-public class SpaceRepositoryCustomImpl implements SpaceRepositoryCustom{
+public class SpaceRepositoryCustomImpl implements SpaceRepositoryCustom {
 
     private JPAQueryFactory queryFactory; // 동적 쿼리 생성 위한 클래스
 
     // JPAQueryFactory 생성자로 EntityManager 넣어줌
-    public SpaceRepositoryCustomImpl(EntityManager em){
+    public SpaceRepositoryCustomImpl(EntityManager em) {
         this.queryFactory = new JPAQueryFactory(em);
     }
 
@@ -46,7 +45,7 @@ public class SpaceRepositoryCustomImpl implements SpaceRepositoryCustom{
                 .leftJoin(reservation).on(reservation.room.roomId.eq(room.roomId).and(possibleDate(dto.getSearchSpaceType(), dto.getSearchStartDate(),
                         dto.getSearchEndDate(), dto.getSearchStartTime(), dto.getSearchEndTime())))
                 .where(eqSpaceType(dto.getSearchSpaceType()), containName(dto.getSearchSpaceName()),
-                        containAddress(dto.getSearchAddress()), space.spaceStatus.eq("approved"), reservation.reserveStatus.ne(ReserveStatus.valueOf("BOOKED")), ifsearchDate(dto.getSearchStartDate()))
+                        containAddress(dto.getSearchAddress()), space.spaceStatus.eq("approved"), ifsearchDate(dto.getSearchStartDate()))
                 .orderBy(space.spaceId.desc())
                 .offset(pageRequest.getOffset())
                 .limit(pageRequest.getPageSize())
@@ -138,7 +137,7 @@ public class SpaceRepositoryCustomImpl implements SpaceRepositoryCustom{
 
     @Override
     public PageImpl<SpaceMasterDto> getSpaceMasterPage(PageRequest pageRequest, SpaceManageSortingDto dto) {
-        List<SpaceMasterDto> content =  queryFactory.select(
+        List<SpaceMasterDto> content = queryFactory.select(
                         new QSpaceMasterDto(
                                 space.spaceId,
                                 space.member.name,
@@ -165,44 +164,42 @@ public class SpaceRepositoryCustomImpl implements SpaceRepositoryCustom{
     }
 
     private BooleanExpression eqSpaceStatus(String searchSpaceStatus) {
-        if(searchSpaceStatus == null || searchSpaceStatus.isEmpty()) {
+        if (searchSpaceStatus == null || searchSpaceStatus.isEmpty()) {
             return null;
         }
         return space.spaceStatus.eq(searchSpaceStatus);
     }
 
     private BooleanExpression eqSpaceType(Integer searchSpaceType) {
-        if(searchSpaceType == null) {
+        if (searchSpaceType == null) {
             return null;
         }
         return space.spaceType.eq(searchSpaceType);
     }
 
     private BooleanExpression containName(String searchSpaceName) {
-        if(searchSpaceName == null || searchSpaceName.isEmpty()) {
+        if (searchSpaceName == null || searchSpaceName.isEmpty()) {
             return null;
         }
         return space.spaceName.containsIgnoreCase(searchSpaceName);
     }
 
     private BooleanExpression containAddress(String searchAddress) {
-        if(searchAddress == null || searchAddress.isEmpty()) {
+        if (searchAddress == null || searchAddress.isEmpty()) {
             return null;
         }
         return space.address.containsIgnoreCase(searchAddress);
     }
 
     private BooleanExpression possibleDate(Integer spaceType, LocalDate searchStartDate, LocalDate searchEndDate,
-                                           Integer searchStartTime, Integer searchEndTime){
+                                           Integer searchStartTime, Integer searchEndTime) {
 
-        if(searchStartDate == null){
+        if (searchStartDate == null) {
             return null;
-        }
-        else if(spaceType == 1){
+        } else if (spaceType == 1) {
             return reservation.bookDate.checkOutDate.goe(searchStartDate)
                     .and(reservation.bookDate.checkInDate.loe(searchEndDate));
-        }
-        else {
+        } else {
             return reservation.bookDate.checkInDate.eq(searchStartDate)
                     .and(reservation.bookDate.checkOutTime.gt(searchStartTime))
                     .and(reservation.bookDate.checkInTime.lt(searchEndTime));
@@ -211,8 +208,8 @@ public class SpaceRepositoryCustomImpl implements SpaceRepositoryCustom{
     }
 
     //날짜검색을 할때만 필요한 조건
-    private BooleanExpression ifsearchDate(LocalDate searchStartDate){
-        if(searchStartDate == null) {
+    private BooleanExpression ifsearchDate(LocalDate searchStartDate) {
+        if (searchStartDate == null) {
             return null;
         }
         return reservation.reserveId.isNull();

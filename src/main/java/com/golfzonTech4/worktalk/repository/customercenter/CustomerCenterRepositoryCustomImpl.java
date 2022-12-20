@@ -8,6 +8,8 @@ import com.golfzonTech4.worktalk.dto.customercenter.QCustomerCenterDetailDto;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 
 import javax.persistence.EntityManager;
 import java.util.List;
@@ -21,38 +23,14 @@ public class CustomerCenterRepositoryCustomImpl implements CustomerCenterReposit
     private JPAQueryFactory queryFactory; // 동적 쿼리 생성 위한 클래스
 
     // JPAQueryFactory 생성자로 EntityManager 넣어줌
-    public CustomerCenterRepositoryCustomImpl(EntityManager em){
+    public CustomerCenterRepositoryCustomImpl(EntityManager em) {
         this.queryFactory = new JPAQueryFactory(em);
     }
 
     @Override
-    public List<CustomerCenterDetailDto> customerManagePage(CustomerCenterSearchDto dto) {
-        log.info("memberType:{}",dto.getSearchMemberType());
-        return queryFactory
-                .select(
-                        new QCustomerCenterDetailDto(
-                                customerCenter.ccId,
-                                customerCenter.member.id,
-                                customerCenter.title,
-                                customerCenter.content,
-                                customerCenter.type,
-                                customerCenter.lastModifiedDate,
-                                customerComment.ccCommentId,
-                                customerComment.content,
-                                customerComment.lastModifiedDate
-                                )
-                )
-                .from(customerCenter)
-                .leftJoin(customerComment).on(customerCenter.ccId.eq(customerComment.ccCommentId))
-                .where(eqMemberType(dto.getSearchMemberType()), eqccType(dto.getSearchccType()))
-                .orderBy(customerCenter.ccId.desc())
-                .fetch();
-    }
+    public PageImpl<CustomerCenterDetailDto> customerManagePage(PageRequest pageRequest, CustomerCenterSearchDto dto) {
 
-    @Override
-    public List<CustomerCenterDetailDto> findccDtoListByMember(String name, CcType ccType) {
-        log.info("memberType:{}", name);
-        return queryFactory
+        List<CustomerCenterDetailDto> content = queryFactory
                 .select(
                         new QCustomerCenterDetailDto(
                                 customerCenter.ccId,
@@ -68,9 +46,55 @@ public class CustomerCenterRepositoryCustomImpl implements CustomerCenterReposit
                 )
                 .from(customerCenter)
                 .leftJoin(customerComment).on(customerCenter.ccId.eq(customerComment.ccCommentId))
-                .where(customerCenter.member.name.eq(name), eqccType(ccType))
+                .where(eqMemberType(dto.getSearchMemberType()), eqccType(dto.getSearchccType()))
                 .orderBy(customerCenter.ccId.desc())
+                .offset(pageRequest.getOffset())
+                .limit(pageRequest.getPageSize())
                 .fetch();
+
+        long total = queryFactory
+                .select(customerCenter.count())
+                .from(customerCenter)
+                .leftJoin(customerComment).on(customerCenter.ccId.eq(customerComment.ccCommentId))
+                .where(eqMemberType(dto.getSearchMemberType()), eqccType(dto.getSearchccType()))
+                .fetchOne();
+
+        return new PageImpl<>(content, pageRequest, total);
+    }
+
+    @Override
+    public PageImpl<CustomerCenterDetailDto> findccDtoListByMember(String name, PageRequest pageRequest, CustomerCenterSearchDto dto) {
+        log.info("memberType:{}", name);
+        List<CustomerCenterDetailDto> content = queryFactory
+                .select(
+                        new QCustomerCenterDetailDto(
+                                customerCenter.ccId,
+                                customerCenter.member.id,
+                                customerCenter.title,
+                                customerCenter.content,
+                                customerCenter.type,
+                                customerCenter.lastModifiedDate,
+                                customerComment.ccCommentId,
+                                customerComment.content,
+                                customerComment.lastModifiedDate
+                        )
+                )
+                .from(customerCenter)
+                .leftJoin(customerComment).on(customerCenter.ccId.eq(customerComment.ccCommentId))
+                .where(customerCenter.member.name.eq(name), eqccType(dto.getSearchccType()))
+                .orderBy(customerCenter.ccId.desc())
+                .offset(pageRequest.getOffset())
+                .limit(pageRequest.getPageSize())
+                .fetch();
+
+        long total = queryFactory
+                .select(customerCenter.count())
+                .from(customerCenter)
+                .leftJoin(customerComment).on(customerCenter.ccId.eq(customerComment.ccCommentId))
+                .where(customerCenter.member.name.eq(name), eqccType(dto.getSearchccType()))
+                .fetchOne();
+
+        return new PageImpl<>(content, pageRequest, total);
     }
 
     private BooleanExpression eqMemberType(MemberType searchMemberType) {

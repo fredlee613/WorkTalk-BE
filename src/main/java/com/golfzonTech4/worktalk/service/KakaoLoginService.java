@@ -26,7 +26,8 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
 import static com.golfzonTech4.worktalk.domain.MemberType.ROLE_USER;
-//
+
+
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -69,7 +70,6 @@ public class KakaoLoginService {
             member.setImgName("profill.png");
             member.setKakaoYn("Y");
 
-//            kakaoUser = new Member(email, encodedPassword, name, memberType, imageName, kakaoYn);
             memberRepository.save(member);
 
         }
@@ -96,7 +96,7 @@ public class KakaoLoginService {
         MultiValueMap<String, String> body = new LinkedMultiValueMap<>();
         body.add("grant_type", "authorization_code");
         body.add("client_id", "79edba60f18097e8e335a7ca1b62de99");                  // REST API 키
-        body.add("redirect_uri", "http://localhost:8100/user/kakao/callback");      // Redirect URI
+        body.add("redirect_uri", "http://15.165.247.125:8100/user/kakao/callback");      // Redirect URI
         body.add("code", code);
 
         // HttpHeader와 HttpBody를 하나의 오브젝트에 담기
