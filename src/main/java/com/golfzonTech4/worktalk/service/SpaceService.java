@@ -9,6 +9,7 @@ import com.golfzonTech4.worktalk.dto.space.*;
 import com.golfzonTech4.worktalk.repository.ListResult;
 import com.golfzonTech4.worktalk.repository.ReviewRepository;
 import com.golfzonTech4.worktalk.repository.member.MemberRepository;
+import com.golfzonTech4.worktalk.repository.reservation.ReservationSimpleRepository;
 import com.golfzonTech4.worktalk.repository.space.SpaceImgRepository;
 import com.golfzonTech4.worktalk.repository.space.SpaceRepository;
 import com.golfzonTech4.worktalk.util.SecurityUtil;
@@ -35,6 +36,7 @@ public class SpaceService {
     private final SpaceRepository spaceRepository;
     private final SpaceImgRepository spaceImgRepository;
     private final ReviewRepository reviewRepository;
+    private final ReservationSimpleRepository reservationSimpleRepository;
     private final AwsS3Service awsS3Service;
 
     //사무공간 등록
@@ -76,7 +78,7 @@ public class SpaceService {
     public void updateSpace(SpaceUpdateDto dto) {
         log.info("updateSpace()....");
         Space space = spaceRepository.findBySpaceId(dto.getSpaceId());
-        log.info("dto:{}",dto);
+        log.info("dto:{}", dto);
 
         if (dto.getMultipartFileList() != null) {
             List<String> newImageurlList = new ArrayList<>();
@@ -113,16 +115,16 @@ public class SpaceService {
         throw new EntityNotFoundException("해당 사무공간을 찾지 못했습니다.");
     }
 
-    //호스트가 등록한 사무공간 리스트 조회
+    //호스트가 등록한 사무공간 리스트 조회(공간관리페이지)
     public List<SpaceMainDto> selectSpaceByHost() {
         log.info("selectSpaceByHost()....");
         Optional<String> currentUsername = SecurityUtil.getCurrentUsername();
 
-        List<SpaceMainDto> result =  spaceRepository.getHostSpacePage(currentUsername.get());
+        List<SpaceMainDto> result = spaceRepository.getHostSpacePage(currentUsername.get());
         return getSpaceList(result);
     }
 
-    //유저-사무공간 리스트 조회
+    //유저 - 사무공간 리스트 조회
     public ListResult getMainSpacePage(PageRequest pageRequest, SpaceSearchDto dto) {
         PageImpl<SpaceMainDto> result = spaceRepository.getMainSpacePage(pageRequest, dto);
         return new ListResult(result.getTotalElements(), getSpaceList(result.getContent()));
@@ -133,13 +135,13 @@ public class SpaceService {
         for (SpaceMainDto space : spaceList) {
             SpaceMainDto dto = space;
 
-                List<Review> reviewList = reviewRepository.findAllBySpaceId(space.getSpaceId());
+            List<Review> reviewList = reviewRepository.findAllBySpaceId(space.getSpaceId());
             double sum = 0;
             for (Review review : reviewList) {
                 sum += review.getGrade();
             }
             double avg = (sum == 0) ? 0 : Math.floor((sum / reviewList.size()) * 10) / 10;
-            log.info("avg= "+ avg);
+            log.info("avg= " + avg);
             dto.setCount(reviewList.size());
             dto.setGradeAvg(avg);
             dto.setSpaceId(space.getSpaceId());
@@ -156,6 +158,8 @@ public class SpaceService {
     @Transactional
     public void deleteSpace(Long spaceId) {
         log.info("deleteSpace()....");
+        List<Long> result = reservationSimpleRepository.findBySpace(spaceId);
+        if (result.size() > 0) throw new IllegalStateException("예약 이력이 있어 삭제할 수 없습니다.");
         spaceRepository.deleteById(spaceId);
     }
 
@@ -190,9 +194,7 @@ public class SpaceService {
     public boolean findHostActivated() {
         Optional<String> currentUsername = SecurityUtil.getCurrentUsername();
         HostDto dto = memberRepository.findActivated(currentUsername.get());
-        boolean result = (dto != null) ? true : false;
 
-        return result;
+        return (dto != null) ? true : false;
     }
-
 }

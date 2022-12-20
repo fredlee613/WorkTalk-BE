@@ -4,6 +4,10 @@ import com.golfzonTech4.worktalk.domain.Qna;
 import com.golfzonTech4.worktalk.dto.review.ReviewInsertDto;
 import com.golfzonTech4.worktalk.dto.review.ReviewUpdateDto;
 import com.golfzonTech4.worktalk.service.ReviewService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -12,6 +16,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 
+@Tag(name = "ReviewController", description = "이용후기 관련 api입니다.")
 @Slf4j
 @RestController
 @RequiredArgsConstructor
@@ -20,8 +25,15 @@ public class ReviewController {
     private final ReviewService reviewService;
 
     //후기 등록
+    @Operation(summary = "후기 작성", description = "후기를 작성합니다.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "OK"),
+            @ApiResponse(responseCode = "400", description = "BAD REQUEST"),
+            @ApiResponse(responseCode = "404", description = "NOT FOUND"),
+            @ApiResponse(responseCode = "500", description = "INTERNAL SERVER ERROR")
+    })
     @PostMapping("/reviewCreate")
-    public ResponseEntity<Qna> createReview(@Valid @RequestBody ReviewInsertDto dto){
+    public ResponseEntity<Qna> createReview(@Valid @RequestBody ReviewInsertDto dto) {
 
         reviewService.createReview(dto);
 
@@ -29,8 +41,15 @@ public class ReviewController {
     }
 
     //후기 수정
+    @Operation(summary = "후기 수정", description = "후기를 수정합니다.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "OK"),
+            @ApiResponse(responseCode = "400", description = "BAD REQUEST"),
+            @ApiResponse(responseCode = "404", description = "NOT FOUND"),
+            @ApiResponse(responseCode = "500", description = "INTERNAL SERVER ERROR")
+    })
     @PostMapping("/reviewUpdate/{reviewId}")
-    public ResponseEntity<Qna> updateReview(@Valid @RequestBody ReviewUpdateDto dto, @PathVariable Long reviewId){
+    public ResponseEntity<Qna> updateReview(@Valid @RequestBody ReviewUpdateDto dto, @PathVariable Long reviewId) {
 
         reviewService.updateReview(reviewId, dto);
 
@@ -38,21 +57,42 @@ public class ReviewController {
     }
 
     //후기 삭제
+    @Operation(summary = "후기 삭제", description = "후기를 삭제합니다.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "OK"),
+            @ApiResponse(responseCode = "400", description = "BAD REQUEST"),
+            @ApiResponse(responseCode = "404", description = "NOT FOUND"),
+            @ApiResponse(responseCode = "500", description = "INTERNAL SERVER ERROR")
+    })
     @DeleteMapping("/reviewDelete/{reviewId}")
-    public ResponseEntity<Void> deleteReview(@PathVariable Long reviewId){
+    public ResponseEntity<Void> deleteReview(@PathVariable Long reviewId) {
         reviewService.deleteReview(reviewId);
         return ResponseEntity.ok().build();
     }
 
     //사무공간상세페이지에서 후기 리스트 출력
+    @Operation(summary = "후기 목록 조회 요청", description = "사무공간 상세페이지에서 후기 목록을 조회합니다.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "OK"),
+            @ApiResponse(responseCode = "400", description = "BAD REQUEST"),
+            @ApiResponse(responseCode = "404", description = "NOT FOUND"),
+            @ApiResponse(responseCode = "500", description = "INTERNAL SERVER ERROR")
+    })
     @GetMapping("/spaceOne/{spaceId}/reviews")
-    public ResponseEntity reviewListBySpace(@PathVariable("spaceId") Long spaceId){
+    public ResponseEntity reviewListBySpace(@PathVariable("spaceId") Long spaceId) {
         return ResponseEntity.ok(reviewService.getReviewsBySpace(spaceId));
     }
 
     //마이페이지에서 후기 리스트 출력
+    @Operation(summary = "마이페이지 후기 목록 조회 요청", description = "내가 작성한 후기 목록을 조회합니다.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "OK"),
+            @ApiResponse(responseCode = "400", description = "BAD REQUEST"),
+            @ApiResponse(responseCode = "404", description = "NOT FOUND"),
+            @ApiResponse(responseCode = "500", description = "INTERNAL SERVER ERROR")
+    })
     @GetMapping("/myreviews")
-    public ResponseEntity myReviewPage(){
+    public ResponseEntity myReviewPage() {
         return ResponseEntity.ok(reviewService.getMyReviews());
     }
 }
