@@ -1,6 +1,7 @@
 package com.golfzonTech4.worktalk.controller;
 
 import com.golfzonTech4.worktalk.domain.MemberType;
+import com.golfzonTech4.worktalk.domain.TempRedisReservation;
 import com.golfzonTech4.worktalk.dto.pay.PayInsertDto;
 import com.golfzonTech4.worktalk.dto.reservation.ReserveCheckDto;
 import com.golfzonTech4.worktalk.dto.reservation.ReserveDto;
@@ -52,6 +53,17 @@ public class ReservationController {
 
         log.info("choose: {}", dto);
         String result = facade.chooseRoom(dto);
+        return ResponseEntity.ok(result);
+    }
+
+    /**
+     * 해당 임시 예약 단건 조회 요청
+     */
+    @GetMapping("/reservation/findById")
+    public ResponseEntity<TempRedisReservation> findById(@RequestParam String tempRedisReserveId)  {
+
+        log.info("findById: {}", tempRedisReserveId);
+        TempRedisReservation result = redisReservationService.findById(tempRedisReserveId);
         return ResponseEntity.ok(result);
     }
 

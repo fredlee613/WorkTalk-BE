@@ -8,7 +8,6 @@ import org.springframework.data.redis.core.TimeToLive;
 import org.springframework.data.redis.core.index.Indexed;
 
 import javax.persistence.Embedded;
-import java.util.concurrent.TimeUnit;
 
 @RedisHash(value = "temp")
 @Getter @Setter
@@ -29,7 +28,7 @@ public class TempRedisReservation {
 
     @Override
     public String toString() {
-        return "TempReservation{" +
+        return "TempRedisReservation{" +
                 "tempReserveId=" + tempReserveId +
                 ", memberId=" + memberId +
                 ", roomId=" + roomId +

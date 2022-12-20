@@ -1,6 +1,8 @@
 package com.golfzonTech4.worktalk.repository.reservation;
 
-import com.golfzonTech4.worktalk.domain.*;
+import com.golfzonTech4.worktalk.domain.PaymentStatus;
+import com.golfzonTech4.worktalk.domain.ReserveStatus;
+import com.golfzonTech4.worktalk.domain.RoomType;
 import com.golfzonTech4.worktalk.dto.pay.PayDto;
 import com.golfzonTech4.worktalk.dto.pay.QPayDto;
 import com.golfzonTech4.worktalk.dto.reservation.QReserveCheckDto;
@@ -11,14 +13,12 @@ import com.golfzonTech4.worktalk.repository.ListResult;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 
 import javax.persistence.EntityManager;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -29,7 +29,6 @@ import static com.golfzonTech4.worktalk.domain.QReservation.reservation;
 import static com.golfzonTech4.worktalk.domain.QReview.review;
 import static com.golfzonTech4.worktalk.domain.QRoom.room;
 import static com.golfzonTech4.worktalk.domain.QSpace.space;
-import static com.golfzonTech4.worktalk.domain.QTempReservation.tempReservation;
 
 @Slf4j
 public class ReservationSimpleRepositoryImpl implements ReservationSimpleRepositoryCustom {
