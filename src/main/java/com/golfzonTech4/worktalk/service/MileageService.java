@@ -98,7 +98,7 @@ public class MileageService {
     @Transactional
     public void cancelSave(Long payId) {
         log.info("cancelSave : {}", payId);
-        Optional<Mileage> deleteMileage = mileageRepository.findByPay(payId, Mileage_status.SAVED);
+        Optional<Mileage> deleteMileage = mileageRepository.findByPay(payId, Mileage_status.TO_BE_SAVED);
         if (! deleteMileage.isEmpty()) mileageRepository.delete(deleteMileage.get());
     }
 
