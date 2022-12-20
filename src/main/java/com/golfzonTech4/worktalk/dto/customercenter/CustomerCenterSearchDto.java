@@ -8,4 +8,5 @@ import lombok.Data;
 public class CustomerCenterSearchDto {
     private MemberType searchMemberType;
     private CcType searchccType;
+    private int pageNum;
 }
