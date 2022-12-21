@@ -108,10 +108,9 @@ public class MemberService {
      */
     public void findDuplicatesName(Member member) {
         log.info("findDuplicatesName : {}", member);
+        if (member.getName().trim().isEmpty())  throw new IllegalArgumentException("잘못된 입력값입니다.");
         Optional<Member> result = memberRepository.findByName(member.getName());
-        if (!result.isEmpty()) {
-            throw new IllegalArgumentException("이미 존재하는 회원입니다.");
-        }
+        if (!result.isEmpty()) throw new IllegalArgumentException("이미 존재하는 회원입니다.");
     }
 
     /**
