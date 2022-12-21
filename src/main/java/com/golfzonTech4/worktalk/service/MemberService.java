@@ -46,6 +46,7 @@ public class MemberService {
         member.setPw(dto.getPw());
         member.setName(dto.getName());
         member.setTel(dto.getTel());
+        member.setKakaoYn("N");
 
         // request의 role 값에 따라 회원 구분 및 활성화 여부를 다르게 설정
         if (dto.getRole() == 0) {
